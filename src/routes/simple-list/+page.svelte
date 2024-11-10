@@ -31,8 +31,8 @@
 		}
 	]);
 
-	function handleDrop({ draggedItem, targetContainer }: DragDropState) {
-		const dragIndex = items.findIndex((item) => item.id === draggedItem.id);
+	function handleDrop({ draggedItem, targetContainer }: DragDropState<Item>) {
+		const dragIndex = items.findIndex((item: Item) => item.id === draggedItem.id);
 		const dropIndex = parseInt(targetContainer ?? '0');
 
 		if (dragIndex !== -1 && !isNaN(dropIndex)) {

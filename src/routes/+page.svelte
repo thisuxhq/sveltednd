@@ -59,11 +59,11 @@
 		}))
 	);
 
-	async function handleDrop({ draggedItem, targetContainer }: DragDropState) {
+	async function handleDrop({ draggedItem, targetContainer }: DragDropState<Task>) {
 		if (!targetContainer) return; // Prevent self-placement
 
 		// Update the task's status to the target container
-		tasks = tasks.map((task) => {
+		tasks = tasks.map((task: Task) => {
 			if (task.id === draggedItem.id) {
 				task.status = targetContainer as TaskStatus;
 			}

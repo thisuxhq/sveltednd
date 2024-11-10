@@ -17,6 +17,13 @@
 		items: Item[];
 	}
 
+	interface DraggedItem {
+		id: string;
+		title: string;
+		description: string;
+		priority: 'low' | 'medium' | 'high';
+	}
+
 	let groups = $state<Group[]>([
 		{
 			id: 'group1',
@@ -58,7 +65,7 @@
 		}
 	]);
 
-	function handleGroupDrop(state: DragDropState) {
+	function handleGroupDrop(state: DragDropState<DraggedItem>) {
 		const { draggedItem, sourceContainer, targetContainer } = state;
 		if (!targetContainer || sourceContainer === targetContainer) return;
 
@@ -69,7 +76,7 @@
 		groups = [...groups.slice(0, targetIndex), movedGroup, ...groups.slice(targetIndex)];
 	}
 
-	function handleItemDrop(groupId: string, state: DragDropState) {
+	function handleItemDrop(groupId: string, state: DragDropState<DraggedItem>) {
 		const { draggedItem, sourceContainer, targetContainer } = state;
 		if (!targetContainer || !draggedItem) return;
 
@@ -83,7 +90,7 @@
 		if (!sourceGroup || !targetGroup) return;
 
 		// Remove from source
-		sourceGroup.items = sourceGroup.items.filter((item) => item.id !== draggedItem.id);
+		sourceGroup.items = sourceGroup.items.filter((item: DraggedItem) => item.id !== draggedItem.id);
 
 		// Add to target
 		targetGroup.items = [

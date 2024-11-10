@@ -18,7 +18,7 @@ import 'sveltednd/styles.css';
 let items = $state(['Item 1', 'Item 2', 'Item 3']);
 
 // Handle drops between containers
-function handleDrop(state) {
+function handleDrop(state: DragDropState<{ id: string }>) {
 	const { draggedItem, sourceContainer, targetContainer } = state;
 	if (!targetContainer || sourceContainer === targetContainer) return;
 
@@ -126,9 +126,9 @@ interface DroppableOptions {
 ### DragDropState Interface
 
 ```typescript
-interface DragDropState {
+interface DragDropState<T = unknown> {
 	isDragging: boolean; // Current drag status
-	draggedItem: any; // Item being dragged
+	draggedItem: T; // Item being dragged
 	sourceContainer: string; // Origin container ID
 	targetContainer: string | null; // Current target container ID
 }
@@ -142,7 +142,7 @@ interface DragDropState {
 <script lang="ts">
 	let items = $state(['Item 1', 'Item 2', 'Item 3']);
 
-	function handleDrop(state: DragDropState) {
+	function handleDrop(state: DragDropState<{ id: string }>) {
 		const { draggedItem } = state;
 		items = [...items, draggedItem];
 	}
@@ -164,7 +164,7 @@ interface DragDropState {
 	let container1 = $state(['A', 'B']);
 	let container2 = $state(['C', 'D']);
 
-	function handleDrop(state: DragDropState) {
+	function handleDrop(state: DragDropState<{ id: string }>) {
 		const { sourceContainer, targetContainer, draggedItem } = state;
 
 		if (sourceContainer === 'container1') {
@@ -263,9 +263,9 @@ interface Task {
 	title: string;
 }
 
-function handleDrop(state: DragDropState) {
-	const draggedTask = state.draggedItem as Task;
-	// TypeScript now knows the shape of draggedTask
+function handleDrop(state: DragDropState<Task>) {
+	const draggedTask = state.draggedItem;
+	// Handle the dropped task
 }
 ```
 

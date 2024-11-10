@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
 
-	let cards = $state([
+	interface Card {
+		id: string;
+		color: string;
+		icon: string;
+	}
+
+	let cards = $state<Card[]>([
 		{ id: '1', color: 'from-rose-400 to-red-500', icon: '🎨' },
 		{ id: '2', color: 'from-blue-400 to-blue-600', icon: '🌊' },
 		{ id: '3', color: 'from-green-400 to-green-600', icon: '🌿' },
@@ -10,10 +16,10 @@
 		{ id: '6', color: 'from-pink-400 to-pink-600', icon: '🌸' }
 	]);
 
-	function handleDrop({ draggedItem, sourceContainer, targetContainer }: DragDropState) {
+	function handleDrop({ draggedItem, sourceContainer, targetContainer }: DragDropState<Card>) {
 		if (!targetContainer || sourceContainer === targetContainer) return; // Prevent self-placement
 
-		cards = cards.filter((card) => card.id !== draggedItem.id); // Remove the dragged item
+		cards = cards.filter((card: Card) => card.id !== draggedItem.id); // Remove the dragged item
 		cards.splice(parseInt(targetContainer), 0, draggedItem); // Insert the dragged item at the new position
 	}
 </script>

@@ -2,17 +2,22 @@
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
 	import '$lib/styles/dnd.css';
 
-	let images = $state([
+	interface ImageItem {
+		id: string;
+		url: string;
+	}
+
+	let images = $state<ImageItem[]>([
 		{ id: '1', url: 'https://picsum.photos/200/300?1' },
 		{ id: '2', url: 'https://picsum.photos/200/300?2' },
 		{ id: '3', url: 'https://picsum.photos/200/300?3' },
 		{ id: '4', url: 'https://picsum.photos/200/300?4' }
 	]);
 
-	function handleDrop({ draggedItem, sourceContainer, targetContainer }: DragDropState) {
+	function handleDrop({ draggedItem, sourceContainer, targetContainer }: DragDropState<ImageItem>) {
 		if (!targetContainer || sourceContainer === targetContainer) return; // Prevent self-placement
 
-		images = images.filter((img) => img.id !== draggedItem.id); // Remove the dragged item
+		images = images.filter((img: ImageItem) => img.id !== draggedItem.id); // Remove the dragged item
 		images.splice(parseInt(targetContainer), 0, draggedItem); // Insert the dragged item at the new position
 	}
 </script>
