@@ -1,5 +1,5 @@
 {
-	"name": "sveltednd",
+	"name": "@thisux/sveltednd",
 	"version": "0.0.1",
 	"description": "A lightweight, flexible drag and drop library for Svelte 5 applications.",
 	"author": "sanju <work@sanju.sh>",
@@ -22,6 +22,7 @@
 		"preview": "vite preview",
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
+		"publish": "npm run build && npm publish",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
