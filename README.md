@@ -5,14 +5,14 @@ A lightweight drag and drop library for Svelte 5 applications. Built with TypeSc
 ## Installation
 
 ```bash
-npm install sveltednd
+npm install @thisux/sveltednd
 ```
 
 ## Quick Start
 
 ```typescript
-import { draggable, droppable } from 'sveltednd';
-import 'sveltednd/styles.css';
+import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
+import '@thisux/sveltednd/styles.css';
 
 // Create a list of items
 let items = $state(['Item 1', 'Item 2', 'Item 3']);
@@ -141,6 +141,8 @@ interface DragDropState<T = unknown> {
 
 ```svelte
 <script lang="ts">
+	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
+
 	let items = $state(['Item 1', 'Item 2', 'Item 3']);
 
 	function handleDrop(state: DragDropState<{ id: string }>) {
@@ -162,6 +164,8 @@ interface DragDropState<T = unknown> {
 
 ```svelte
 <script lang="ts">
+	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
+
 	let container1 = $state(['A', 'B']);
 	let container2 = $state(['C', 'D']);
 
@@ -201,7 +205,9 @@ interface DragDropState<T = unknown> {
 
 ```svelte
 <script lang="ts">
-  function handleDragOver(state: DragDropState) {
+	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
+
+	function handleDragOver(state: DragDropState) {
     const { draggedItem } = state;
     // Prevent dropping if item doesn't meet criteria
     if (!isValidItem(draggedItem)) {
@@ -211,11 +217,11 @@ interface DragDropState<T = unknown> {
 </script>
 
 <div use:droppable={{
-  container: "filtered",
-  callbacks: {
-    onDragOver: handleDragOver,
-    onDrop: handleDrop
-  }
+	container: 'filtered',
+	callbacks: {
+		onDragOver: handleDragOver,
+			onDrop: handleDrop
+		}
 }}>
 ```
 
