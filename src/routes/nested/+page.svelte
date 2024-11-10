@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { droppable, draggable, type DragDropState } from '$lib/index.js';
-	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import '$lib/styles/dnd.css';
 

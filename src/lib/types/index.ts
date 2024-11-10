@@ -1,22 +1,22 @@
-export interface DragDropState {
+export interface DragDropState<T = unknown> {
 	isDragging: boolean;
-	draggedItem: any;
+	draggedItem: T;
 	sourceContainer: string;
 	targetContainer: string | null;
 }
 
-export interface DragDropCallbacks {
-	onDragStart?: (state: DragDropState) => void;
-	onDragEnter?: (state: DragDropState) => void;
-	onDragLeave?: (state: DragDropState) => void;
-	onDragOver?: (state: DragDropState) => void;
-	onDrop?: (state: DragDropState) => Promise<void> | void;
-	onDragEnd?: (state: DragDropState) => void;
+export interface DragDropCallbacks<T = unknown> {
+	onDragStart?: (state: DragDropState<T>) => void;
+	onDragEnter?: (state: DragDropState<T>) => void;
+	onDragLeave?: (state: DragDropState<T>) => void;
+	onDragOver?: (state: DragDropState<T>) => void;
+	onDrop?: (state: DragDropState<T>) => Promise<void> | void;
+	onDragEnd?: (state: DragDropState<T>) => void;
 }
 
-export interface DragDropOptions {
-	dragData?: any;
+export interface DragDropOptions<T = unknown> {
+	dragData?: T;
 	container: string;
 	disabled?: boolean;
-	callbacks?: DragDropCallbacks;
+	callbacks?: DragDropCallbacks<T>;
 }
