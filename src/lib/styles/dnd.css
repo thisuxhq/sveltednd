@@ -35,16 +35,11 @@
 	border: 2px dashed #9e9e9e;
 }
 
-/* Visual feedback for touch interactions */
-.svelte-dnd-touch-feedback {
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-	border-color: #2196f3;
-}
-
 /* Media queries for responsive design */
 @media (max-width: 600px) {
 	.svelte-dnd-draggable {
 		width: 100%;
+		touch-action: none; /* Prevents scrolling during drag */
 	}
 
 	.svelte-dnd-droppable {
