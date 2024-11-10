@@ -258,4 +258,4 @@ MIT
 
 ## Acknowledgment
 
-SvelteDnD is proudly built by [ThisUX](https://thisux.com) – A Design led product studio.
+SvelteDnD is proudly built by [ThisUX](https://thisux.com) – A Design led product studio. If you need help building your next product, [let's talk](https://cal.com/imsanju/15min).
