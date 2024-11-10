@@ -41,7 +41,7 @@
 						dragData: image
 					}}
 					class="group relative h-[300px] w-[200px] cursor-move overflow-hidden rounded-xl
-							transition-transform hover:scale-105"
+							transition-transform hover:scale-105 svelte-dnd-touch-feedback"
 				>
 					<img
 						src={image.url}

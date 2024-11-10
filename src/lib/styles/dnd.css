@@ -35,3 +35,21 @@
 	opacity: 0.3;
 	border: 2px dashed #9e9e9e;
 }
+
+/* Visual feedback for touch interactions */
+.svelte-dnd-touch-feedback {
+	opacity: 0.7;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	border-color: #2196f3;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 600px) {
+	.svelte-dnd-draggable {
+		width: 100%;
+	}
+
+	.svelte-dnd-droppable {
+		padding: 10px;
+	}
+}

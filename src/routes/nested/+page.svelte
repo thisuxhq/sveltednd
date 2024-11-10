@@ -128,7 +128,7 @@
 						container: groupIndex.toString(),
 						dragData: group
 					}}
-					class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
+					class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 svelte-dnd-touch-feedback"
 					in:fade={{ duration: 150 }}
 					out:fade={{ duration: 150 }}
 				>
@@ -160,7 +160,7 @@
 										dragData: item
 									}}
 									class="cursor-move rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200
-                                           transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
+                                           transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200 svelte-dnd-touch-feedback"
 								>
 									<div class="mb-2 flex items-start justify-between gap-2">
 										<h3 class="font-medium text-gray-900">{item.title}</h3>

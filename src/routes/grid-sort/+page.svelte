@@ -48,7 +48,7 @@
 							container: index.toString(),
 							dragData: card
 						}}
-						class={`h-full w-full cursor-move rounded-lg bg-gradient-to-br ${card.color} shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-95 active:brightness-110`}
+						class={`h-full w-full cursor-move rounded-lg bg-gradient-to-br ${card.color} shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-95 active:brightness-110 svelte-dnd-touch-feedback`}
 					>
 						<div class="flex h-full items-center justify-center">
 							<span class="text-4xl">{card.icon}</span>
