@@ -17,7 +17,8 @@
 		{ id: '6', color: 'from-pink-400 to-pink-600', icon: '🌸' }
 	]);
 
-	function handleDrop({ draggedItem, sourceContainer, targetContainer }: DragDropState<Card>) {
+	function handleDrop(state: DragDropState<Card>) {
+		const { draggedItem, sourceContainer, targetContainer } = state;
 		if (!targetContainer || sourceContainer === targetContainer) return; // Prevent self-placement
 
 		cards = cards.filter((card: Card) => card.id !== draggedItem.id); // Remove the dragged item

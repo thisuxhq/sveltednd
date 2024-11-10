@@ -22,6 +22,7 @@ function handleDrop(state: DragDropState<{ id: string }>) {
 	const { draggedItem, sourceContainer, targetContainer } = state;
 	if (!targetContainer || sourceContainer === targetContainer) return;
 
+	// Update items based on the drop
 	items = items.filter((item) => item !== draggedItem);
 	items = [...items, draggedItem];
 }

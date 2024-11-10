@@ -14,7 +14,8 @@
 		{ id: '4', url: 'https://picsum.photos/200/300?4' }
 	]);
 
-	function handleDrop({ draggedItem, sourceContainer, targetContainer }: DragDropState<ImageItem>) {
+	function handleDrop(state: DragDropState<ImageItem>) {
+		const { draggedItem, sourceContainer, targetContainer } = state;
 		if (!targetContainer || sourceContainer === targetContainer) return; // Prevent self-placement
 
 		images = images.filter((img: ImageItem) => img.id !== draggedItem.id); // Remove the dragged item
