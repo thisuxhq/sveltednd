@@ -221,11 +221,11 @@ interface DragDropState<T = unknown> {
 
 ### Additional Examples
 
-- **Kanban Board**: Find the example in `src/routes/kanban/+page.svelte`.
-- **Simple Sortable List**: Refer to `src/routes/simple-list/+page.svelte`.
-- **Grid Sort**: Check out the implementation in `src/routes/grid-sort/+page.svelte`.
-- **Horizontal Scroll**: See how it works in `src/routes/horizontal-scroll/+page.svelte`.
-- **Nested Containers**: Explore the example in `src/routes/nested/+page.svelte`.
+- **[Kanban Board](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/+page.svelte)**: Find the example in `src/routes/+page.svelte`.
+- **[Simple Sortable List](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/simple-list/+page.svelte)**: Refer to `src/routes/simple-list/+page.svelte`.
+- **[Grid Sort](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/grid-sort/+page.svelte)**: Check out the implementation in `src/routes/grid-sort/+page.svelte`.
+- **[Horizontal Scroll](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/horizontal-scroll/+page.svelte)**: See how it works in `src/routes/horizontal-scroll/+page.svelte`.
+- **[Nested Containers](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/nested/+page.svelte)**: Explore the example in `src/routes/nested/+page.svelte`.
 
 ## Styling
 

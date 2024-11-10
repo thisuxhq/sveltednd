@@ -1,6 +1,6 @@
 {
 	"name": "@thisux/sveltednd",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"private": false,
 	"description": "A lightweight, flexible drag and drop library for Svelte 5 applications.",
 	"author": "sanju <work@sanju.sh>",
