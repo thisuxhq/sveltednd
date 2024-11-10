@@ -59,6 +59,22 @@ function handleDrop(state) {
 - Access current drag state via `dndState` store
 - Automatic cleanup and memory management
 
+## API Design
+
+Our API is designed with simplicity and usability in mind. Each action (`draggable` and `droppable`) is intuitive, allowing developers to easily implement drag-and-drop functionality without deep diving into complex configurations. The use of callbacks provides flexibility, enabling custom behavior during drag events. This design philosophy ensures that developers can focus on building features rather than wrestling with the library.
+
+### API Overview
+
+```mermaid
+graph TD;
+    A[Draggable] -->|use:draggable| B[Drag Data]
+    A -->|callbacks| C[onDragStart]
+    A -->|callbacks| D[onDragEnd]
+    E[Droppable] -->|use:droppable| F[Container ID]
+    E -->|callbacks| G[onDragEnter]
+    E -->|callbacks| H[onDrop]
+```
+
 ## API Reference
 
 ### Draggable Action
@@ -201,6 +217,14 @@ interface DragDropState {
   }
 }}>
 ```
+
+### Additional Examples
+
+- **Kanban Board**: Find the example in `src/routes/kanban/+page.svelte`.
+- **Simple Sortable List**: Refer to `src/routes/simple-list/+page.svelte`.
+- **Grid Sort**: Check out the implementation in `src/routes/grid-sort/+page.svelte`.
+- **Horizontal Scroll**: See how it works in `src/routes/horizontal-scroll/+page.svelte`.
+- **Nested Containers**: Explore the example in `src/routes/nested/+page.svelte`.
 
 ## Styling
 
