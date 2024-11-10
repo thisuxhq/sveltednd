@@ -1,7 +1,5 @@
 # SvelteDnD
 
-[![npm version](https://img.shields.io/npm/v/@thisux/sveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
-
 A lightweight drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's new runes system.
 
 ## Installation
@@ -264,19 +262,21 @@ interface DragDropState<T = unknown> {
 
 		// Handle the drop action
 		// For example, move the item to a different category or list
-		items = items.map(item =>
+		items = items.map((item) =>
 			item.id === draggedItem.id ? { ...item, category: targetContainer } : item
 		);
 	}
 </script>
 
-<div use:droppable={{
-	container: 'filtered',
-	callbacks: {
-		onDragOver: handleDragOver,
-		onDrop: handleDrop
-	}
-}}>
+<div
+	use:droppable={{
+		container: 'filtered',
+		callbacks: {
+			onDragOver: handleDragOver,
+			onDrop: handleDrop
+		}
+	}}
+>
 	{#each items as item}
 		<div use:draggable={{ container: 'filtered', dragData: item }}>
 			{item.name}
