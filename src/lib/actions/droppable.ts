@@ -1,16 +1,17 @@
 import { dndState } from '$lib/stores/dnd.svelte.js';
-import type { DragDropOptions } from '$lib/types/index.js';
+import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
-export function droppable(node: HTMLElement, options: DragDropOptions) {
-	let touchTimeout: number | null = null;
-
+export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
+  let touchTimeout: number | null = null;
+	
 	function handleDragEnter(event: DragEvent | TouchEvent) {
+
 		if (options.disabled) return;
 		event.preventDefault();
 
 		dndState.targetContainer = options.container;
 		node.classList.add('drag-over');
-		options.callbacks?.onDragEnter?.(dndState);
+		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
 
 	function handleDragLeave(event: DragEvent | TouchEvent) {
@@ -20,7 +21,7 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 		if (!node.contains(target)) {
 			dndState.targetContainer = null;
 			node.classList.remove('drag-over');
-			options.callbacks?.onDragLeave?.(dndState);
+			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 		}
 	}
 
@@ -32,7 +33,7 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 			event.dataTransfer.dropEffect = 'move';
 		}
 
-		options.callbacks?.onDragOver?.(dndState);
+		options.callbacks?.onDragOver?.(dndState as DragDropState<T>);
 	}
 
 	async function handleDrop(event: DragEvent | TouchEvent) {
@@ -42,12 +43,13 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 		node.classList.remove('drag-over');
 
 		try {
+      
 			if (event instanceof DragEvent && event.dataTransfer) {
-				const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
+				const dragData = JSON.parse(event.dataTransfer.getData('text/plain')) as T;
 				dndState.draggedItem = dragData;
 			}
 
-			await options.callbacks?.onDrop?.(dndState);
+			await options.callbacks?.onDrop?.(dndState as DragDropState<T>);
 		} catch (error) {
 			console.error('Drop handling failed:', error);
 		}
@@ -70,7 +72,7 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 	node.addEventListener('touchmove', handleTouchMove);
 
 	return {
-		update(newOptions: DragDropOptions) {
+		update(newOptions: DragDropOptions<T>) {
 			options = newOptions;
 		},
 

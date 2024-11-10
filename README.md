@@ -1,7 +1,5 @@
 # SvelteDnD
 
-[![npm version](https://badge.fury.io/js/%40thisux%2Fsveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
-
 A lightweight drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's new runes system.
 
 ## Installation
@@ -14,7 +12,7 @@ npm install @thisux/sveltednd
 
 ```typescript
 import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
-import '@thisux/sveltednd/styles.css';
+import '@thisux/sveltednd/styles.css'; // optional
 
 // Create a list of items
 let items = $state(['Item 1', 'Item 2', 'Item 3']);
@@ -145,9 +143,18 @@ interface DragDropState<T = unknown> {
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
 
-	let items = $state(['Item 1', 'Item 2', 'Item 3']);
+	interface Item {
+		id: string;
+		name: string;
+	}
 
-	function handleDrop(state: DragDropState<{ id: string }>) {
+	let items = $state<Item[]>([
+		{ id: '1', name: 'Item 1' },
+		{ id: '2', name: 'Item 2' },
+		{ id: '3', name: 'Item 3' }
+	]);
+
+	function handleDrop(state: DragDropState<Item>) {
 		const { draggedItem } = state;
 		items = [...items, draggedItem];
 	}
@@ -156,7 +163,7 @@ interface DragDropState<T = unknown> {
 <div use:droppable={{ container: 'list', callbacks: { onDrop: handleDrop } }}>
 	{#each items as item}
 		<div use:draggable={{ container: 'list', dragData: item }}>
-			{item}
+			{item.name}
 		</div>
 	{/each}
 </div>
@@ -168,17 +175,29 @@ interface DragDropState<T = unknown> {
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
 
-	let container1 = $state(['A', 'B']);
-	let container2 = $state(['C', 'D']);
+	interface Item {
+		id: string;
+		name: string;
+	}
 
-	function handleDrop(state: DragDropState<{ id: string }>) {
+	let container1 = $state<Item[]>([
+		{ id: 'a', name: 'A' },
+		{ id: 'b', name: 'B' }
+	]);
+
+	let container2 = $state<Item[]>([
+		{ id: 'c', name: 'C' },
+		{ id: 'd', name: 'D' }
+	]);
+
+	function handleDrop(state: DragDropState<Item>) {
 		const { sourceContainer, targetContainer, draggedItem } = state;
 
 		if (sourceContainer === 'container1') {
-			container1 = container1.filter((i) => i !== draggedItem);
+			container1 = container1.filter((i) => i.id !== draggedItem.id);
 			container2 = [...container2, draggedItem];
 		} else {
-			container2 = container2.filter((i) => i !== draggedItem);
+			container2 = container2.filter((i) => i.id !== draggedItem.id);
 			container1 = [...container1, draggedItem];
 		}
 	}
@@ -188,7 +207,7 @@ interface DragDropState<T = unknown> {
 	<div use:droppable={{ container: 'container1', callbacks: { onDrop: handleDrop } }}>
 		{#each container1 as item}
 			<div use:draggable={{ container: 'container1', dragData: item }}>
-				{item}
+				{item.name}
 			</div>
 		{/each}
 	</div>
@@ -196,7 +215,7 @@ interface DragDropState<T = unknown> {
 	<div use:droppable={{ container: 'container2', callbacks: { onDrop: handleDrop } }}>
 		{#each container2 as item}
 			<div use:draggable={{ container: 'container2', dragData: item }}>
-				{item}
+				{item.name}
 			</div>
 		{/each}
 	</div>
@@ -209,22 +228,61 @@ interface DragDropState<T = unknown> {
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
 
-	function handleDragOver(state: DragDropState) {
-    const { draggedItem } = state;
-    // Prevent dropping if item doesn't meet criteria
-    if (!isValidItem(draggedItem)) {
-      return false;
-    }
-  }
+	interface Item {
+		id: string;
+		name: string;
+		category: string;
+	}
+
+	let items = $state<Item[]>([
+		{ id: '1', name: 'Item 1', category: 'A' },
+		{ id: '2', name: 'Item 2', category: 'B' },
+		{ id: '3', name: 'Item 3', category: 'A' }
+	]);
+
+	function isValidItem(item: Item): boolean {
+		// Example criterion: Only allow dropping items from category 'A'
+		return item.category === 'A';
+	}
+
+	function handleDragOver(state: DragDropState<Item>) {
+		const { draggedItem } = state;
+		// Prevent dropping if item doesn't meet criteria
+		if (!isValidItem(draggedItem)) {
+			// Optionally, add a class to indicate invalid drop target
+			dndState.invalidDrop = true;
+		} else {
+			dndState.invalidDrop = false;
+		}
+	}
+
+	function handleDrop(state: DragDropState<Item>) {
+		const { draggedItem, targetContainer } = state;
+		if (!targetContainer || !isValidItem(draggedItem)) return;
+
+		// Handle the drop action
+		// For example, move the item to a different category or list
+		items = items.map((item) =>
+			item.id === draggedItem.id ? { ...item, category: targetContainer } : item
+		);
+	}
 </script>
 
-<div use:droppable={{
-	container: 'filtered',
-	callbacks: {
-		onDragOver: handleDragOver,
+<div
+	use:droppable={{
+		container: 'filtered',
+		callbacks: {
+			onDragOver: handleDragOver,
 			onDrop: handleDrop
 		}
-}}>
+	}}
+>
+	{#each items as item}
+		<div use:draggable={{ container: 'filtered', dragData: item }}>
+			{item.name}
+		</div>
+	{/each}
+</div>
 ```
 
 ### Additional Examples
