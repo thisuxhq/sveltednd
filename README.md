@@ -255,3 +255,7 @@ function handleDrop(state: DragDropState) {
 ## License
 
 MIT
+
+## Acknowledgment
+
+SvelteDnD is proudly built by [ThisUX](https://thisux.com) – A Design led product studio.
