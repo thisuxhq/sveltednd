@@ -1,0 +1,37 @@
+/* Base draggable styles */
+.svelte-dnd-draggable {
+	touch-action: none; /* Prevents touch scrolling while dragging */
+	user-select: none; /* Prevents text selection during drag */
+}
+
+/* Active dragging state */
+.svelte-dnd-dragging {
+	opacity: 0.5;
+	cursor: grabbing;
+}
+
+/* Draggable hover state */
+.svelte-dnd-draggable:hover {
+	cursor: grab;
+}
+
+/* Droppable area styles */
+.svelte-dnd-droppable {
+	position: relative;
+}
+
+/* Active drop target */
+.svelte-dnd-drop-target {
+	outline: 2px dashed #4caf50;
+}
+
+/* Invalid drop target */
+.svelte-dnd-invalid-target {
+	outline: 2px dashed #f44336;
+}
+
+/* Drop preview/placeholder */
+.svelte-dnd-placeholder {
+	opacity: 0.3;
+	border: 2px dashed #9e9e9e;
+}
