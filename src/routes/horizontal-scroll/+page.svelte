@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
+	import { flip } from 'svelte/animate';
+	import { fade } from 'svelte/transition';
 	import '$lib/styles/dnd.css';
 
 	interface ImageItem {
@@ -34,14 +36,17 @@
 			<div
 				use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
 				class="relative"
+				animate:flip={{ duration: 200 }}
 			>
 				<div
 					use:draggable={{
 						container: index.toString(),
 						dragData: image
 					}}
-					class="group relative h-[300px] w-[200px] cursor-move overflow-hidden rounded-xl
-							transition-transform hover:scale-105 svelte-dnd-touch-feedback"
+					in:fade={{ duration: 150 }}
+					out:fade={{ duration: 150 }}
+					class="svelte-dnd-touch-feedback group relative h-[300px] w-[200px] cursor-move overflow-hidden
+							rounded-xl transition-transform hover:scale-105"
 				>
 					<img
 						src={image.url}

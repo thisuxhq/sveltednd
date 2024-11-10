@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { droppable, draggable, type DragDropState } from '$lib/index.js';
 	import { fade } from 'svelte/transition';
+	import { flip } from 'svelte/animate';
 	import '$lib/styles/dnd.css';
 
 	interface Item {
@@ -122,13 +123,14 @@
 					container: groupIndex.toString(),
 					callbacks: { onDrop: handleGroupDrop }
 				}}
+				animate:flip={{ duration: 200 }}
 			>
 				<div
 					use:draggable={{
 						container: groupIndex.toString(),
 						dragData: group
 					}}
-					class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 svelte-dnd-touch-feedback"
+					class="svelte-dnd-touch-feedback rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
 					in:fade={{ duration: 150 }}
 					out:fade={{ duration: 150 }}
 				>
@@ -159,8 +161,8 @@
 										container: `${group.id}:${itemIndex}`,
 										dragData: item
 									}}
-									class="cursor-move rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200
-                                           transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200 svelte-dnd-touch-feedback"
+									class="svelte-dnd-touch-feedback cursor-move rounded-lg bg-white p-3 shadow-sm ring-1
+                                           ring-gray-200 transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
 								>
 									<div class="mb-2 flex items-start justify-between gap-2">
 										<h3 class="font-medium text-gray-900">{item.title}</h3>

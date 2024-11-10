@@ -58,7 +58,7 @@
 	</div>
 
 	<div class="w-80">
-		<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-xl bg-gray-100 p-4 shadow-sm ring-1 ring-gray-200">
 			<div class="space-y-3">
 				{#each items as item, index (item.id)}
 					<div
