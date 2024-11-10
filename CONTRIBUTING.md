@@ -7,6 +7,7 @@ Thanks for wanting to contribute to **@thisux/sveltednd**! We’re happy to have
 ## How to Get Started
 
 1. **Fork** this repo and **clone** it to your computer:
+
    ```bash
    git clone https://github.com/thisuxhq/sveltednd.git
    cd sveltednd
@@ -33,6 +34,7 @@ If you find a bug or want to suggest a new feature, [open an issue here](https:/
 ## Making a Pull Request
 
 1. **Create a new branch** for your work:
+
    ```bash
    git checkout -b feature/my-new-feature
    ```
@@ -40,6 +42,7 @@ If you find a bug or want to suggest a new feature, [open an issue here](https:/
 2. **Write clear commit messages** to describe your changes.
 
 3. **Push your branch** and open a pull request:
+
    ```bash
    git push origin feature/my-new-feature
    ```
@@ -49,6 +52,7 @@ If you find a bug or want to suggest a new feature, [open an issue here](https:/
 ## Coding Style
 
 - Run **Prettier** and **ESLint** to keep code clean:
+
   ```bash
   npm run format
   npm run lint
