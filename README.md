@@ -14,7 +14,7 @@ npm install @thisux/sveltednd
 
 ```typescript
 import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
-import '@thisux/sveltednd/styles.css';
+import '@thisux/sveltednd/styles.css'; // optional
 
 // Create a list of items
 let items = $state(['Item 1', 'Item 2', 'Item 3']);
