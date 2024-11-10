@@ -31,8 +31,8 @@
 >
 	<div class="max-w-2xl">
 		<div class="mb-8 flex flex-col gap-2">
-			<h1 class="text-2xl font-bold text-gray-900">Sortable List</h1>
-			<p class="text-gray-600">Drag and drop items to reorder them in the list.</p>
+			<h1 class="text-2xl font-bold text-gray-900">SortGable Grid</h1>
+			<p class="text-gray-600">Drag and drop items to reorder them in the grid.</p>
 		</div>
 
 		<div class="grid grid-cols-3 gap-6">
