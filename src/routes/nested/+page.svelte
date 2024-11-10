@@ -150,7 +150,7 @@
 								use:droppable={{
 									container: `${group.id}:${itemIndex}`,
 									callbacks: {
-										onDrop: (state) => handleItemDrop(group.id, state)
+										onDrop: (state: DragDropState<DraggedItem>) => handleItemDrop(group.id, state)
 									}
 								}}
 							>

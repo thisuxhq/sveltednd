@@ -93,7 +93,9 @@
 				<div
 					class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
 					use:droppable={{
+						// The container is the status of the task. e.g. 'todo', 'in-progress', 'done'
 						container: status,
+						// When a task is dropped, the handleDrop function is called to update the task's status
 						callbacks: { onDrop: handleDrop }
 					}}
 				>
@@ -110,7 +112,9 @@
 						{#each items as task (task.id)}
 							<div
 								use:draggable={{
+									// The container is the status of the task. e.g. 'todo', 'in-progress', 'done'
 									container: status,
+									// The dragData is the task that is being dragged
 									dragData: task
 								}}
 								animate:flip={{ duration: 200 }}

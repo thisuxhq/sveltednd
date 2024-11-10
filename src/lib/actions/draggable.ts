@@ -1,11 +1,10 @@
 import { dndState } from '$lib/stores/dnd.svelte.js';
-import type { DragDropOptions } from '$lib/types/index.js';
+import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
-export function draggable(node: HTMLElement, options: DragDropOptions) {
+export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
 
-		// Update state using assignment (Svelte 5 style)
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
 		dndState.sourceContainer = options.container;
@@ -17,12 +16,12 @@ export function draggable(node: HTMLElement, options: DragDropOptions) {
 		}
 
 		node.classList.add('dragging');
-		options.callbacks?.onDragStart?.(dndState);
+		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 	}
 
 	function handleDragEnd() {
 		node.classList.remove('dragging');
-		options.callbacks?.onDragEnd?.(dndState);
+		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
 		// Reset state
 		dndState.isDragging = false;
@@ -36,7 +35,7 @@ export function draggable(node: HTMLElement, options: DragDropOptions) {
 	node.addEventListener('dragend', handleDragEnd);
 
 	return {
-		update(newOptions: DragDropOptions) {
+		update(newOptions: DragDropOptions<T>) {
 			options = newOptions;
 			node.draggable = !options.disabled;
 		},
