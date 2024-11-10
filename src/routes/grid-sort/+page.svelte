@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
+	import { flip } from 'svelte/animate';
 
 	interface Card {
 		id: string;
@@ -39,6 +40,7 @@
 					use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
 					class="relative aspect-square rounded-xl bg-white/50 p-1 backdrop-blur-sm
                            transition-all duration-300 hover:bg-white/60 dark:bg-slate-800/50"
+					animate:flip={{ duration: 300 }}
 				>
 					<div
 						use:draggable={{

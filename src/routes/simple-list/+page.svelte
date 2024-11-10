@@ -31,7 +31,8 @@
 		}
 	]);
 
-	function handleDrop({ draggedItem, targetContainer }: DragDropState<Item>) {
+	function handleDrop(state: DragDropState<unknown>) {
+		const { draggedItem, targetContainer } = state as DragDropState<Item>;
 		const dragIndex = items.findIndex((item: Item) => item.id === draggedItem.id);
 		const dropIndex = parseInt(targetContainer ?? '0');
 
