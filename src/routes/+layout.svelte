@@ -15,7 +15,7 @@
 	const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');
 </script>
 
-<div class="mx-auto min-h-screen max-w-screen-xl bg-gray-50">
+<div class="mx-auto min-h-screen w-full bg-gray-100">
 	<div class="flex flex-col">
 		<nav class="hidden border-b bg-white px-8 py-4 md:sticky md:top-0 md:block">
 			<div class="flex items-center justify-between">
