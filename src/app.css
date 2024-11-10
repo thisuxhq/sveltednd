@@ -1,3 +1,15 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+/* Mobile-specific styles and media queries for better responsiveness */
+@media (max-width: 600px) {
+	/* Adjust layout and styling for smaller screens */
+	.draggable-item {
+		width: 100%;
+	}
+
+	.droppable-container {
+		padding: 10px;
+	}
+}

@@ -2,7 +2,9 @@ import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions } from '$lib/types/index.js';
 
 export function droppable(node: HTMLElement, options: DragDropOptions) {
-	function handleDragEnter(event: DragEvent) {
+	let touchTimeout: number | null = null;
+
+	function handleDragEnter(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
 
@@ -11,7 +13,7 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 		options.callbacks?.onDragEnter?.(dndState);
 	}
 
-	function handleDragLeave(event: DragEvent) {
+	function handleDragLeave(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 
 		const target = event.target as HTMLElement;
@@ -22,25 +24,25 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 		}
 	}
 
-	function handleDragOver(event: DragEvent) {
+	function handleDragOver(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
 
-		if (event.dataTransfer) {
+		if (event instanceof DragEvent && event.dataTransfer) {
 			event.dataTransfer.dropEffect = 'move';
 		}
 
 		options.callbacks?.onDragOver?.(dndState);
 	}
 
-	async function handleDrop(event: DragEvent) {
+	async function handleDrop(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
 
 		node.classList.remove('drag-over');
 
 		try {
-			if (event.dataTransfer) {
+			if (event instanceof DragEvent && event.dataTransfer) {
 				const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
 				dndState.draggedItem = dragData;
 			}
@@ -51,10 +53,21 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 		}
 	}
 
+	function handleTouchMove(event: TouchEvent) {
+		if (touchTimeout) {
+			clearTimeout(touchTimeout);
+		}
+
+		touchTimeout = window.setTimeout(() => {
+			handleDragOver(event);
+		}, 100);
+	}
+
 	node.addEventListener('dragenter', handleDragEnter);
 	node.addEventListener('dragleave', handleDragLeave);
 	node.addEventListener('dragover', handleDragOver);
 	node.addEventListener('drop', handleDrop);
+	node.addEventListener('touchmove', handleTouchMove);
 
 	return {
 		update(newOptions: DragDropOptions) {
@@ -66,6 +79,7 @@ export function droppable(node: HTMLElement, options: DragDropOptions) {
 			node.removeEventListener('dragleave', handleDragLeave);
 			node.removeEventListener('dragover', handleDragOver);
 			node.removeEventListener('drop', handleDrop);
+			node.removeEventListener('touchmove', handleTouchMove);
 		}
 	};
 }
