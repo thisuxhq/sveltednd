@@ -1,6 +1,6 @@
 # SvelteDnD
 
-[![npm version](https://badge.fury.io/js/%40thisux%2Fsveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
+[![npm version](https://img.shields.io/npm/v/@thisux/sveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
 
 A lightweight drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's new runes system.
 
