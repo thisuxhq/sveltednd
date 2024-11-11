@@ -2,27 +2,37 @@ import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
 export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
-  let touchTimeout: number | null = null;
-	
-	function handleDragEnter(event: DragEvent | TouchEvent) {
+	const dragOverClasses = (options.attributes?.dragOverClasses ?? 'drag-over').split(' ');
 
+	let touchTimeout: number | null = null;
+
+	function handleDragEnter(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
 
+		const target = event.target as HTMLElement;
+
 		dndState.targetContainer = options.container;
-		node.classList.add('drag-over');
-		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
+		dndState.dragOverElement = target;
+
+		if (node.isSameNode(target)) {
+			node.classList.add(...dragOverClasses);
+			options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
+		}
 	}
 
 	function handleDragLeave(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 
 		const target = event.target as HTMLElement;
-		if (!node.contains(target)) {
-			dndState.targetContainer = null;
-			node.classList.remove('drag-over');
-			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-		}
+
+		// check if element is still being dragged over
+		if (!dndState.dragOverElement?.isSameNode(target)) return;
+
+		node.classList.remove(...dragOverClasses);
+
+		dndState.targetContainer = null;
+		dndState.dragOverElement = null;
 	}
 
 	function handleDragOver(event: DragEvent | TouchEvent) {
@@ -40,10 +50,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
-		node.classList.remove('drag-over');
+		node.classList.remove(...dragOverClasses);
 
 		try {
-      
 			if (event instanceof DragEvent && event.dataTransfer) {
 				const dragData = JSON.parse(event.dataTransfer.getData('text/plain')) as T;
 				dndState.draggedItem = dragData;

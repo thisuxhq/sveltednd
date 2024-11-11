@@ -2,8 +2,9 @@ import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
 export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
-	function handleDragStart(event: DragEvent | TouchEvent) {
+	const draggingClasses = (options.attributes?.draggingClasses ?? 'dragging').split(' ');
 
+	function handleDragStart(event: DragEvent | TouchEvent) {
 		if (options.disabled) return;
 
 		dndState.isDragging = true;
@@ -16,12 +17,14 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			event.dataTransfer.setData('text/plain', JSON.stringify(options.dragData));
 		}
 
-		node.classList.add('dragging');
+		node.classList.add(...draggingClasses);
+
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 	}
 
 	function handleDragEnd(event: DragEvent | TouchEvent) {
-		node.classList.remove('dragging');
+		node.classList.remove(...draggingClasses);
+
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
 		// Reset state
