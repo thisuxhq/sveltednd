@@ -5,14 +5,14 @@ A lightweight drag and drop library for Svelte 5 applications. Built with TypeSc
 ## Installation
 
 ```bash
-npm install @thisux/sveltednd
+npm i @thisux/sveltednd@0.0.13
 ```
 
 ## Quick Start
 
-```typescript
+````typescript
+<script lang="ts">
 import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
-import '@thisux/sveltednd/styles.css'; // optional
 
 // Create a list of items
 let items = $state(['Item 1', 'Item 2', 'Item 3']);
@@ -26,7 +26,7 @@ function handleDrop(state: DragDropState<{ id: string }>) {
 	items = items.filter((item) => item !== draggedItem);
 	items = [...items, draggedItem];
 }
-```
+</script>
 
 ```svelte
 <!-- Make a droppable container -->
@@ -38,7 +38,7 @@ function handleDrop(state: DragDropState<{ id: string }>) {
 		</div>
 	{/each}
 </div>
-```
+````
 
 ## Core Concepts
 

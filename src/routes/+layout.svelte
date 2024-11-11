@@ -9,7 +9,8 @@
 		{ path: '/simple-list', title: 'Simple List' },
 		{ path: '/horizontal-scroll', title: 'Horizontal Scroll' },
 		{ path: '/grid-sort', title: 'Grid Sort' },
-		{ path: '/nested', title: 'Nested Containers' }
+		{ path: '/nested', title: 'Nested Containers' },
+		{ path: '/multiple', title: 'Multiple' }
 	];
 
 	const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');

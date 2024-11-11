@@ -1,6 +1,6 @@
 {
 	"name": "@thisux/sveltednd",
-	"version": "0.0.12",
+	"version": "0.0.13",
 	"private": false,
 	"description": "A lightweight, flexible drag and drop library for Svelte 5 applications.",
 	"author": "sanju <work@sanju.sh>",
@@ -73,5 +73,8 @@
 		"typescript-eslint": "^8.0.0",
 		"vite": "^5.0.11",
 		"vitest": "^2.0.4"
+	},
+	"dependencies": {
+		"@thisux/sveltednd": "^0.0.12"
 	}
 }
