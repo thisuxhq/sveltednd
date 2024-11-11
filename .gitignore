@@ -23,3 +23,7 @@ vite.config.ts.timestamp-*
 
 # .github 
 .github/copilot-instructions.md
+
+# pnpm
+
+pnpm-lock.yaml
