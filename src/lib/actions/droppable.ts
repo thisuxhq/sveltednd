@@ -10,7 +10,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
+		const target = event.target as HTMLElement;
+
 		dndState.targetContainer = options.container;
+		dndState.targetElement = target;
+
 		node.classList.add(...dragOverClass);
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
@@ -19,11 +23,16 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 
 		const target = event.target as HTMLElement;
-		if (!node.contains(target)) {
-			dndState.targetContainer = null;
-			node.classList.remove(...dragOverClass);
-			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-		}
+
+		// check if element is still being dragged over
+		if (!dndState.targetElement?.isSameNode(target)) return;
+
+		node.classList.remove(...dragOverClass);
+
+		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+
+		dndState.targetContainer = null;
+		dndState.targetElement = null;
 	}
 
 	function handleDragOver(event: DragEvent) {

@@ -3,6 +3,7 @@ export interface DragDropState<T = unknown> {
 	draggedItem: T;
 	sourceContainer: string;
 	targetContainer: string | null;
+	targetElement: HTMLElement | null;
 }
 
 export interface DragDropCallbacks<T = unknown> {

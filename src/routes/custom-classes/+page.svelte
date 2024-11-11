@@ -67,8 +67,8 @@
 							container: index.toString(),
 							callbacks: { onDrop: handleDrop },
 							attributes: {
-								draggingClass: 'custom-dragging ring-1 ring-blue-500',
-								dragOverClass: 'custom-drag-over ring-1 ring-red-500'
+								draggingClass: 'border border-blue-500',
+								dragOverClass: 'border border-red-500'
 							}
 						}}
 						animate:flip={{ duration: 200 }}
