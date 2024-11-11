@@ -1,13 +1,17 @@
 import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
+const DEFAULT_DRAG_OVER_CLASS = 'drag-over';
+
 export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
+	const dragOverClass = (options.attributes?.draggingClass || DEFAULT_DRAG_OVER_CLASS).split(' ');
+
 	function handleDragEnter(event: DragEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
 
 		dndState.targetContainer = options.container;
-		node.classList.add('drag-over');
+		node.classList.add(...dragOverClass);
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
 
@@ -17,7 +21,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		const target = event.target as HTMLElement;
 		if (!node.contains(target)) {
 			dndState.targetContainer = null;
-			node.classList.remove('drag-over');
+			node.classList.remove(...dragOverClass);
 			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 		}
 	}
@@ -37,7 +41,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
-		node.classList.remove('drag-over');
+		node.classList.remove(...dragOverClass);
 
 		try {
 			if (event.dataTransfer) {
@@ -55,7 +59,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled || !dndState.isDragging) return;
 
 		dndState.targetContainer = options.container;
-		node.classList.add('drag-over');
+		node.classList.add(...dragOverClass);
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
 
@@ -63,14 +67,14 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled || !dndState.isDragging) return;
 
 		dndState.targetContainer = null;
-		node.classList.remove('drag-over');
+		node.classList.remove(...dragOverClass);
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 	}
 
 	function handlePointerUp(event: PointerEvent) {
 		if (options.disabled || !dndState.isDragging) return;
 
-		node.classList.remove('drag-over');
+		node.classList.remove(...dragOverClass);
 		options.callbacks?.onDrop?.(dndState as DragDropState<T>);
 	}
 
