@@ -1,7 +1,11 @@
 import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
+const DEFAULT_DRAGGING_CLASS = 'dragging';
+
 export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
+	const draggingClass = (options.attributes?.draggingClass || DEFAULT_DRAGGING_CLASS).split(' ');
+
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
 
@@ -15,12 +19,12 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			event.dataTransfer.setData('text/plain', JSON.stringify(options.dragData));
 		}
 
-		node.classList.add('dragging');
+		node.classList.add(...draggingClass);
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 	}
 
 	function handleDragEnd() {
-		node.classList.remove('dragging');
+		node.classList.remove(...draggingClass);
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
 		// Reset state
@@ -39,7 +43,7 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		dndState.targetContainer = null;
 
 		node.setPointerCapture(event.pointerId);
-		node.classList.add('dragging');
+		node.classList.add(...draggingClass);
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 	}
 
@@ -53,7 +57,7 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (!dndState.isDragging) return;
 
 		node.releasePointerCapture(event.pointerId);
-		node.classList.remove('dragging');
+		node.classList.remove(...draggingClass);
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
 		// Reset state

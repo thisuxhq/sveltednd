@@ -3,6 +3,7 @@ export interface DragDropState<T = unknown> {
 	draggedItem: T;
 	sourceContainer: string;
 	targetContainer: string | null;
+	targetElement: HTMLElement | null;
 }
 
 export interface DragDropCallbacks<T = unknown> {
@@ -14,9 +15,15 @@ export interface DragDropCallbacks<T = unknown> {
 	onDragEnd?: (state: DragDropState<T>) => void;
 }
 
+export interface DragDropAttributes {
+	draggingClass?: string;
+	dragOverClass?: string;
+}
+
 export interface DragDropOptions<T = unknown> {
 	dragData?: T;
 	container: string;
 	disabled?: boolean;
 	callbacks?: DragDropCallbacks<T>;
+	attributes?: DragDropAttributes;
 }
