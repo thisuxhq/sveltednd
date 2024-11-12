@@ -19,17 +19,17 @@
 	],
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build && npm run package",
+		"build": "vite build && bun run package",
 		"preview": "vite preview",
 		"package": "svelte-kit sync && svelte-package && publint",
-		"prepublishOnly": "npm run package",
-		"publish": "npm run build && npm publish",
+		"prepublishOnly": "bun run package",
+		"publish": "bun run build && bun publish",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "bun run test:unit -- --run"
 	},
 	"files": [
 		"dist",
@@ -75,6 +75,6 @@
 		"vitest": "^2.0.4"
 	},
 	"dependencies": {
-		"@thisux/sveltednd": "^0.0.12"
+		"@thisux/sveltednd": "0.0.12"
 	}
 }
