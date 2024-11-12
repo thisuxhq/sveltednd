@@ -5,7 +5,7 @@ A lightweight drag and drop library for Svelte 5 applications. Built with TypeSc
 ## Installation
 
 ```bash
-npm i @thisux/sveltednd@latest 
+npm i @thisux/sveltednd@latest
 # or bun add @thisux/sveltednd or yarn add @thisux/sveltednd or pnpm add @thisux/sveltednd
 ```
 
@@ -133,6 +133,12 @@ interface DragDropState<T = unknown> {
 	draggedItem: T; // Item being dragged
 	sourceContainer: string; // Origin container ID
 	targetContainer: string | null; // Current target container ID
+	attributes?: DragDropAttributes; // Drag attributes
+}
+
+interface DragDropAttributes {
+	draggingClass?: string; // Custom class for dragging state
+	dragOverClass?: string; // Custom class for drag-over state
 }
 ```
 
