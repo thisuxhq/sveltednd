@@ -5,7 +5,8 @@ A lightweight drag and drop library for Svelte 5 applications. Built with TypeSc
 ## Installation
 
 ```bash
-npm i @thisux/sveltednd@0.0.13
+npm i @thisux/sveltednd@latest 
+# or bun add @thisux/sveltednd or yarn add @thisux/sveltednd or pnpm add @thisux/sveltednd
 ```
 
 ## Quick Start
