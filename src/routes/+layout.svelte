@@ -10,7 +10,8 @@
 		{ path: '/horizontal-scroll', title: 'Horizontal Scroll' },
 		{ path: '/grid-sort', title: 'Grid Sort' },
 		{ path: '/nested', title: 'Nested Containers' },
-		{ path: '/multiple', title: 'Multiple' }
+		{ path: '/multiple', title: 'Multiple' },
+		{ path: '/custom-classes', title: 'Custom Classes' }
 	];
 
 	const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');

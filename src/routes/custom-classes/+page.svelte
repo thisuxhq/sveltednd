@@ -49,17 +49,24 @@
 			high: 'bg-red-50 text-red-700'
 		}[priority];
 	};
+
+	const dragStyles = {
+		low: 'bg-gradient-to-r from-sky-400/30 via-blue-400/20 to-indigo-400/30 backdrop-blur-lg',
+		medium:
+			'bg-gradient-to-r from-amber-400/30 via-orange-400/20 to-yellow-400/30 backdrop-blur-lg',
+		high: 'bg-gradient-to-r from-rose-400/30 via-red-400/20 to-pink-400/30 backdrop-blur-lg'
+	};
 </script>
 
-<div class="min-h-screen bg-gray-50 p-8">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-8">
 	<div class="mb-8 flex flex-col gap-2">
-		<h1 class="text-2xl font-bold text-gray-900">Sortable List</h1>
-		<p class="text-gray-600">Drag and drop items to reorder them in the list.</p>
+		<h1 class="text-2xl font-bold text-gray-900">Custom classes</h1>
+		<p class="text-gray-600">You can add custom classes to the draggable and droppable elements.</p>
 	</div>
 
 	<div class="w-80">
-		<div class="rounded-xl bg-gray-100 p-4 shadow-sm ring-1 ring-gray-200">
-			<div class="space-y-3">
+		<div class="rounded-xl bg-white/40 p-4 shadow-lg ring-1 ring-white/60 backdrop-blur-xl">
+			<div class="space-y-4">
 				{#each items as item, index (item.id)}
 					<div
 						use:draggable={{ container: index.toString(), dragData: item }}
@@ -67,31 +74,41 @@
 							container: index.toString(),
 							callbacks: { onDrop: handleDrop },
 							attributes: {
-								draggingClass: 'border border-blue-500',
-								dragOverClass: 'border border-red-500'
+								draggingClass: 'scale-105 rotate-2 !shadow-2xl !ring-2 ring-blue-500/50 z-50',
+								dragOverClass: 'scale-98 -rotate-1 !shadow-inner !ring-2 ring-emerald-500/50'
 							}
 						}}
-						animate:flip={{ duration: 200 }}
-						in:fade={{ duration: 150 }}
-						out:fade={{ duration: 150 }}
-						class="svelte-dnd-touch-feedback cursor-move rounded-lg bg-white p-3 shadow-sm
-                               ring-gray-200 transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
+						animate:flip={{ duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
+						in:fade={{ duration: 300 }}
+						out:fade={{ duration: 200 }}
+						class="group relative cursor-move rounded-lg p-4
+                               shadow-md ring-1 ring-white/60
+                               backdrop-blur-md transition-all duration-500
+                               ease-out hover:-rotate-1 hover:scale-[1.02]
+                               hover:shadow-xl active:shadow-inner
+                               {dragStyles[item.priority]}"
 					>
-						<div class="mb-2 flex items-start justify-between gap-2">
-							<h3 class="font-medium text-gray-900">
-								{item.title}
-							</h3>
-							<span
-								class={`rounded-full px-2 py-0.5 text-xs font-medium ${getPriorityColor(
-									item.priority
-								)}`}
-							>
-								{item.priority}
-							</span>
+						<div class="relative overflow-hidden rounded-md">
+							<!-- Enhanced gradient overlay -->
+							<div
+								class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/20 opacity-0
+                                      transition-all duration-500 group-hover:opacity-100"
+							/>
+
+							<!-- Kanban card content -->
+							<div class="relative z-10 space-y-2">
+								<div class="flex items-start justify-between">
+									<h3 class="font-medium text-gray-900">{item.title}</h3>
+									<span
+										class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
+													 {getPriorityColor(item.priority)}"
+									>
+										{item.priority}
+									</span>
+								</div>
+								<p class="text-sm text-gray-600">{item.description}</p>
+							</div>
 						</div>
-						<p class="text-sm text-gray-500">
-							{item.description}
-						</p>
 					</div>
 				{/each}
 			</div>
@@ -101,10 +118,29 @@
 
 <style>
 	:global(.dragging) {
-		@apply opacity-50 shadow-lg ring-2 ring-blue-400;
+		@apply opacity-60;
+		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 0.6;
+		}
+		50% {
+			opacity: 0.8;
+		}
 	}
 
 	:global(.drag-over) {
 		@apply bg-blue-50;
+	}
+
+	/* Add custom scaling utility */
+	.scale-102 {
+		transform: scale(1.02);
+	}
+	.scale-98 {
+		transform: scale(0.98);
 	}
 </style>

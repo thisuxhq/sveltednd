@@ -26,9 +26,7 @@
 	}
 </script>
 
-<div
-	class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8 dark:from-slate-900 dark:to-slate-800"
->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
 	<div class="max-w-2xl">
 		<div class="mb-8 flex flex-col gap-2">
 			<h1 class="text-2xl font-bold text-gray-900">SortGable Grid</h1>
@@ -40,7 +38,7 @@
 				<div
 					use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
 					class="relative aspect-square rounded-xl bg-white/50 p-1 backdrop-blur-sm
-                           transition-all duration-300 hover:bg-white/60 dark:bg-slate-800/50"
+                           transition-all duration-300 hover:bg-white/60"
 					animate:flip={{ duration: 300 }}
 				>
 					<div
@@ -48,7 +46,7 @@
 							container: index.toString(),
 							dragData: card
 						}}
-						class={`h-full w-full cursor-move rounded-lg bg-gradient-to-br ${card.color} shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-95 active:brightness-110 svelte-dnd-touch-feedback`}
+						class={`h-full w-full cursor-move rounded-lg bg-gradient-to-br ${card.color} svelte-dnd-touch-feedback shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-95 active:brightness-110`}
 					>
 						<div class="flex h-full items-center justify-center">
 							<span class="text-4xl">{card.icon}</span>
@@ -56,8 +54,7 @@
 					</div>
 					<div
 						class="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-white/90
-                              px-3 py-1 text-xs font-medium text-slate-600 shadow-sm dark:bg-slate-700
-                              dark:text-slate-300"
+                              px-3 py-1 text-xs font-medium text-slate-600 shadow-sm"
 					>
 						Position {index + 1}
 					</div>
