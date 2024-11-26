@@ -5,15 +5,18 @@ const DEFAULT_DRAG_OVER_CLASS = 'drag-over';
 
 export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	const dragOverClass = (options.attributes?.draggingClass || DEFAULT_DRAG_OVER_CLASS).split(' ');
+	let dragEnterCounter = 0; // Initialize the counter
 
 	function handleDragEnter(event: DragEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
 
-		const target = event.target as HTMLElement;
+		dragEnterCounter++;
 
 		dndState.targetContainer = options.container;
-		dndState.targetElement = target;
+		dndState.targetElement = event.target as HTMLElement;
+
+		if (dragEnterCounter === 0) return;
 
 		node.classList.add(...dragOverClass);
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
@@ -22,10 +25,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handleDragLeave(event: DragEvent) {
 		if (options.disabled) return;
 
-		const target = event.target as HTMLElement;
+		dragEnterCounter--;
 
 		// check if element is still being dragged over
-		if (!dndState.targetElement?.isSameNode(target)) return;
+		if (dragEnterCounter > 0) return;
 
 		node.classList.remove(...dragOverClass);
 
@@ -50,6 +53,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
+		dragEnterCounter = 0; // Reset the counter
 		node.classList.remove(...dragOverClass);
 
 		try {
@@ -62,6 +66,14 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		} catch (error) {
 			console.error('Drop handling failed:', error);
 		}
+	}
+
+	function handleDragStartOnContainer(event: Event) {
+		if (options.disabled) return;
+
+		// Reset the counter and remove the class
+		dragEnterCounter = 0;
+		node.classList.remove(...dragOverClass);
 	}
 
 	function handlePointerOver(event: PointerEvent) {
@@ -91,6 +103,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	node.addEventListener('dragleave', handleDragLeave);
 	node.addEventListener('dragover', handleDragOver);
 	node.addEventListener('drop', handleDrop);
+	node.addEventListener('dragstart-on-container', handleDragStartOnContainer);
 
 	node.addEventListener('pointerover', handlePointerOver);
 	node.addEventListener('pointerout', handlePointerOut);
@@ -106,6 +119,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			node.removeEventListener('dragleave', handleDragLeave);
 			node.removeEventListener('dragover', handleDragOver);
 			node.removeEventListener('drop', handleDrop);
+			node.removeEventListener('dragstart-on-container', handleDragStartOnContainer);
 
 			node.removeEventListener('pointerover', handlePointerOver);
 			node.removeEventListener('pointerout', handlePointerOut);
