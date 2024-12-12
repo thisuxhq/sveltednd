@@ -26,8 +26,8 @@
 			<!-- Logo section -->
 			<div class="border-b p-4">
 				<div class="flex flex-col space-y-1">
-					<h1 class="text-xl font-semibold text-primary">SvelteDnD</h1>
-					<a href="https://thisux.com" target="_blank" class="text-xs hover:text-primary"
+					<h1 class="text-primary text-xl font-semibold">SvelteDnD</h1>
+					<a href="https://thisux.com" target="_blank" class="hover:text-primary text-xs"
 						>by ThisUX</a
 					>
 				</div>
@@ -118,7 +118,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				Get in Touch
+				Book a call →
 				<svg
 					class="h-4 w-4 transition-transform group-hover:translate-x-1"
 					fill="none"
@@ -144,12 +144,12 @@
 		<span class="text-xs font-medium text-green-600">Available for Projects</span>
 	</div>
 	<a
-		href="https://thisux.com"
-		class="text-xs font-medium text-gray-900 hover:text-primary"
+		href="https://cal.com/imsanju/15min"
+		class="hover:text-primary text-xs font-medium text-gray-900"
 		target="_blank"
 		rel="noopener noreferrer"
 	>
-		Get in Touch →
+		Book a call →
 	</a>
 </div>
 
