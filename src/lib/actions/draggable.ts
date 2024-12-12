@@ -21,6 +21,10 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 		node.classList.add(...draggingClass);
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
+
+		// **Dispatch the custom event that bubbles up to the container**
+		const customEvent = new CustomEvent('dragstart-on-container', { bubbles: true });
+		node.dispatchEvent(customEvent);
 	}
 
 	function handleDragEnd() {
