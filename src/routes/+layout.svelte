@@ -53,7 +53,7 @@
 			<div class="border-t p-4">
 				<div class="flex gap-2">
 					<a
-						href="https://github.com/yourusername/svelte-dnd"
+						href="https://github.com/thisuxhq/svelte-dnd"
 						target="_blank"
 						class="flex-1 rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
 					>
