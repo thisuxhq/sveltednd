@@ -3,8 +3,24 @@ import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 
 const DEFAULT_DRAGGING_CLASS = 'dragging';
 
-export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
+interface DraggableOptions<T> extends DragDropOptions<T> {
+	// Add new option for interactive selectors
+	interactive?: string[];
+}
+
+export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	const draggingClass = (options.attributes?.draggingClass || DEFAULT_DRAGGING_CLASS).split(' ');
+	let initialX: number;
+	let initialY: number;
+	
+	function isInteractiveElement(target: HTMLElement): boolean {
+		if (!options.interactive) return false;
+		
+		// Check if the target or its parents match any of the interactive selectors
+		return options.interactive.some(selector => 
+			target.matches(selector) || target.closest(selector)
+		);
+	}
 
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
@@ -40,6 +56,15 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 	function handlePointerDown(event: PointerEvent) {
 		if (options.disabled) return;
+		
+		// If the target is an interactive element, don't start dragging
+		if (isInteractiveElement(event.target as HTMLElement)) {
+			return;
+		}
+
+		// Store initial pointer position
+		initialX = event.clientX;
+		initialY = event.clientY;
 
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
@@ -79,7 +104,7 @@ export function draggable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	node.addEventListener('pointerup', handlePointerUp);
 
 	return {
-		update(newOptions: DragDropOptions<T>) {
+		update(newOptions: DraggableOptions<T>) {
 			options = newOptions;
 			node.draggable = !options.disabled;
 		},
