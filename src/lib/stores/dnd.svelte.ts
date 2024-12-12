@@ -6,5 +6,6 @@ export const dndState = $state<DragDropState>({
 	draggedItem: null,
 	sourceContainer: '',
 	targetContainer: null,
-	targetElement: null
+	targetElement: null,
+	invalidDrop: false
 });
