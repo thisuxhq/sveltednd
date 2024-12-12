@@ -4,6 +4,7 @@ export interface DragDropState<T = unknown> {
 	sourceContainer: string;
 	targetContainer: string | null;
 	targetElement: HTMLElement | null;
+	invalidDrop?: boolean;
 }
 
 export interface DragDropCallbacks<T = unknown> {

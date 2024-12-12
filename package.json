@@ -75,6 +75,6 @@
 		"vitest": "^2.0.4"
 	},
 	"dependencies": {
-		"@thisux/sveltednd": "^0.0.14"
+		"@thisux/sveltednd": "^0.0.17"
 	}
 }
