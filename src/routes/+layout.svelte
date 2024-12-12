@@ -26,8 +26,8 @@
 			<!-- Logo section -->
 			<div class="border-b p-4">
 				<div class="flex flex-col space-y-1">
-					<h1 class="text-primary text-xl font-semibold">SvelteDnD</h1>
-					<a href="https://thisux.com" target="_blank" class="hover:text-primary text-xs"
+					<h1 class="text-xl font-semibold text-primary">SvelteDnD</h1>
+					<a href="https://thisux.com" target="_blank" class="text-xs hover:text-primary"
 						>by ThisUX</a
 					>
 				</div>
@@ -47,6 +47,26 @@
 						{title}
 					</a>
 				{/each}
+			</div>
+
+			<!-- Sidebar footer with GitHub and NPM buttons -->
+			<div class="border-t p-4">
+				<div class="flex gap-2">
+					<a
+						href="https://github.com/yourusername/svelte-dnd"
+						target="_blank"
+						class="flex-1 rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
+					>
+						GitHub
+					</a>
+					<a
+						href="https://www.npmjs.com/package/your-package"
+						target="_blank"
+						class="flex-1 rounded-md bg-[#CB3837] px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#B02E2E]"
+					>
+						NPM
+					</a>
+				</div>
 			</div>
 		</div>
 	</aside>
@@ -78,38 +98,58 @@
 	</div>
 </nav>
 
-<!-- Floating badge (hidden on mobile)-->
+<!-- Redesigned floating badge -->
 <footer class="fixed bottom-8 right-8 z-50 hidden md:block">
 	<div
-		class="flex flex-col items-center justify-center gap-2 rounded-lg border bg-white/80 px-6 py-4 shadow-sm backdrop-blur-sm"
+		class="group relative overflow-hidden rounded-lg border bg-white/90 px-6 py-4 shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-white/95"
 	>
-		<p class="text-sm font-light tracking-wide text-gray-500">
-			ThisUX, a forward-thinking product studio
-		</p>
-		<a
-			href="https://thisux.com"
-			class="hover:text-primary group flex items-center gap-2 text-sm font-medium text-gray-900 transition-colors"
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			thisux.com
-			<span class="text-xs opacity-0 transition-opacity group-hover:opacity-100">→</span>
-		</a>
+		<div class="flex flex-col items-start gap-3">
+			<div class="flex items-center gap-2">
+				<div class="h-2 w-2 rounded-full bg-green-500"></div>
+				<span class="text-sm font-medium text-green-600">Available for Projects</span>
+			</div>
+			<div class="space-y-1">
+				<h3 class="text-sm font-medium text-gray-900">Let's build something amazing</h3>
+				<p class="text-sm text-gray-500">Product design & development studio</p>
+			</div>
+			<a
+				href="https://thisux.com"
+				class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				Get in Touch
+				<svg
+					class="h-4 w-4 transition-transform group-hover:translate-x-1"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M14 5l7 7m0 0l-7 7m7-7H3"
+					/>
+				</svg>
+			</a>
+		</div>
 	</div>
 </footer>
 
 <!-- Static text on mobile (above bottom nav) -->
 <div class="flex flex-col items-center justify-center gap-1 border-t bg-white px-4 py-3 md:hidden">
-	<p class="text-xs font-light tracking-wide text-gray-500">
-		ThisUX, a forward-thinking product studio
-	</p>
+	<div class="flex items-center gap-2">
+		<div class="h-2 w-2 rounded-full bg-green-500"></div>
+		<span class="text-xs font-medium text-green-600">Available for Projects</span>
+	</div>
 	<a
 		href="https://thisux.com"
-		class="hover:text-primary text-xs font-medium text-gray-900"
+		class="text-xs font-medium text-gray-900 hover:text-primary"
 		target="_blank"
 		rel="noopener noreferrer"
 	>
-		thisux.com
+		Get in Touch →
 	</a>
 </div>
 
