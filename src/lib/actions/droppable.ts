@@ -34,8 +34,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 
-		dndState.targetContainer = null;
-		dndState.targetElement = null;
+		if (dndState.targetContainer === options.container && dndState.targetElement === event.target) {
+			dndState.targetContainer = null;
+			dndState.targetElement = null;
+		}
 	}
 
 	function handleDragOver(event: DragEvent) {
@@ -87,7 +89,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handlePointerOut(event: PointerEvent) {
 		if (options.disabled || !dndState.isDragging) return;
 
-		dndState.targetContainer = null;
+		if (dndState.targetContainer === options.container) {
+			dndState.targetContainer = null;
+		}
 		node.classList.remove(...dragOverClass);
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 	}
