@@ -147,9 +147,8 @@
 		href="https://cal.com/imsanju/15min"
 		class="hover:text-primary text-xs font-medium text-gray-900"
 		target="_blank"
-		rel="noopener noreferrer"
 	>
-		Book a call →
+		Book a call
 	</a>
 </div>
 
