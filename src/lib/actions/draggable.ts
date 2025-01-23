@@ -12,13 +12,13 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	const draggingClass = (options.attributes?.draggingClass || DEFAULT_DRAGGING_CLASS).split(' ');
 	let initialX: number;
 	let initialY: number;
-	
+
 	function isInteractiveElement(target: HTMLElement): boolean {
 		if (!options.interactive) return false;
-		
+
 		// Check if the target or its parents match any of the interactive selectors
-		return options.interactive.some(selector => 
-			target.matches(selector) || target.closest(selector)
+		return options.interactive.some(
+			(selector) => target.matches(selector) || target.closest(selector)
 		);
 	}
 
@@ -56,7 +56,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 
 	function handlePointerDown(event: PointerEvent) {
 		if (options.disabled) return;
-		
+
 		// If the target is an interactive element, don't start dragging
 		if (isInteractiveElement(event.target as HTMLElement)) {
 			return;

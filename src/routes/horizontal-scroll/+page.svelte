@@ -17,11 +17,14 @@
 	]);
 
 	function handleDrop(state: DragDropState<ImageItem>) {
-		const { draggedItem, sourceContainer, targetContainer } = state;
-		if (!targetContainer || sourceContainer === targetContainer) return; // Prevent self-placement
+		const { draggedItem, targetContainer } = state;
+		const dragIndex = images.findIndex((img) => img.id === draggedItem.id);
+		const dropIndex = parseInt(targetContainer ?? '0');
 
-		images = images.filter((img: ImageItem) => img.id !== draggedItem.id); // Remove the dragged item
-		images.splice(parseInt(targetContainer), 0, draggedItem); // Insert the dragged item at the new position
+		if (dragIndex !== -1 && !isNaN(dropIndex)) {
+			const [item] = images.splice(dragIndex, 1);
+			images.splice(dropIndex, 0, item);
+		}
 	}
 </script>
 
@@ -34,34 +37,32 @@
 	<div class="flex gap-4 overflow-x-auto p-4">
 		{#each images as image, index (image.id)}
 			<div
-				use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
-				class="relative"
+				use:draggable={{ container: index.toString(), dragData: image }}
+				use:droppable={{
+					container: index.toString(),
+					callbacks: { onDrop: handleDrop }
+				}}
+				class="svelte-dnd-touch-feedback relative p-4"
 				animate:flip={{ duration: 200 }}
+				in:fade={{ duration: 150 }}
+				out:fade={{ duration: 150 }}
 			>
 				<div
-					use:draggable={{
-						container: index.toString(),
-						dragData: image
-					}}
-					in:fade={{ duration: 150 }}
-					out:fade={{ duration: 150 }}
-					class="svelte-dnd-touch-feedback group relative h-[300px] w-[200px] cursor-move overflow-hidden
-							rounded-xl transition-transform hover:scale-105"
+					class="group relative h-[300px] w-[200px] cursor-move overflow-hidden rounded-xl
+						transition-transform hover:scale-105"
 				>
 					<img
 						src={image.url}
 						alt=""
 						class="h-full w-full object-cover transition-transform duration-700
-								group-hover:scale-105"
+							group-hover:scale-105"
 					/>
-					<!-- ... existing overlay code ... -->
 				</div>
 
-				<!-- Added position indicator -->
 				<div
 					class="absolute -bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/90
-								px-4 py-1.5 text-sm font-medium text-zinc-600 backdrop-blur-sm
-								transition-all group-hover:bg-white"
+						px-4 py-1.5 text-sm font-medium text-zinc-600 backdrop-blur-sm
+						transition-all group-hover:bg-white"
 				>
 					{index + 1}
 				</div>
@@ -69,3 +70,13 @@
 		{/each}
 	</div>
 </div>
+
+<style>
+	:global(.dragging) {
+		@apply opacity-50 shadow-lg ring-2 ring-blue-400;
+	}
+
+	:global(.drag-over) {
+		@apply bg-blue-50;
+	}
+</style>
