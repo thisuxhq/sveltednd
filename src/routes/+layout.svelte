@@ -118,7 +118,7 @@
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				Book a call →
+				Book a call
 				<svg
 					class="h-4 w-4 transition-transform group-hover:translate-x-1"
 					fill="none"
