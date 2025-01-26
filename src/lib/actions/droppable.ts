@@ -4,7 +4,7 @@ import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
 const DEFAULT_DRAG_OVER_CLASS = 'drag-over';
 
 export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
-	const dragOverClass = (options.attributes?.draggingClass || DEFAULT_DRAG_OVER_CLASS).split(' ');
+	const dragOverClass = (options.attributes?.dragOverClass || DEFAULT_DRAG_OVER_CLASS).split(' ');
 	let dragEnterCounter = 0; // Initialize the counter
 
 	function handleDragEnter(event: DragEvent) {
