@@ -37,6 +37,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (dndState.targetContainer === options.container && dndState.targetElement === event.target) {
 			dndState.targetContainer = null;
 			dndState.targetElement = null;
+			dragEnterCounter = 0; // Ensure dragEnterCounter is reset to 0
 		}
 	}
 
