@@ -79,7 +79,7 @@
 						{#each sourceFruits as fruit}
 							<div
 								use:draggable={{ container: 'source', dragData: fruit }}
-								class={`group flex items-center justify-between rounded-md border p-3 shadow-sm transition-all hover:shadow
+								class={`group flex items-center justify-between rounded-md border p-3 shadow-sm transition-all hover:shadow select-none touch-none md:select-auto md:touch-auto
 									${fruit.color === 'Red' ? 'border-red-200 bg-red-50/50' : 'border-muted bg-muted/5'}`}
 							>
 								<span class="font-medium">{fruit.name}</span>

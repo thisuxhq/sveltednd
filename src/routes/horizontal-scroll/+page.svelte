@@ -42,7 +42,7 @@
 					container: index.toString(),
 					callbacks: { onDrop: handleDrop }
 				}}
-				class="svelte-dnd-touch-feedback relative p-4"
+				class="svelte-dnd-touch-feedback relative p-4 select-none touch-none md:select-auto md:touch-auto"
 				animate:flip={{ duration: 200 }}
 				in:fade={{ duration: 150 }}
 				out:fade={{ duration: 150 }}

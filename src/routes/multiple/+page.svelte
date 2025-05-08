@@ -106,7 +106,7 @@
 								animate:flip={{ duration: 200 }}
 								in:fade={{ duration: 150 }}
 								out:fade={{ duration: 150 }}
-								class="group cursor-move rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200
+								class="group cursor-move select-none touch-none md:select-auto md:touch-auto rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200
                                        transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
 							>
 								<div class="relative mb-2">
