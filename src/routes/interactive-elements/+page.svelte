@@ -57,7 +57,7 @@
 					dragData: item,
 					interactive: ['[data-delete-btn]', '[data-select-btn]', '.interactive']
 				}}
-				class="flex items-center justify-between rounded-lg bg-white p-4 shadow transition-all hover:shadow-md"
+				class="flex items-center select-none touch-none md:select-auto md:touch-auto justify-between rounded-lg bg-white p-4 shadow transition-all hover:shadow-md"
 			>
 				<button
 					data-select-btn

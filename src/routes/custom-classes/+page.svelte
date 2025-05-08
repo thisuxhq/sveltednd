@@ -81,7 +81,7 @@
 						animate:flip={{ duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
 						in:fade={{ duration: 300 }}
 						out:fade={{ duration: 200 }}
-						class="group relative cursor-move rounded-lg p-4
+						class="group relative cursor-move select-none touch-none md:select-auto md:touch-auto rounded-lg p-4
                                shadow-md ring-1 ring-white/60
                                backdrop-blur-md transition-all duration-500
                                ease-out hover:-rotate-1 hover:scale-[1.02]
@@ -93,7 +93,7 @@
 							<div
 								class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/20 opacity-0
                                       transition-all duration-500 group-hover:opacity-100"
-							/>
+							></div>
 
 							<!-- Kanban card content -->
 							<div class="relative z-10 space-y-2">
