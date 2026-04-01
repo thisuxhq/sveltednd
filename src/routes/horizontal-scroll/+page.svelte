@@ -28,7 +28,7 @@
 	}
 </script>
 
-<div class="min-h-screen pt-20 md:pt-0">
+<div class="h-screen pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
 		<h1 class="text-3xl text-swiss-black md:text-4xl">horizontal scroll</h1>
@@ -37,9 +37,9 @@
 		</p>
 	</header>
 
-	<!-- Content -->
-	<div class="p-8 md:p-16">
-		<div class="flex gap-6 overflow-x-auto pb-8">
+	<!-- Content - scrollable area only -->
+	<div class="overflow-x-auto p-8 md:p-16">
+		<div class="flex gap-6 pb-8">
 			{#each images as image, index (image.id)}
 				<div
 					use:draggable={{ container: index.toString(), dragData: image }}
