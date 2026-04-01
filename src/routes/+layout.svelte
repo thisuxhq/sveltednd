@@ -114,22 +114,19 @@
 	</div>
 </nav>
 
-<!-- Swiss Grid geometric accent - static badge -->
+<!-- Swiss Grid badge -->
 <footer class="fixed bottom-8 right-8 z-50 hidden md:block">
-	<div class="flex items-center gap-3">
-		<div class="h-px w-12 bg-swiss-black"></div>
-		<div class="flex items-center gap-2 border border-swiss-black bg-white px-4 py-2">
-			<div class="h-2 w-2 bg-swiss-red"></div>
-			<span class="text-xs text-swiss-dark-gray">available for projects</span>
-			<a
-				href="https://thisux.com"
-				class="ml-2 text-xs text-swiss-black hover:text-swiss-red"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				thisux.com →
-			</a>
-		</div>
+	<div class="flex items-center gap-2 border border-swiss-black bg-white px-4 py-2">
+		<div class="h-2 w-2 bg-swiss-red"></div>
+		<span class="text-xs text-swiss-dark-gray">available for projects</span>
+		<a
+			href="https://thisux.com"
+			class="ml-2 text-xs text-swiss-black hover:text-swiss-red"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			thisux.com →
+		</a>
 	</div>
 </footer>
 
