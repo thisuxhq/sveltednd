@@ -55,7 +55,7 @@
 						<p class="mt-1 text-sm text-swiss-mid-gray dark:text-white/60">drag & drop library</p>
 					</div>
 					<div class="text-right">
-						<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.1.0</span>
+						<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.1.1</span>
 					</div>
 				</div>
 			</div>
@@ -116,7 +116,7 @@
 		<div class="flex items-center gap-2">
 			<div class="h-2 w-2 bg-swiss-red"></div>
 			<span class="text-lg dark:text-white">sveltednd</span>
-			<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.1.0</span>
+			<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.1.1</span>
 		</div>
 	</div>
 </header>

@@ -372,7 +372,7 @@ All generic types use `T = unknown` as default, so they work without specifying 
 ## Package Info
 
 - Package name: `@thisux/sveltednd`
-- Version: 0.1.0
+- Version: 0.1.1
 - License: MIT
 - Peer dependency: `svelte@^5.0.0`
 - Module type: ESM only (`"type": "module"`)
