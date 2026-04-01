@@ -44,8 +44,8 @@
 					<a
 						href={path}
 						class={cn(
-							'group flex items-baseline gap-4 border-b px-8 py-4 transition-colors',
-							index === 0 ? 'border-swiss-black' : 'border-swiss-gray',
+							'group flex items-baseline gap-4 px-8 py-4 transition-colors',
+							index > 0 ? 'border-t border-swiss-gray' : '',
 							'hover:bg-swiss-gray',
 							$page.url.pathname === path
 								? 'bg-swiss-gray text-swiss-black'
