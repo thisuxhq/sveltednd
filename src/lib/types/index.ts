@@ -28,3 +28,7 @@ export interface DragDropOptions<T = unknown> {
 	callbacks?: DragDropCallbacks<T>;
 	attributes?: DragDropAttributes;
 }
+
+export interface DraggableOptions<T = unknown> extends DragDropOptions<T> {
+	interactive?: string[];
+}

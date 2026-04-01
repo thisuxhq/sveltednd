@@ -11,7 +11,7 @@ npm i @thisux/sveltednd@latest
 
 ## Quick Start
 
-````typescript
+```svelte
 <script lang="ts">
 import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
 
@@ -29,8 +29,6 @@ function handleDrop(state: DragDropState<{ id: string }>) {
 }
 </script>
 
-```svelte
-<!-- Make a droppable container -->
 <div use:droppable={{ container: 'list', callbacks: { onDrop: handleDrop } }}>
 	{#each items as item}
 		<!-- Make items draggable -->
@@ -39,7 +37,7 @@ function handleDrop(state: DragDropState<{ id: string }>) {
 		</div>
 	{/each}
 </div>
-````
+```
 
 ## Core Concepts
 

@@ -36,6 +36,7 @@ bun run test:unit -- --run src/lib/actions/draggable.spec.ts   # Single test fil
 ## Code Style Guidelines
 
 ### Formatting (Prettier)
+
 - **Tabs**: Use tabs for indentation (not spaces)
 - **Quotes**: Single quotes in JS/TS, double in Svelte templates
 - **Trailing commas**: Never
@@ -43,12 +44,14 @@ bun run test:unit -- --run src/lib/actions/draggable.spec.ts   # Single test fil
 - Run `bun run format` before committing
 
 ### Imports
+
 - Use `$lib` alias for internal imports: `import { x } from '$lib/actions/index.js'`
 - Always include `.js` extension in relative imports: `import { x } from './file.js'`
 - Use `import type` for type-only imports: `import type { DragDropState } from '$lib/types/index.js'`
 - Group: external deps → internal aliases → relative imports
 
 ### TypeScript Conventions
+
 - Enable `strict: true` - all strict mode options required
 - Use generics with defaults: `interface DragDropState<T = unknown>`
 - Prefer `type` over `interface` for complex unions
@@ -56,6 +59,7 @@ bun run test:unit -- --run src/lib/actions/draggable.spec.ts   # Single test fil
 - Use `$state` runes for reactive state (Svelte 5)
 
 ### Naming Conventions
+
 - **Files**: kebab-case (e.g., `draggable.ts`, `dnd.svelte.ts`)
 - **Functions**: camelCase (e.g., `handleDragStart`, `isInteractiveElement`)
 - **Interfaces/Types**: PascalCase (e.g., `DragDropState`, `DraggableOptions`)
@@ -63,27 +67,35 @@ bun run test:unit -- --run src/lib/actions/draggable.spec.ts   # Single test fil
 - **Generic parameters**: Single uppercase letter (e.g., `T`, `K`, `V`)
 
 ### Actions Pattern
+
 Svelte actions follow this structure:
+
 ```typescript
 export function actionName<T>(node: HTMLElement, options: Options<T>) {
-    // Setup logic
-    function handleEvent(event: Event) { }
-    
-    node.addEventListener('event', handleEvent);
-    
-    return {
-        update(newOptions: Options<T>) { options = newOptions; },
-        destroy() { node.removeEventListener('event', handleEvent); }
-    };
+	// Setup logic
+	function handleEvent(event: Event) {}
+
+	node.addEventListener('event', handleEvent);
+
+	return {
+		update(newOptions: Options<T>) {
+			options = newOptions;
+		},
+		destroy() {
+			node.removeEventListener('event', handleEvent);
+		}
+	};
 }
 ```
 
 ### Error Handling
+
 - Use optional chaining for callbacks: `options.callbacks?.onDrop?.(state)`
 - Wrap async operations in try/catch in droppable handlers
 - Log errors with context: `console.error('Drop handling failed:', error)`
 
 ### CSS/Styling
+
 - Default classes: `dragging`, `drag-over` (overridable via attributes)
 - Use Tailwind for demo/examples
 - Import styles in `src/lib/index.ts`: `import './styles/dnd.css'`

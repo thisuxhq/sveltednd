@@ -1,12 +1,17 @@
 import { dndState } from '$lib/stores/dnd.svelte.js';
-import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
+import type { DraggableOptions, DragDropState } from '$lib/types/index.js';
 
 const DEFAULT_DRAGGING_CLASS = 'dragging';
-
-interface DraggableOptions<T> extends DragDropOptions<T> {
-	// Add new option for interactive selectors
-	interactive?: string[];
-}
+const DEFAULT_INTERACTIVE_SELECTORS = [
+	'input',
+	'textarea',
+	'select',
+	'button',
+	'[contenteditable]',
+	'a[href]',
+	'label',
+	'option'
+];
 
 export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	const draggingClass = (options.attributes?.draggingClass || DEFAULT_DRAGGING_CLASS).split(' ');
@@ -14,10 +19,11 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	let initialY: number;
 
 	function isInteractiveElement(target: HTMLElement): boolean {
-		if (!options.interactive) return false;
+		// Combine default selectors with user-provided ones
+		const interactiveSelectors = [...DEFAULT_INTERACTIVE_SELECTORS, ...(options.interactive || [])];
 
 		// Check if the target or its parents match any of the interactive selectors
-		return options.interactive.some(
+		return interactiveSelectors.some(
 			(selector) => target.matches(selector) || target.closest(selector)
 		);
 	}
@@ -87,6 +93,14 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 
 		node.releasePointerCapture(event.pointerId);
 		node.classList.remove(...draggingClass);
+
+		// Dispatch custom event before cleanup so droppable can handle the drop
+		const customEvent = new CustomEvent('pointerdrop-on-container', {
+			bubbles: true,
+			detail: { dragData: options.dragData }
+		});
+		node.dispatchEvent(customEvent);
+
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
 		// Reset state

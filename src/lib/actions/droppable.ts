@@ -27,6 +27,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 		dragEnterCounter--;
 
+		// Reset counter if it goes negative (prevents drag-over class persistence)
+		if (dragEnterCounter < 0) {
+			dragEnterCounter = 0;
+		}
+
 		// check if element is still being dragged over
 		if (dragEnterCounter > 0) return;
 
@@ -96,11 +101,24 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 	}
 
-	function handlePointerUp(event: PointerEvent) {
+	async function handlePointerDropOnContainer(event: Event) {
 		if (options.disabled || !dndState.isDragging) return;
 
+		// Only process if this is the target container
+		if (dndState.targetContainer !== options.container) return;
+
 		node.classList.remove(...dragOverClass);
-		options.callbacks?.onDrop?.(dndState as DragDropState<T>);
+
+		try {
+			// Update dragData from the custom event detail if available
+			const customEvent = event as CustomEvent;
+			if (customEvent.detail?.dragData) {
+				dndState.draggedItem = customEvent.detail.dragData;
+			}
+			await options.callbacks?.onDrop?.(dndState as DragDropState<T>);
+		} catch (error) {
+			console.error('Drop handling failed:', error);
+		}
 	}
 
 	node.addEventListener('dragenter', handleDragEnter);
@@ -111,7 +129,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 	node.addEventListener('pointerover', handlePointerOver);
 	node.addEventListener('pointerout', handlePointerOut);
-	node.addEventListener('pointerup', handlePointerUp);
+	node.addEventListener('pointerdrop-on-container', handlePointerDropOnContainer as EventListener);
 
 	return {
 		update(newOptions: DragDropOptions<T>) {
@@ -127,7 +145,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 			node.removeEventListener('pointerover', handlePointerOver);
 			node.removeEventListener('pointerout', handlePointerOut);
-			node.removeEventListener('pointerup', handlePointerUp);
+			node.removeEventListener(
+				'pointerdrop-on-container',
+				handlePointerDropOnContainer as EventListener
+			);
 		}
 	};
 }
