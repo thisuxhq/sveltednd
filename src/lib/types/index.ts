@@ -31,4 +31,5 @@ export interface DragDropOptions<T = unknown> {
 
 export interface DraggableOptions<T = unknown> extends DragDropOptions<T> {
 	interactive?: string[];
+	handle?: string;
 }

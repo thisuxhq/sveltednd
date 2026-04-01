@@ -166,6 +166,115 @@ describe('draggable', () => {
 		});
 	});
 
+	describe('Issue #20 - Dragging by handle', () => {
+		it('should only allow drag from handle element when handle is specified', () => {
+			const onDragStart = vi.fn();
+			const handle = document.createElement('div');
+			handle.className = 'drag-handle';
+			node.appendChild(handle);
+
+			const content = document.createElement('div');
+			content.className = 'content';
+			content.textContent = 'Not a handle';
+			node.appendChild(content);
+
+			const action = draggable(node, {
+				container: 'test',
+				handle: '.drag-handle',
+				callbacks: { onDragStart }
+			});
+
+			// Click on content (not handle) - should not start drag
+			const contentEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			});
+			content.dispatchEvent(contentEvent);
+
+			expect(onDragStart).not.toHaveBeenCalled();
+			expect(dndState.isDragging).toBe(false);
+
+			// Click on handle - should start drag
+			const handleEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true,
+				pointerId: 1
+			});
+			handle.dispatchEvent(handleEvent);
+
+			expect(onDragStart).toHaveBeenCalled();
+			expect(dndState.isDragging).toBe(true);
+
+			action.destroy();
+		});
+
+		it('should work with data-handle attribute', () => {
+			const handle = document.createElement('div');
+			handle.setAttribute('data-handle', 'true');
+			node.appendChild(handle);
+
+			const action = draggable(node, {
+				container: 'test',
+				handle: '[data-handle="true"]'
+			});
+
+			// Click on handle
+			handle.dispatchEvent(
+				new PointerEvent('pointerdown', {
+					bubbles: true,
+					pointerId: 1
+				})
+			);
+
+			expect(dndState.isDragging).toBe(true);
+			action.destroy();
+		});
+
+		it('should work without handle option (entire element draggable)', () => {
+			const onDragStart = vi.fn();
+
+			const action = draggable(node, {
+				container: 'test',
+				callbacks: { onDragStart }
+			});
+
+			// Click anywhere on node
+			node.dispatchEvent(
+				new PointerEvent('pointerdown', {
+					bubbles: true,
+					pointerId: 1
+				})
+			);
+
+			expect(onDragStart).toHaveBeenCalled();
+			action.destroy();
+		});
+
+		it('should work with nested handle elements', () => {
+			const handle = document.createElement('div');
+			handle.className = 'grip';
+			const gripIcon = document.createElement('span');
+			handle.appendChild(gripIcon);
+			node.appendChild(handle);
+
+			const action = draggable(node, {
+				container: 'test',
+				handle: '.grip'
+			});
+
+			// Click on child element of handle
+			gripIcon.dispatchEvent(
+				new PointerEvent('pointerdown', {
+					bubbles: true,
+					pointerId: 1
+				})
+			);
+
+			expect(dndState.isDragging).toBe(true);
+			action.destroy();
+		});
+	});
+
 	describe('Issue #16 - onDrop not called for pointer events', () => {
 		it('should dispatch pointerdrop-on-container event on pointerup', () => {
 			const dropHandler = vi.fn();

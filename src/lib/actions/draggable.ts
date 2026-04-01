@@ -28,8 +28,19 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		);
 	}
 
+	function isHandleElement(target: HTMLElement): boolean {
+		if (!options.handle) return true; // No handle specified - entire element is handle
+		return target.matches(options.handle) || !!target.closest(options.handle);
+	}
+
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
+
+		// Only start drag if clicking on handle element
+		if (!isHandleElement(event.target as HTMLElement)) {
+			event.preventDefault();
+			return;
+		}
 
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
@@ -62,6 +73,11 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 
 	function handlePointerDown(event: PointerEvent) {
 		if (options.disabled) return;
+
+		// Only start drag if clicking on handle element
+		if (!isHandleElement(event.target as HTMLElement)) {
+			return;
+		}
 
 		// If the target is an interactive element, don't start dragging
 		if (isInteractiveElement(event.target as HTMLElement)) {
