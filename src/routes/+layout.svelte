@@ -81,7 +81,7 @@
 	</aside>
 
 	<!-- Main content area -->
-	<main class="flex-1 bg-white">
+	<main class="min-w-0 flex-1 bg-white">
 		{@render children()}
 	</main>
 </div>

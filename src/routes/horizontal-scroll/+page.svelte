@@ -38,7 +38,7 @@
 	</header>
 
 	<!-- Content - scrollable area only -->
-	<div class="overflow-x-auto p-8 md:p-16">
+	<div class="overflow-x-auto p-8 md:p-16" style="max-width: 100%;">
 		<div class="flex gap-6 pb-8">
 			{#each images as image, index (image.id)}
 				<div
