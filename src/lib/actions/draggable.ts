@@ -72,6 +72,15 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	const draggingClass = (options.attributes?.draggingClass || DEFAULT_DRAGGING_CLASS).split(' ');
 
 	/**
+	 * Tracks the actual element pressed during pointerdown.
+	 *
+	 * dragstart's event.target is always the draggable container (node), not
+	 * the element the user actually clicked. We capture it here so handleDragStart
+	 * can correctly detect interactive children (inputs, checkboxes, etc.).
+	 */
+	let pointerDownTarget: HTMLElement | null = null;
+
+	/**
 	 * Checks if the clicked element (or its parent) is an interactive element.
 	 *
 	 * We walk up the DOM tree because the user might click on a span inside a button,
@@ -111,7 +120,11 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
 
-		const target = event.target as HTMLElement;
+		// Use the element that was actually pressed (captured in pointerdown), not
+		// event.target — dragstart always reports the draggable container as target,
+		// not the child element the user clicked, so interactive-child detection
+		// (inputs, checkboxes, radios, etc.) would silently fail without this.
+		const target = (pointerDownTarget ?? event.target) as HTMLElement;
 
 		// If we're using a handle and didn't click it, bail out
 		if (!isHandleElement(target)) {
@@ -181,6 +194,9 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 * - Document listeners let us track the pointer while still allowing normal event bubbling
 	 */
 	function handlePointerDown(event: PointerEvent) {
+		// Always capture the pressed element so handleDragStart can use it.
+		pointerDownTarget = event.target as HTMLElement;
+
 		if (options.disabled) return;
 
 		if (!isHandleElement(event.target as HTMLElement)) return;
@@ -264,6 +280,22 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	// Enable native HTML5 dragging (unless disabled)
 	node.draggable = !options.disabled;
 
+	/**
+	 * Critical for touch/mobile support.
+	 *
+	 * Without touch-action: none the browser intercepts the touch gesture for
+	 * scrolling and fires pointercancel instead of pointermove/pointerup, so
+	 * the pointer-events drag path never works on any mobile browser.
+	 *
+	 * user-select: none prevents text selection while dragging.
+	 *
+	 * Set inline so they apply even when the consumer hasn't imported dnd.css.
+	 */
+	if (!options.disabled) {
+		node.style.touchAction = 'none';
+		node.style.userSelect = 'none';
+	}
+
 	// HTML5 drag API events
 	node.addEventListener('dragstart', handleDragStart);
 	node.addEventListener('dragend', handleDragEnd);
@@ -281,6 +313,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		update(newOptions: DraggableOptions<T>) {
 			options = newOptions;
 			node.draggable = !options.disabled;
+			node.style.touchAction = options.disabled ? '' : 'none';
+			node.style.userSelect = options.disabled ? '' : 'none';
 		},
 
 		/**
@@ -290,6 +324,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		 * listeners (in case the component unmounts mid-drag).
 		 */
 		destroy() {
+			node.style.touchAction = '';
+			node.style.userSelect = '';
 			node.removeEventListener('dragstart', handleDragStart);
 			node.removeEventListener('dragend', handleDragEnd);
 			node.removeEventListener('pointerdown', handlePointerDown);

@@ -80,6 +80,30 @@ describe('draggable', () => {
 			action.destroy();
 		});
 
+		it('should prevent dragstart when pointerdown was on an interactive child (HTML5 path)', () => {
+			// dragstart's event.target is always the draggable node, not the clicked
+			// element. Without tracking the pointerdown target, interactive children
+			// (radio, checkbox, input) would fail to block the HTML5 drag.
+			const radio = document.createElement('input');
+			radio.type = 'radio';
+			node.appendChild(radio);
+
+			const action = draggable(node, { container: 'test' });
+
+			// Press on radio — this populates pointerDownTarget
+			radio.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+
+			// Simulate HTML5 dragstart (target is the draggable node, not the radio)
+			const dragStartEvent = new DragEvent('dragstart', { bubbles: true, cancelable: true });
+			const prevented = !node.dispatchEvent(dragStartEvent);
+
+			// The drag should have been prevented
+			expect(prevented).toBe(true);
+			expect(dndState.isDragging).toBe(false);
+
+			action.destroy();
+		});
+
 		it('should not start drag when clicking on checkbox', () => {
 			const onDragStart = vi.fn();
 			const checkbox = document.createElement('input');

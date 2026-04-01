@@ -81,63 +81,130 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	let indicatorNode: HTMLElement | null = null;
 
 	/**
-	 * Which indicator style to apply: 'drop-before' or 'drop-after'.
+	 * Which indicator style to apply.
 	 *
-	 * These classes draw the blue line indicator via CSS ::before/::after pseudo-elements.
+	 * Vertical lists: 'drop-before' (line above) / 'drop-after' (line below)
+	 * Horizontal lists: 'drop-left' (line to the left) / 'drop-right' (line to the right)
 	 */
-	let indicatorClass: 'drop-before' | 'drop-after' = 'drop-before';
+	let indicatorClass: 'drop-before' | 'drop-after' | 'drop-left' | 'drop-right' = 'drop-before';
 
 	/**
 	 * Calculates whether the drop should be positioned before or after the target.
 	 *
-	 * Uses the cursor's Y position relative to the element's center point.
-	 * Above center = before, below center = after.
+	 * For vertical lists: compares cursor Y against the element's vertical midpoint.
+	 * For horizontal lists: compares cursor X against the element's horizontal midpoint.
+	 *
+	 * Not used for 'grid' direction — see updateDropIndicator instead.
 	 *
 	 * @param clientY - Mouse/pointer Y coordinate
+	 * @param clientX - Mouse/pointer X coordinate
 	 * @returns 'before' or 'after'
 	 */
-	function getDropPosition(clientY: number): 'before' | 'after' {
+	function getDropPosition(clientY: number, clientX: number): 'before' | 'after' {
+		if (options.direction === 'horizontal') {
+			const { left, width } = node.getBoundingClientRect();
+			return clientX < left + width / 2 ? 'before' : 'after';
+		}
 		const { top, height } = node.getBoundingClientRect();
 		return clientY < top + height / 2 ? 'before' : 'after';
 	}
 
 	/**
-	 * Sets the visual drop indicator (the blue line showing where item will drop).
+	 * Nearest-edge detection for grid layouts.
 	 *
-	 * THE SIBLING STRATEGY:
-	 * When dropping "after" item A, we look for the next sibling (item B).
-	 * If found, we apply 'drop-before' to B. This means:
-	 * - "After A" and "Before B" render at the SAME visual position (the gap between them)
-	 * - We avoid drawing a line below A that might look disconnected
+	 * Finds which of the four edges (top, right, bottom, left) the cursor is
+	 * closest to using normalised relative coordinates. Normalising by half the
+	 * element's dimensions means a square cell and a wide rectangle both give
+	 * sensible results without bias toward one axis.
 	 *
-	 * If there's no next sibling (last item), we draw the line below ourselves.
+	 * Returns the CSS indicator class and the logical drop position ('before' |
+	 * 'after') so callers don't have to re-derive either.
 	 */
-	function setDropIndicator(position: 'before' | 'after') {
-		// Clear any existing indicator first
-		clearDropIndicator();
+	function getNearestEdge(clientY: number, clientX: number): {
+		edgeClass: 'drop-before' | 'drop-after' | 'drop-left' | 'drop-right';
+		position: 'before' | 'after';
+	} {
+		const { left, top, width, height } = node.getBoundingClientRect();
 
-		// Update global state so consumers can react
+		// Normalise to [-1, 1] relative to element centre, accounting for aspect ratio
+		const nx = (clientX - (left + width / 2)) / (width / 2);
+		const ny = (clientY - (top + height / 2)) / (height / 2);
+
+		if (Math.abs(nx) >= Math.abs(ny)) {
+			// Cursor is closer to left or right edge
+			return nx < 0
+				? { edgeClass: 'drop-left', position: 'before' }
+				: { edgeClass: 'drop-right', position: 'after' };
+		} else {
+			// Cursor is closer to top or bottom edge
+			return ny < 0
+				? { edgeClass: 'drop-before', position: 'before' }
+				: { edgeClass: 'drop-after', position: 'after' };
+		}
+	}
+
+	/**
+	 * Single call-site for updating the drop indicator during any drag move.
+	 *
+	 * Routes to nearest-edge logic for grids, or the midpoint comparison for
+	 * vertical/horizontal lists.
+	 */
+	function updateDropIndicator(clientY: number, clientX: number) {
+		if (options.direction === 'grid') {
+			const { edgeClass, position } = getNearestEdge(clientY, clientX);
+			setDropIndicator(position, edgeClass);
+		} else {
+			setDropIndicator(getDropPosition(clientY, clientX));
+		}
+	}
+
+	/**
+	 * Applies the visual drop indicator.
+	 *
+	 * For vertical/horizontal lists the sibling-transfer strategy is used:
+	 * when dropping "after" item A, we draw the indicator on item B's leading
+	 * edge so the line sits in the visual gap between them.
+	 *
+	 * For grid layouts the caller passes an explicit edgeClass derived from
+	 * nearest-edge detection. We always apply it to the current node — the
+	 * sibling strategy doesn't make sense in 2D because the next DOM sibling
+	 * is the next cell in row order, which may not be visually adjacent.
+	 *
+	 * @param position - Logical drop position (updates dndState)
+	 * @param edgeClass - Override CSS class; when provided skips sibling logic
+	 */
+	function setDropIndicator(
+		position: 'before' | 'after',
+		edgeClass?: 'drop-before' | 'drop-after' | 'drop-left' | 'drop-right'
+	) {
+		clearDropIndicator();
 		dndState.dropPosition = position;
 
-		if (position === 'after') {
-			// Try to find the next sibling to draw the line on
-			const next = node.nextElementSibling as HTMLElement | null;
-			if (next) {
-				// There's a next item - draw line at its top (which is same as our bottom gap)
-				indicatorNode = next;
-				indicatorClass = 'drop-before';
-			} else {
-				// No next sibling (we're the last item) - draw line below ourselves
-				indicatorNode = node;
-				indicatorClass = 'drop-after';
-			}
-		} else {
-			// Position is 'before' - draw line at our top
+		if (edgeClass) {
+			// Grid path: pin the indicator to this node on the detected edge
 			indicatorNode = node;
-			indicatorClass = 'drop-before';
+			indicatorClass = edgeClass;
+		} else {
+			// Vertical/horizontal path: sibling-transfer strategy
+			const isHorizontal = options.direction === 'horizontal';
+			const beforeClass = isHorizontal ? 'drop-left' : 'drop-before';
+			const afterClass = isHorizontal ? 'drop-right' : 'drop-after';
+
+			if (position === 'after') {
+				const next = node.nextElementSibling as HTMLElement | null;
+				if (next) {
+					indicatorNode = next;
+					indicatorClass = beforeClass;
+				} else {
+					indicatorNode = node;
+					indicatorClass = afterClass;
+				}
+			} else {
+				indicatorNode = node;
+				indicatorClass = beforeClass;
+			}
 		}
 
-		// Apply the CSS class that draws the line via ::before or ::after
 		indicatorNode.classList.add(indicatorClass);
 	}
 
@@ -219,8 +286,8 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		// Show the "move" cursor to indicate this is a valid drop target
 		if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
 
-		// Update the position indicator based on cursor Y position
-		setDropIndicator(getDropPosition(event.clientY));
+		// Update the position indicator based on cursor position
+		updateDropIndicator(event.clientY, event.clientX);
 		options.callbacks?.onDragOver?.(dndState as DragDropState<T>);
 	}
 
@@ -258,6 +325,23 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	}
 
 	/**
+	 * Handles the global dragend event.
+	 *
+	 * When a drag is cancelled (Escape key, dropped outside any droppable, etc.),
+	 * the browser may not fire dragleave on every element that received dragenter.
+	 * This leaves drag-over classes stuck on elements indefinitely.
+	 *
+	 * We listen at the document level so any drag ending — regardless of where it
+	 * started — triggers cleanup on this drop zone.
+	 */
+	function handleGlobalDragEnd() {
+		if (dragEnterCounter === 0) return;
+		dragEnterCounter = 0;
+		node.classList.remove(...dragOverClass);
+		clearDropIndicator();
+	}
+
+	/**
 	 * Handles dragstart-on-container custom event.
 	 *
 	 * This is fired by the draggable action when dragging starts.
@@ -282,7 +366,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 		dndState.targetContainer = options.container;
 		node.classList.add(...dragOverClass);
-		setDropIndicator(getDropPosition(event.clientY));
+		updateDropIndicator(event.clientY, event.clientX);
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
 
@@ -296,7 +380,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled || !dndState.isDragging) return;
 		if (dndState.targetContainer !== options.container) return;
 
-		setDropIndicator(getDropPosition(event.clientY));
+		updateDropIndicator(event.clientY, event.clientX);
 	}
 
 	/**
@@ -354,6 +438,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	node.addEventListener('drop', handleDrop);
 	node.addEventListener('dragstart-on-container', handleDragStartOnContainer as EventListener);
 
+	// Global dragend: cleans up drag-over state when the drag ends without a drop
+	// on this element (cancelled drag, dropped outside, etc.)
+	document.addEventListener('dragend', handleGlobalDragEnd);
+
 	// Pointer events for custom drag support
 	node.addEventListener('pointerover', handlePointerOver);
 	node.addEventListener('pointermove', handlePointerMove);
@@ -386,6 +474,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 				'dragstart-on-container',
 				handleDragStartOnContainer as EventListener
 			);
+			document.removeEventListener('dragend', handleGlobalDragEnd);
 			node.removeEventListener('pointerover', handlePointerOver);
 			node.removeEventListener('pointermove', handlePointerMove);
 			node.removeEventListener('pointerout', handlePointerOut);

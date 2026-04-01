@@ -36,7 +36,7 @@
 		<div class="grid grid-cols-3 gap-6">
 			{#each cards as card, index (card.id)}
 				<div
-					use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
+					use:droppable={{ container: index.toString(), direction: 'grid', callbacks: { onDrop: handleDrop } }}
 					class="relative aspect-square rounded-xl bg-white/50 p-1 backdrop-blur-sm
                            transition-all duration-300 hover:bg-white/60"
 					animate:flip={{ duration: 300 }}

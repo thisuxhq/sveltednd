@@ -167,6 +167,19 @@ export interface DragDropOptions<T = unknown> {
 	callbacks?: DragDropCallbacks<T>;
 	/** CSS class customization options */
 	attributes?: DragDropAttributes;
+	/**
+	 * Layout direction of the list.
+	 * - 'vertical' (default): items stacked top-to-bottom; drop indicator is a horizontal line
+	 * - 'horizontal': items laid out left-to-right; drop indicator is a vertical line
+	 * - 'grid': 2D grid layout; nearest-edge detection picks the correct side automatically
+	 *
+	 * @example
+	 * // Horizontal image gallery
+	 * use:droppable={{ container: 'gallery', direction: 'horizontal', callbacks: { onDrop } }}
+	 * // Grid sort
+	 * use:droppable={{ container: index.toString(), direction: 'grid', callbacks: { onDrop } }}
+	 */
+	direction?: 'vertical' | 'horizontal' | 'grid';
 }
 
 /**

@@ -101,6 +101,25 @@ describe('droppable', () => {
 			action.destroy();
 		});
 
+		it('should remove drag-over class when drag ends without a drop (dragend)', () => {
+			// When drag is cancelled (Escape, dropped outside, etc.) the browser
+			// may not fire dragleave. The global dragend listener must clean up.
+			const action = droppable(node, {
+				container: 'test',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+
+			// Enter the zone
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
+			expect(node.classList.contains('drag-over')).toBe(true);
+
+			// Drag ends globally (e.g. dropped outside or Escape pressed)
+			document.dispatchEvent(new DragEvent('dragend', { bubbles: false }));
+			expect(node.classList.contains('drag-over')).toBe(false);
+
+			action.destroy();
+		});
+
 		it('should remove drag-over class on drop', async () => {
 			const onDrop = vi.fn();
 			const action = droppable(node, {
@@ -121,6 +140,75 @@ describe('droppable', () => {
 			node.dispatchEvent(dropEvent);
 
 			expect(node.classList.contains('drag-over')).toBe(false);
+			action.destroy();
+		});
+	});
+
+	describe('direction: grid — nearest-edge indicator', () => {
+		function makeDragOverEvent(clientX: number, clientY: number) {
+			const event = new DragEvent('dragover', { bubbles: true, cancelable: true });
+			Object.defineProperty(event, 'clientX', { value: clientX });
+			Object.defineProperty(event, 'clientY', { value: clientY });
+			return event;
+		}
+
+		beforeEach(() => {
+			// Give the node a known bounding rect: 0,0 → 100,100
+			vi.spyOn(node, 'getBoundingClientRect').mockReturnValue({
+				left: 0, top: 0, right: 100, bottom: 100,
+				width: 100, height: 100, x: 0, y: 0, toJSON: () => ({})
+			});
+		});
+
+		it('should apply drop-left when cursor is on the left third', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(10, 50)); // left side
+			expect(node.classList.contains('drop-left')).toBe(true);
+			action.destroy();
+		});
+
+		it('should apply drop-right when cursor is on the right third', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(90, 50)); // right side
+			expect(node.classList.contains('drop-right')).toBe(true);
+			action.destroy();
+		});
+
+		it('should apply drop-before when cursor is near the top', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(50, 10)); // top area
+			expect(node.classList.contains('drop-before')).toBe(true);
+			action.destroy();
+		});
+
+		it('should apply drop-after when cursor is near the bottom', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(50, 90)); // bottom area
+			expect(node.classList.contains('drop-after')).toBe(true);
+			action.destroy();
+		});
+
+		it('should set dropPosition to before for left/top edges', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(10, 50));
+			expect(dndState.dropPosition).toBe('before');
+			action.destroy();
+		});
+
+		it('should set dropPosition to after for right/bottom edges', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(90, 50));
+			expect(dndState.dropPosition).toBe('after');
+			action.destroy();
+		});
+
+		it('should clear indicator class on dragleave', () => {
+			const action = droppable(node, { container: 'test', direction: 'grid' });
+			node.dispatchEvent(makeDragOverEvent(10, 50));
+			expect(node.classList.contains('drop-left')).toBe(true);
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
+			node.dispatchEvent(new DragEvent('dragleave', { bubbles: true }));
+			expect(node.classList.contains('drop-left')).toBe(false);
 			action.destroy();
 		});
 	});

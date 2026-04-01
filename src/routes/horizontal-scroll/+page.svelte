@@ -40,6 +40,7 @@
 				use:draggable={{ container: index.toString(), dragData: image }}
 				use:droppable={{
 					container: index.toString(),
+					direction: 'horizontal',
 					callbacks: { onDrop: handleDrop }
 				}}
 				class="svelte-dnd-touch-feedback relative p-4"

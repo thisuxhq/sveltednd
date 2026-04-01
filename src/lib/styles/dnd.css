@@ -33,6 +33,22 @@
 }
 
 /**
+ * Convenience alias used by the built-in demo pages.
+ *
+ * Apply this class alongside use:draggable when you want touch support
+ * purely through CSS (e.g. when the draggable action is on a wrapper
+ * element but the visual card is an inner element).
+ *
+ * Note: the draggable action already sets touch-action/user-select inline,
+ * so this class is only needed for elements that don't have use:draggable
+ * directly but still need to opt out of browser touch handling.
+ */
+.svelte-dnd-touch-feedback {
+	touch-action: none;
+	user-select: none;
+}
+
+/**
  * Applied while an element is actively being dragged.
  *
  * By default we dim the item slightly and show a grabbing cursor.
@@ -150,6 +166,40 @@
 /* Line appears just below the element */
 .drop-after::after {
 	bottom: -1px;
+}
+
+/**
+ * Horizontal list drop indicators — vertical lines on left/right edges.
+ *
+ * Used when direction: 'horizontal' is set on the droppable action.
+ * Same blue color and pointer-events: none as the vertical variants.
+ */
+.drop-left,
+.drop-right {
+	position: relative;
+}
+
+.drop-left::before,
+.drop-right::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background-color: #3b82f6;
+	border-radius: 1px;
+	z-index: 10;
+	pointer-events: none;
+}
+
+/* Line appears just to the left of the element */
+.drop-left::before {
+	left: -1px;
+}
+
+/* Line appears just to the right of the element */
+.drop-right::after {
+	right: -1px;
 }
 
 /* =============================================================================
