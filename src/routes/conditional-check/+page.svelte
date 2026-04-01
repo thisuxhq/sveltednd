@@ -19,7 +19,7 @@
 		{ id: '7', name: 'Watermelon', color: 'Green' }
 	]);
 
-	let targetFruits = $state([]);
+	let targetFruits = $state<Fruit[]>([]);
 
 	// Add a derived state for empty states
 	let isTargetEmpty = $derived(targetFruits.length === 0);
@@ -65,7 +65,9 @@
 	<div class="grid gap-8 md:grid-cols-2">
 		<!-- Source Container -->
 		<div class="space-y-4">
-			<h2 class="text-sm font-medium uppercase tracking-wide text-muted-foreground">Available Fruits</h2>
+			<h2 class="text-muted-foreground text-sm font-medium uppercase tracking-wide">
+				Available Fruits
+			</h2>
 			<div
 				class="min-h-[400px] rounded-lg border bg-white p-4 shadow-sm transition-all"
 				use:droppable={{ container: 'source' }}
@@ -98,7 +100,9 @@
 
 		<!-- Target Container -->
 		<div class="space-y-4">
-			<h2 class="text-sm font-medium uppercase tracking-wide text-muted-foreground">Red Fruits Only</h2>
+			<h2 class="text-muted-foreground text-sm font-medium uppercase tracking-wide">
+				Red Fruits Only
+			</h2>
 			<div
 				class={`min-h-[400px] rounded-lg border bg-white p-4 shadow-sm transition-all
 					${
@@ -108,7 +112,6 @@
 								: 'border-blue-500/50 bg-blue-50/5'
 							: ''
 					}`}
-					
 				use:droppable={{
 					container: 'target',
 					callbacks: dragDropCallbacks,
@@ -124,7 +127,9 @@
 				{:else}
 					<div class="grid gap-2">
 						{#each targetFruits as fruit}
-							<div class="flex items-center justify-between rounded-md border-red-200 bg-red-50/50 p-3 shadow-sm">
+							<div
+								class="flex items-center justify-between rounded-md border-red-200 bg-red-50/50 p-3 shadow-sm"
+							>
 								<span class="font-medium">{fruit.name}</span>
 								<span class="rounded bg-red-100 px-2 py-1 text-xs text-red-700">{fruit.color}</span>
 							</div>

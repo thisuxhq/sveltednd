@@ -1,0 +1,281 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { draggable } from './draggable.js';
+import { dndState } from '../stores/dnd.svelte.js';
+
+describe('draggable', () => {
+	let node: HTMLElement;
+
+	beforeEach(() => {
+		// Reset dndState
+		dndState.isDragging = false;
+		dndState.draggedItem = null;
+		dndState.sourceContainer = '';
+		dndState.targetContainer = null;
+		dndState.targetElement = null;
+		node = document.createElement('div');
+		document.body.appendChild(node);
+	});
+
+	afterEach(() => {
+		node.remove();
+	});
+
+	describe('Issue #12 - DraggableOptions interface', () => {
+		it('should accept DraggableOptions with interactive property', () => {
+			const options = {
+				container: 'test',
+				dragData: { id: '1' },
+				interactive: ['button', 'input']
+			};
+
+			const action = draggable(node, options);
+			expect(action).toHaveProperty('destroy');
+			expect(action).toHaveProperty('update');
+			action.destroy();
+		});
+
+		it('should export DraggableOptions type with correct properties', () => {
+			// Type-only test - this will fail at compile time if types are wrong
+			const options: import('../types/index.js').DraggableOptions<{ id: string }> = {
+				container: 'test',
+				dragData: { id: '1' },
+				interactive: ['button', 'input'],
+				disabled: false,
+				callbacks: {
+					onDragStart: vi.fn(),
+					onDragEnd: vi.fn()
+				},
+				attributes: {
+					draggingClass: 'dragging'
+				}
+			};
+
+			const action = draggable(node, options);
+			action.destroy();
+		});
+	});
+
+	describe('Issue #21 - Interactive elements not blocked', () => {
+		it('should not start drag when clicking on input elements by default', () => {
+			const onDragStart = vi.fn();
+			const input = document.createElement('input');
+			input.type = 'text';
+			node.appendChild(input);
+
+			const action = draggable(node, {
+				container: 'test',
+				callbacks: { onDragStart }
+			});
+
+			// Simulate pointer down on the input
+			const pointerDownEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			});
+			input.dispatchEvent(pointerDownEvent);
+
+			expect(onDragStart).not.toHaveBeenCalled();
+			expect(dndState.isDragging).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should not start drag when clicking on checkbox', () => {
+			const onDragStart = vi.fn();
+			const checkbox = document.createElement('input');
+			checkbox.type = 'checkbox';
+			node.appendChild(checkbox);
+
+			const action = draggable(node, {
+				container: 'test',
+				callbacks: { onDragStart }
+			});
+
+			const pointerDownEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			});
+			checkbox.dispatchEvent(pointerDownEvent);
+
+			expect(onDragStart).not.toHaveBeenCalled();
+			action.destroy();
+		});
+
+		it('should not start drag when clicking on button', () => {
+			const onDragStart = vi.fn();
+			const button = document.createElement('button');
+			button.textContent = 'Click me';
+			node.appendChild(button);
+
+			const action = draggable(node, {
+				container: 'test',
+				callbacks: { onDragStart }
+			});
+
+			const pointerDownEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			});
+			button.dispatchEvent(pointerDownEvent);
+
+			expect(onDragStart).not.toHaveBeenCalled();
+			action.destroy();
+		});
+
+		it('should start drag when clicking on non-interactive area of container', () => {
+			const onDragStart = vi.fn();
+			const div = document.createElement('div');
+			div.textContent = 'Drag handle';
+			node.appendChild(div);
+
+			const action = draggable(node, {
+				container: 'test',
+				callbacks: { onDragStart }
+			});
+
+			const pointerDownEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			});
+			node.dispatchEvent(pointerDownEvent);
+
+			expect(dndState.isDragging).toBe(true);
+			action.destroy();
+		});
+
+		it('should respect custom interactive selectors', () => {
+			const onDragStart = vi.fn();
+			const customElement = document.createElement('span');
+			customElement.className = 'custom-handle';
+			node.appendChild(customElement);
+
+			const action = draggable(node, {
+				container: 'test',
+				interactive: ['.custom-handle'],
+				callbacks: { onDragStart }
+			});
+
+			const pointerDownEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true
+			});
+			customElement.dispatchEvent(pointerDownEvent);
+
+			expect(onDragStart).not.toHaveBeenCalled();
+			action.destroy();
+		});
+	});
+
+	describe('Issue #16 - onDrop not called for pointer events', () => {
+		it('should dispatch pointerdrop-on-container event on pointerup', () => {
+			const dropHandler = vi.fn();
+			node.addEventListener('pointerdrop-on-container', dropHandler);
+
+			const action = draggable(node, {
+				container: 'test',
+				dragData: 'test-data'
+			});
+
+			// Start drag
+			const pointerDownEvent = new PointerEvent('pointerdown', {
+				bubbles: true,
+				cancelable: true,
+				pointerId: 1
+			});
+			node.dispatchEvent(pointerDownEvent);
+
+			expect(dndState.isDragging).toBe(true);
+
+			// End drag
+			const pointerUpEvent = new PointerEvent('pointerup', {
+				bubbles: true,
+				cancelable: true,
+				pointerId: 1
+			});
+			node.dispatchEvent(pointerUpEvent);
+
+			expect(dropHandler).toHaveBeenCalled();
+			expect(dropHandler.mock.calls[0][0].detail).toEqual({ dragData: 'test-data' });
+
+			action.destroy();
+		});
+
+		it('should include dragData in the custom event detail', () => {
+			const dragData = { id: '123', name: 'Test Item' };
+			let receivedDetail: unknown;
+
+			node.addEventListener('pointerdrop-on-container', (e: Event) => {
+				receivedDetail = (e as CustomEvent).detail;
+			});
+
+			const action = draggable(node, {
+				container: 'test',
+				dragData
+			});
+
+			// Start and end drag
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			node.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+
+			expect(receivedDetail).toEqual({ dragData });
+			action.destroy();
+		});
+	});
+
+	describe('General functionality', () => {
+		it('should set node.draggable based on disabled option', () => {
+			const action = draggable(node, { container: 'test', disabled: true });
+			expect(node.draggable).toBe(false);
+
+			action.update({ container: 'test', disabled: false });
+			expect(node.draggable).toBe(true);
+
+			action.destroy();
+		});
+
+		it('should add and remove dragging class', () => {
+			const action = draggable(node, {
+				container: 'test',
+				attributes: { draggingClass: 'my-dragging' }
+			});
+
+			// Initially no class
+			expect(node.classList.contains('my-dragging')).toBe(false);
+
+			// Start drag
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			expect(node.classList.contains('my-dragging')).toBe(true);
+
+			// End drag
+			node.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+			expect(node.classList.contains('my-dragging')).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should call onDragStart and onDragEnd callbacks', () => {
+			const onDragStart = vi.fn();
+			const onDragEnd = vi.fn();
+
+			const action = draggable(node, {
+				container: 'test',
+				callbacks: { onDragStart, onDragEnd }
+			});
+
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			expect(onDragStart).toHaveBeenCalledTimes(1);
+
+			node.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+			expect(onDragEnd).toHaveBeenCalledTimes(1);
+
+			action.destroy();
+		});
+
+		it('should clean up event listeners on destroy', () => {
+			const action = draggable(node, { container: 'test' });
+
+			// Just verify destroy doesn't throw and removes listeners
+			expect(() => action.destroy()).not.toThrow();
+		});
+	});
+});

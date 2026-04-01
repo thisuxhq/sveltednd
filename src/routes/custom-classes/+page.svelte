@@ -2,6 +2,7 @@
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 
 	interface Item {
 		id: string;
@@ -78,7 +79,7 @@
 								dragOverClass: 'scale-98 -rotate-1 !shadow-inner !ring-2 ring-emerald-500/50'
 							}
 						}}
-						animate:flip={{ duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
+						animate:flip={{ duration: 400, easing: cubicOut }}
 						in:fade={{ duration: 300 }}
 						out:fade={{ duration: 200 }}
 						class="group relative cursor-move rounded-lg p-4
