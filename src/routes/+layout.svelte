@@ -40,7 +40,7 @@
 
 			<!-- Navigation with numbers -->
 			<div class="flex-1 overflow-y-auto">
-				<div class="border-b border-swiss-black px-8 py-[2.125rem]">
+				<div class="border-b border-swiss-black px-8 py-3">
 					<span class="text-xs text-swiss-mid-gray">examples</span>
 				</div>
 				{#each examples as { path, title, number }}
