@@ -142,10 +142,10 @@
 	</div>
 </nav>
 
-<!-- Theme toggle - positioned in main content area, top right -->
+<!-- Theme toggle - positioned at far right -->
 <button
 	onclick={toggleTheme}
-	class="fixed right-8 top-8 z-50 text-xs text-swiss-mid-gray transition-colors hover:text-swiss-black dark:text-white/60 dark:hover:text-white md:right-[calc(2rem+18rem)]"
+	class="fixed right-4 top-4 z-50 text-xs text-swiss-mid-gray transition-colors hover:text-swiss-black dark:text-white/60 dark:hover:text-white md:right-8 md:top-8"
 	aria-label="Toggle theme"
 >
 	{isDark ? 'light' : 'dark'}
