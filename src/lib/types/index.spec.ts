@@ -95,6 +95,7 @@ describe('Type exports', () => {
 				sourceContainer: 'source',
 				targetContainer: 'target',
 				targetElement: null,
+				dropPosition: null,
 				invalidDrop: false
 			};
 
@@ -111,7 +112,8 @@ describe('Type exports', () => {
 				draggedItem: 'test',
 				sourceContainer: 'source',
 				targetContainer: null,
-				targetElement: null
+				targetElement: null,
+				dropPosition: null
 			};
 
 			expect(state.targetContainer).toBeNull();
@@ -124,6 +126,7 @@ describe('Type exports', () => {
 				sourceContainer: 'source',
 				targetContainer: null,
 				targetElement: null,
+				dropPosition: null,
 				invalidDrop: true
 			};
 

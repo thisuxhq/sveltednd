@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { draggable } from './draggable.js';
 import { dndState } from '../stores/dnd.svelte.js';
 
