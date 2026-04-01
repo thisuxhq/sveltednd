@@ -74,24 +74,37 @@ export function unregisterDroppable(node: HTMLElement): void {
 }
 
 /**
- * Move focus to the next droppable after `current` in the registry.
+ * Move focus to the next droppable after `current` in the registry,
+ * skipping `current` itself so the drag source is never auto-focused.
  * Wraps around to the first droppable if at the end.
- * If `current` is null, focuses the first droppable.
  */
 export function focusNextDroppable(current: HTMLElement | null): void {
 	if (droppableRegistry.length === 0) return;
 	const index = current ? droppableRegistry.indexOf(current) : -1;
-	const next = droppableRegistry[(index + 1) % droppableRegistry.length];
-	next?.focus();
+	// Find next entry that is not the current node
+	for (let i = 1; i <= droppableRegistry.length; i++) {
+		const candidate = droppableRegistry[(index + i) % droppableRegistry.length];
+		if (candidate && candidate !== current) {
+			candidate.focus();
+			return;
+		}
+	}
 }
 
 /**
- * Move focus to the previous droppable before `current` in the registry.
+ * Move focus to the previous droppable before `current` in the registry,
+ * skipping `current` itself.
  * Wraps around to the last droppable if at the beginning.
  */
 export function focusPrevDroppable(current: HTMLElement | null): void {
 	if (droppableRegistry.length === 0) return;
 	const index = current ? droppableRegistry.indexOf(current) : 0;
-	const prev = droppableRegistry[(index - 1 + droppableRegistry.length) % droppableRegistry.length];
-	prev?.focus();
+	for (let i = 1; i <= droppableRegistry.length; i++) {
+		const candidate =
+			droppableRegistry[(index - i + droppableRegistry.length) % droppableRegistry.length];
+		if (candidate && candidate !== current) {
+			candidate.focus();
+			return;
+		}
+	}
 }

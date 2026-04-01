@@ -514,6 +514,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handleFocus() {
 		if (!dndState.isKeyboardDragging || options.disabled) return;
 		dndState.targetContainer = options.container;
+		dndState.targetElement = node;
 		node.classList.add(...dragOverClass);
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
@@ -527,9 +528,18 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		clearDropIndicator();
 		if (dndState.targetContainer === options.container) {
 			dndState.targetContainer = null;
+			dndState.targetElement = null;
 		}
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 	}
+
+	/**
+	 * Expose this droppable as a Tab stop while a keyboard drag is in progress.
+	 * Without this, container-only droppables (not also draggable) are unreachable via Tab.
+	 * We store the original value so we can restore it when the drag ends.
+	 */
+	const originalTabIndex = node.getAttribute('tabindex');
+	if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
 
 	// === Setup: Attach all event listeners ===
 
@@ -601,6 +611,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			node.removeEventListener('keydown', handleKeyDown);
 			node.removeEventListener('focus', handleFocus);
 			node.removeEventListener('blur', handleBlur);
+			// Restore original tabindex
+			if (originalTabIndex === null) node.removeAttribute('tabindex');
+			else node.setAttribute('tabindex', originalTabIndex);
 		}
 	};
 }

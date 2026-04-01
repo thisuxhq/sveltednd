@@ -292,7 +292,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		node.classList.add(...draggingClass);
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 		announce('Item grabbed. Use Tab or arrow keys to move to a drop zone, then press Space or Enter to drop. Press Escape to cancel.');
-		focusNextDroppable(null);
+		// Pass node so focusNextDroppable skips the source element itself
+		focusNextDroppable(node);
 	}
 
 	/**
