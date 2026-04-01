@@ -1,12 +1,32 @@
-# SvelteDnD
+# @thisux/sveltednd
 
-A lightweight drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's new runes system.
+A lightweight, flexible drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's runes system for maximum performance and developer experience.
+
+[![npm version](https://badge.fury.io/js/@thisux%2Fsveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Features
+
+- **Svelte 5 Native** — Built on Svelte's `$state` runes for reactive state management
+- **Dual-Mode Drag** — HTML5 Drag API for desktop + Pointer Events for touch/mobile support
+- **TypeScript-First** — Full type safety with generics support throughout
+- **Flexible Layouts** — Vertical, horizontal, and grid layouts with smart drop indicators
+- **Drag Handles** — Optional handle selectors for precise drag control
+- **Smart Interaction** — Automatically protects interactive elements (inputs, buttons, etc.)
+- **Drop Indicators** — Visual feedback showing exactly where items will drop
+- **Nested Support** — Works with nested containers and complex hierarchies
+- **Lightweight** — Minimal footprint with zero external dependencies
 
 ## Installation
 
 ```bash
-npm i @thisux/sveltednd@latest
-# or bun add @thisux/sveltednd or yarn add @thisux/sveltednd or pnpm add @thisux/sveltednd
+npm install @thisux/sveltednd
+# or
+bun add @thisux/sveltednd
+# or
+yarn add @thisux/sveltednd
+# or
+pnpm add @thisux/sveltednd
 ```
 
 ## Quick Start
@@ -15,261 +35,304 @@ npm i @thisux/sveltednd@latest
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
 
-	// Create a list of items
 	let items = $state(['Item 1', 'Item 2', 'Item 3']);
 
-	// Handle drops between containers
-	function handleDrop(state: DragDropState<{ id: string }>) {
-		const { draggedItem, sourceContainer, targetContainer } = state;
-		if (!targetContainer || sourceContainer === targetContainer) return;
+	function handleDrop(state: DragDropState<string>) {
+		const { draggedItem, sourceContainer, targetContainer, dropPosition } = state;
 
-		// Update items based on the drop
-		items = items.filter((item) => item !== draggedItem);
-		items = [...items, draggedItem];
+		// Simple reordering logic
+		const dragIndex = items.indexOf(draggedItem);
+		let dropIndex = parseInt(targetContainer ?? '0');
+		if (dropPosition === 'after') dropIndex++;
+
+		if (dragIndex !== -1) {
+			const [item] = items.splice(dragIndex, 1);
+			const adjusted = dragIndex < dropIndex ? dropIndex - 1 : dropIndex;
+			items.splice(adjusted, 0, item);
+		}
 	}
 </script>
 
-<div use:droppable={{ container: 'list', callbacks: { onDrop: handleDrop } }}>
-	{#each items as item}
-		<!-- Make items draggable -->
-		<div use:draggable={{ container: 'list', dragData: item }}>
-			{item}
-		</div>
-	{/each}
-</div>
+{#each items as item, index (item)}
+	<div
+		use:draggable={{ container: index.toString(), dragData: item }}
+		use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
+	>
+		{item}
+	</div>
+{/each}
 ```
 
 ## Core Concepts
 
-### 1. Draggable Items
+### 1. Draggable Items (`use:draggable`)
 
-- Add `use:draggable` to make elements draggable
-- Specify container ID and data to transfer
-- Optional callbacks for drag start/end
+Make any element draggable with the `draggable` action:
 
-### 2. Droppable Containers
+```svelte
+<div use:draggable={{ container: 'my-list', dragData: item }}>
+	{item.name}
+</div>
+```
 
-- Add `use:droppable` to create drop zones
-- Handle drops via callbacks
-- Visual feedback during drag operations
+### 2. Droppable Containers (`use:droppable`)
 
-### 3. State Management
+Create drop zones with the `droppable` action:
 
-- Built-in state tracking via Svelte 5 runes
-- Access current drag state via `dndState` store
-- Automatic cleanup and memory management
+```svelte
+<div use:droppable={{ container: 'my-list', callbacks: { onDrop: handleDrop } }}>
+	<!-- Draggable items go here -->
+</div>
+```
 
-## API Design
+### 3. Global State (`dndState`)
 
-Our API is designed with simplicity and usability in mind. Each action (`draggable` and `droppable`) is intuitive, allowing developers to easily implement drag-and-drop functionality without deep diving into complex configurations. The use of callbacks provides flexibility, enabling custom behavior during drag events. This design philosophy ensures that developers can focus on building features rather than wrestling with the library.
+Access real-time drag state anywhere in your app:
 
-### API Overview
+```svelte
+<script>
+	import { dndState } from '@thisux/sveltednd';
+</script>
 
-```mermaid
-graph TD;
-    A[Draggable] -->|use:draggable| B[Drag Data]
-    A -->|callbacks| C[onDragStart]
-    A -->|callbacks| D[onDragEnd]
-    E[Droppable] -->|use:droppable| F[Container ID]
-    E -->|callbacks| G[onDragEnter]
-    E -->|callbacks| H[onDrop]
+{#if dndState.isDragging}
+	<p>Dragging {dndState.draggedItem?.name} from {dndState.sourceContainer}</p>
+{/if}
 ```
 
 ## API Reference
 
-### Draggable Action
+### Draggable Options (`DraggableOptions<T>`)
 
-```typescript
-interface DraggableOptions {
-  container: string;      // Container identifier
-  dragData: any;         // Data to transfer
-  disabled?: boolean;    // Disable dragging
-  callbacks?: {
-    onDragStart?: (state: DragDropState) => void;
-    onDragEnd?: (state: DragDropState) => void;
-  }
-}
+| Property      | Type       | Description                                                               |
+| ------------- | ---------- | ------------------------------------------------------------------------- |
+| `container`   | `string`   | **Required.** Container identifier for grouping items                     |
+| `dragData`    | `T`        | **Required.** Data payload to transfer during drag                        |
+| `disabled`    | `boolean`  | Disable dragging for this element                                         |
+| `handle`      | `string`   | CSS selector for drag handle (e.g., `'.drag-handle'`)                     |
+| `interactive` | `string[]` | Additional selectors for interactive elements that shouldn't trigger drag |
+| `callbacks`   | `object`   | Event callbacks (`onDragStart`, `onDragEnd`)                              |
+| `attributes`  | `object`   | CSS class overrides (`draggingClass`)                                     |
 
-// Usage
-<div use:draggable={{
-  container: "my-list",
-  dragData: item,
-  callbacks: {
-    onDragStart: (state) => console.log('Started dragging', state)
-  }
-}}>
-```
+### Droppable Options (`DragDropOptions<T>`)
 
-### Droppable Action
-
-```typescript
-interface DroppableOptions {
-  container: string;      // Container identifier
-  disabled?: boolean;    // Disable dropping
-  callbacks?: {
-    onDragEnter?: (state: DragDropState) => void;
-    onDragLeave?: (state: DragDropState) => void;
-    onDragOver?: (state: DragDropState) => void;
-    onDrop?: (state: DragDropState) => Promise<void> | void;
-  }
-}
-
-// Usage
-<div use:droppable={{
-  container: "my-list",
-  callbacks: {
-    onDrop: async (state) => handleDrop(state)
-  }
-}}>
-```
+| Property     | Type                                   | Description                                                            |
+| ------------ | -------------------------------------- | ---------------------------------------------------------------------- |
+| `container`  | `string`                               | **Required.** Container identifier                                     |
+| `disabled`   | `boolean`                              | Disable dropping for this element                                      |
+| `direction`  | `'vertical' \| 'horizontal' \| 'grid'` | Layout direction (default: `'vertical'`)                               |
+| `callbacks`  | `object`                               | Event callbacks (`onDragEnter`, `onDragLeave`, `onDragOver`, `onDrop`) |
+| `attributes` | `object`                               | CSS class overrides (`dragOverClass`)                                  |
 
 ### DragDropState Interface
 
 ```typescript
 interface DragDropState<T = unknown> {
-	isDragging: boolean; // Current drag status
+	isDragging: boolean; // Currently dragging?
 	draggedItem: T; // Item being dragged
 	sourceContainer: string; // Origin container ID
-	targetContainer: string | null; // Current target container ID
-	attributes?: DragDropAttributes; // Drag attributes
+	targetContainer: string | null; // Current drop target
+	targetElement: HTMLElement | null; // Element under cursor
+	dropPosition: 'before' | 'after' | null; // Where item will drop
+	invalidDrop?: boolean; // Over invalid drop zone?
 }
+```
 
-interface DragDropAttributes {
-	draggingClass?: string; // Custom class for dragging state
-	dragOverClass?: string; // Custom class for drag-over state
+### Callbacks
+
+```typescript
+interface DragDropCallbacks<T = unknown> {
+	onDragStart?: (state: DragDropState<T>) => void;
+	onDragEnd?: (state: DragDropState<T>) => void;
+	onDragEnter?: (state: DragDropState<T>) => void;
+	onDragLeave?: (state: DragDropState<T>) => void;
+	onDragOver?: (state: DragDropState<T>) => void;
+	onDrop?: (state: DragDropState<T>) => Promise<void> | void;
 }
 ```
 
 ## Examples
 
-### Basic List
+### Sortable List
 
 ```svelte
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
 
-	interface Item {
+	interface Task {
 		id: string;
-		name: string;
+		title: string;
 	}
 
-	let items = $state<Item[]>([
-		{ id: '1', name: 'Item 1' },
-		{ id: '2', name: 'Item 2' },
-		{ id: '3', name: 'Item 3' }
+	let tasks = $state<Task[]>([
+		{ id: '1', title: 'Design review' },
+		{ id: '2', title: 'Code review' },
+		{ id: '3', title: 'Deploy to prod' }
 	]);
 
-	function handleDrop(state: DragDropState<Item>) {
-		const { draggedItem } = state;
-		items = [...items, draggedItem];
+	function handleDrop(state: DragDropState<Task>) {
+		const { draggedItem, targetContainer, dropPosition } = state;
+		const dragIndex = tasks.findIndex((t) => t.id === draggedItem.id);
+		let dropIndex = parseInt(targetContainer ?? '0');
+		if (dropPosition === 'after') dropIndex++;
+
+		if (dragIndex !== -1) {
+			const [task] = tasks.splice(dragIndex, 1);
+			const adjusted = dragIndex < dropIndex ? dropIndex - 1 : dropIndex;
+			tasks.splice(adjusted, 0, task);
+		}
 	}
 </script>
 
-<div use:droppable={{ container: 'list', callbacks: { onDrop: handleDrop } }}>
-	{#each items as item}
-		<div use:draggable={{ container: 'list', dragData: item }}>
+<div class="task-list">
+	{#each tasks as task, index (task.id)}
+		<div
+			use:draggable={{ container: index.toString(), dragData: task }}
+			use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
+			class="task-item"
+		>
+			{task.title}
+		</div>
+	{/each}
+</div>
+```
+
+### Multiple Containers (Kanban Board)
+
+```svelte
+<script lang="ts">
+	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
+
+	interface Card {
+		id: string;
+		title: string;
+		status: 'todo' | 'in-progress' | 'done';
+	}
+
+	let cards = $state<Card[]>([
+		{ id: '1', title: 'Task A', status: 'todo' },
+		{ id: '2', title: 'Task B', status: 'in-progress' },
+		{ id: '3', title: 'Task C', status: 'done' }
+	]);
+
+	const columns = ['todo', 'in-progress', 'done'] as const;
+
+	function handleDrop(state: DragDropState<Card>) {
+		const { draggedItem, targetContainer } = state;
+		if (!targetContainer) return;
+
+		cards = cards.map((c) =>
+			c.id === draggedItem.id ? { ...c, status: targetContainer as Card['status'] } : c
+		);
+	}
+</script>
+
+<div class="board">
+	{#each columns as column}
+		<div use:droppable={{ container: column, callbacks: { onDrop: handleDrop } }} class="column">
+			<h3>{column}</h3>
+			{#each cards.filter((c) => c.status === column) as card (card.id)}
+				<div use:draggable={{ container: column, dragData: card }} class="card">
+					{card.title}
+				</div>
+			{/each}
+		</div>
+	{/each}
+</div>
+```
+
+### Drag Handles
+
+Use the `handle` option to restrict dragging to a specific element:
+
+```svelte
+<div
+	use:draggable={{
+		container: 'items',
+		dragData: item,
+		handle: '.drag-handle' // Only the grip icon starts dragging
+	}}
+>
+	<span class="drag-handle">⋮⋮</span>
+	<span>{item.name}</span>
+	<!-- Text remains selectable, buttons remain clickable -->
+</div>
+```
+
+### Custom CSS Classes
+
+Override default styling with custom classes:
+
+```svelte
+<div
+	use:draggable={{
+		container: 'list',
+		dragData: item,
+		attributes: { draggingClass: 'my-dragging opacity-50' }
+	}}
+	use:droppable={{
+		container: 'list',
+		callbacks: { onDrop: handleDrop },
+		attributes: { dragOverClass: 'my-dropzone bg-blue-100' }
+	}}
+>
+	{item}
+</div>
+```
+
+### Grid Layout
+
+For grid layouts, the library uses nearest-edge detection:
+
+```svelte
+<div class="grid grid-cols-3 gap-4">
+	{#each items as item, index (item.id)}
+		<div
+			use:draggable={{ container: index.toString(), dragData: item }}
+			use:droppable={{
+				container: index.toString(),
+				direction: 'grid',
+				callbacks: { onDrop: handleDrop }
+			}}
+		>
 			{item.name}
 		</div>
 	{/each}
 </div>
 ```
 
-### Multiple Containers
+### Horizontal Lists
 
 ```svelte
-<script lang="ts">
-	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
-
-	interface Item {
-		id: string;
-		name: string;
-	}
-
-	let container1 = $state<Item[]>([
-		{ id: 'a', name: 'A' },
-		{ id: 'b', name: 'B' }
-	]);
-
-	let container2 = $state<Item[]>([
-		{ id: 'c', name: 'C' },
-		{ id: 'd', name: 'D' }
-	]);
-
-	function handleDrop(state: DragDropState<Item>) {
-		const { sourceContainer, targetContainer, draggedItem } = state;
-
-		if (sourceContainer === 'container1') {
-			container1 = container1.filter((i) => i.id !== draggedItem.id);
-			container2 = [...container2, draggedItem];
-		} else {
-			container2 = container2.filter((i) => i.id !== draggedItem.id);
-			container1 = [...container1, draggedItem];
-		}
-	}
-</script>
-
 <div class="flex gap-4">
-	<div use:droppable={{ container: 'container1', callbacks: { onDrop: handleDrop } }}>
-		{#each container1 as item}
-			<div use:draggable={{ container: 'container1', dragData: item }}>
-				{item.name}
-			</div>
-		{/each}
-	</div>
-
-	<div use:droppable={{ container: 'container2', callbacks: { onDrop: handleDrop } }}>
-		{#each container2 as item}
-			<div use:draggable={{ container: 'container2', dragData: item }}>
-				{item.name}
-			</div>
-		{/each}
-	</div>
+	{#each items as item, index (item.id)}
+		<div
+			use:draggable={{ container: index.toString(), dragData: item }}
+			use:droppable={{
+				container: index.toString(),
+				direction: 'horizontal',
+				callbacks: { onDrop: handleDrop }
+			}}
+		>
+			{item}
+		</div>
+	{/each}
 </div>
 ```
 
 ### Conditional Dropping
 
+Control which items can be dropped where:
+
 ```svelte
 <script lang="ts">
-	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
-
-	interface Item {
-		id: string;
-		name: string;
-		category: string;
-	}
-
-	let items = $state<Item[]>([
-		{ id: '1', name: 'Item 1', category: 'A' },
-		{ id: '2', name: 'Item 2', category: 'B' },
-		{ id: '3', name: 'Item 3', category: 'A' }
-	]);
-
-	function isValidItem(item: Item): boolean {
-		// Example criterion: Only allow dropping items from category 'A'
-		return item.category === 'A';
-	}
-
 	function handleDragOver(state: DragDropState<Item>) {
-		const { draggedItem } = state;
-		// Prevent dropping if item doesn't meet criteria
-		if (!isValidItem(draggedItem)) {
-			// Optionally, add a class to indicate invalid drop target
-			dndState.invalidDrop = true;
-		} else {
-			dndState.invalidDrop = false;
-		}
+		// Mark invalid drops
+		dndState.invalidDrop = !isValidDrop(state.draggedItem, state.targetContainer);
 	}
 
 	function handleDrop(state: DragDropState<Item>) {
-		const { draggedItem, targetContainer } = state;
-		if (!targetContainer || !isValidItem(draggedItem)) return;
-
-		// Handle the drop action
-		// For example, move the item to a different category or list
-		items = items.map((item) =>
-			item.id === draggedItem.id ? { ...item, category: targetContainer } : item
-		);
+		if (dndState.invalidDrop) return;
+		// Process the drop
 	}
 </script>
 
@@ -282,230 +345,93 @@ interface DragDropAttributes {
 		}
 	}}
 >
-	{#each items as item}
-		<div use:draggable={{ container: 'filtered', dragData: item }}>
-			{item.name}
-		</div>
-	{/each}
+	<!-- Items -->
 </div>
 ```
 
-### Custom Classes for Drag and Drop States
+### Async Drop Handlers
+
+Drop callbacks support async operations:
 
 ```svelte
-<script lang="ts">
-	import { draggable, droppable, type DragDropState } from '$lib/index.js';
-	import { flip } from 'svelte/animate';
-	import { fade } from 'svelte/transition';
-
-	interface Item {
-		id: string;
-		title: string;
-		description: string;
-		priority: 'low' | 'medium' | 'high';
-	}
-
-	const items = $state<Item[]>([
-		{
-			id: '1',
-			title: 'Design System Updates',
-			description: 'Update color palette and component library',
-			priority: 'high'
-		},
-		{
-			id: '2',
-			title: 'User Research',
-			description: 'Conduct interviews with 5 key customers',
-			priority: 'medium'
-		},
-		{
-			id: '3',
-			title: 'API Documentation',
-			description: 'Document new endpoints and examples',
-			priority: 'low'
+<div
+	use:droppable={{
+		container: 'list',
+		callbacks: {
+			onDrop: async (state) => {
+				await saveToDatabase(state.draggedItem);
+				await refreshData();
+			}
 		}
-	]);
-
-	function handleDrop(state: DragDropState<Item>) {
-		const { draggedItem, targetContainer } = state;
-		const dragIndex = items.findIndex((item: Item) => item.id === draggedItem.id);
-		const dropIndex = parseInt(targetContainer ?? '0');
-
-		if (dragIndex !== -1 && !isNaN(dropIndex)) {
-			const [item] = items.splice(dragIndex, 1);
-			items.splice(dropIndex, 0, item);
-		}
-	}
-
-	const getPriorityColor = (priority: Item['priority']) => {
-		return {
-			low: 'bg-blue-50 text-blue-700',
-			medium: 'bg-yellow-50 text-yellow-700',
-			high: 'bg-red-50 text-red-700'
-		}[priority];
-	};
-
-	const dragStyles = {
-		low: 'bg-gradient-to-r from-sky-400/30 via-blue-400/20 to-indigo-400/30 backdrop-blur-lg',
-		medium:
-			'bg-gradient-to-r from-amber-400/30 via-orange-400/20 to-yellow-400/30 backdrop-blur-lg',
-		high: 'bg-gradient-to-r from-rose-400/30 via-red-400/20 to-pink-400/30 backdrop-blur-lg'
-	};
-</script>
-
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-8">
-	<div class="mb-8 flex flex-col gap-2">
-		<h1 class="text-2xl font-bold text-gray-900">Custom classes</h1>
-		<p class="text-gray-600">You can add custom classes to the draggable and droppable elements.</p>
-	</div>
-
-	<div class="w-80">
-		<div class="rounded-xl bg-white/40 p-4 shadow-lg ring-1 ring-white/60 backdrop-blur-xl">
-			<div class="space-y-4">
-				{#each items as item, index (item.id)}
-					<div
-						use:draggable={{ container: index.toString(), dragData: item }}
-						use:droppable={{
-							container: index.toString(),
-							callbacks: { onDrop: handleDrop },
-							attributes: {
-								draggingClass: 'scale-105 rotate-2 !shadow-2xl !ring-2 ring-blue-500/50 z-50',
-								dragOverClass: 'scale-98 -rotate-1 !shadow-inner !ring-2 ring-emerald-500/50'
-							}
-						}}
-						animate:flip={{ duration: 400, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
-						in:fade={{ duration: 300 }}
-						out:fade={{ duration: 200 }}
-						class="group relative cursor-move rounded-lg p-4
-                               shadow-md ring-1 ring-white/60
-                               backdrop-blur-md transition-all duration-500
-                               ease-out hover:-rotate-1 hover:scale-[1.02]
-                               hover:shadow-xl active:shadow-inner
-                               {dragStyles[item.priority]}"
-					>
-						<div class="relative overflow-hidden rounded-md">
-							<!-- Enhanced gradient overlay -->
-							<div
-								class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/20 opacity-0
-                                      transition-all duration-500 group-hover:opacity-100"
-							/>
-
-							<!-- Kanban card content -->
-							<div class="relative z-10 space-y-2">
-								<div class="flex items-start justify-between">
-									<h3 class="font-medium text-gray-900">{item.title}</h3>
-									<span
-										class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
-													 {getPriorityColor(item.priority)}"
-									>
-										{item.priority}
-									</span>
-								</div>
-								<p class="text-sm text-gray-600">{item.description}</p>
-							</div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		</div>
-	</div>
+	}}
+>
+	<!-- Items -->
 </div>
-
-<style>
-	:global(.dragging) {
-		@apply opacity-60;
-		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 0.6;
-		}
-		50% {
-			opacity: 0.8;
-		}
-	}
-
-	:global(.drag-over) {
-		@apply bg-blue-50;
-	}
-
-	/* Add custom scaling utility */
-	.scale-102 {
-		transform: scale(1.02);
-	}
-	.scale-98 {
-		transform: scale(0.98);
-	}
-</style>
 ```
 
-### Additional Examples
+## Default CSS Classes
 
-- **[Kanban Board](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/+page.svelte)**: Find the example in `src/routes/+page.svelte`.
-- **[Simple Sortable List](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/simple-list/+page.svelte)**: Refer to `src/routes/simple-list/+page.svelte`.
-- **[Grid Sort](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/grid-sort/+page.svelte)**: Check out the implementation in `src/routes/grid-sort/+page.svelte`.
-- **[Horizontal Scroll](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/horizontal-scroll/+page.svelte)**: See how it works in `src/routes/horizontal-scroll/+page.svelte`.
-- **[Nested Containers](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/nested/+page.svelte)**: Explore the example in `src/routes/nested/+page.svelte`.
-- **[Custom Classes](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/custom-classes/+page.svelte)**: Explore the example in `src/routes/custom-classes/+page.svelte`.
-- **[Interactive Elements](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/interactive-elements/+page.svelte)**: Explore the example in `src/routes/interactive-elements/+page.svelte`.
-- **[Conditional Check](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/conditional-check/+page.svelte)**: Explore the example in `src/routes/conditional-check/+page.svelte`.
-
-## Styling
-
-The library provides CSS classes for styling drag and drop states:
+The library provides these default classes (all customizable):
 
 ```css
-/* Base styles */
-.svelte-dnd-draggable {
-	cursor: grab;
-}
-
-/* Active dragging */
-.svelte-dnd-dragging {
+/* Applied while dragging */
+.dragging {
 	opacity: 0.5;
-	cursor: grabbing;
 }
 
-/* Valid drop target */
-.svelte-dnd-drop-target {
+/* Applied when dragged over */
+.drag-over {
 	outline: 2px dashed #4caf50;
 }
 
-/* Invalid drop target */
-.svelte-dnd-invalid-target {
-	outline: 2px dashed #f44336;
+/* Drop position indicators */
+.drop-before::before,      /* Line above element */
+.drop-after::after,        /* Line below element */
+.drop-left::before,        /* Line to left (horizontal) */
+.drop-right::after {
+	/* Line to right (horizontal) */
+	content: '';
+	position: absolute;
+	background-color: #3b82f6;
+	pointer-events: none;
 }
 ```
 
-## TypeScript Support
+## More Examples
 
-The library is written in TypeScript and provides full type definitions. Use interfaces to type your dragged items:
+Explore the demo pages for complete working examples:
 
-```typescript
-interface Task {
-	id: string;
-	title: string;
-}
+- **[Kanban Board](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/+page.svelte)** — Full-featured board with multiple columns
+- **[Simple Sortable List](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/simple-list/+page.svelte)** — Basic reordering
+- **[Grid Sort](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/grid-sort/+page.svelte)** — 2D grid reordering
+- **[Horizontal Scroll](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/horizontal-scroll/+page.svelte)** — Horizontal lists
+- **[Nested Containers](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/nested/+page.svelte)** — Hierarchical drag and drop
+- **[Drag Handles](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/drag-handle/+page.svelte)** — Handle-based dragging
+- **[Custom Classes](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/custom-classes/+page.svelte)** — Custom styling
+- **[Interactive Elements](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/interactive-elements/+page.svelte)** — Forms inside draggable items
+- **[Conditional Check](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/conditional-check/+page.svelte)** — Validation before drop
 
-function handleDrop(state: DragDropState<Task>) {
-	const draggedTask = state.draggedItem;
-	// Handle the dropped task
-}
-```
+## Browser Support
 
-## Performance Tips
+- Chrome/Edge 88+
+- Firefox 78+
+- Safari 14+
+- Mobile Safari (iOS 14+)
+- Chrome for Android
 
-1. Use unique IDs as keys in loops
-2. Keep drag data minimal
-3. Avoid expensive operations in drag callbacks
-4. Use `$derived` for computed values
+## Requirements
+
+- Svelte 5.0 or higher
+- TypeScript 5.0 or higher (optional but recommended)
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## License
 
-MIT
+MIT License — see [LICENSE](./LICENSE) for details.
 
 ## Acknowledgment
 
-SvelteDnD is proudly built by [ThisUX](https://thisux.com) – A Design led product studio. If you need help building your next product, [let's talk](https://cal.com/imsanju/15min).
+SvelteDnD is proudly built by [ThisUX](https://thisux.com) — A design-led product studio. If you need help building your next product, [let's talk](https://cal.com/imsanju/15min).
