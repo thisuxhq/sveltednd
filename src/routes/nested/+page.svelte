@@ -28,38 +28,38 @@
 	let groups = $state<Group[]>([
 		{
 			id: 'group1',
-			title: 'Development Tasks',
-			description: 'Technical implementation tasks',
+			title: 'development tasks',
+			description: 'technical implementation tasks',
 			items: [
 				{
 					id: 'dev1',
-					title: 'Setup Project',
-					description: 'Initialize repository and configure tools',
+					title: 'setup project',
+					description: 'initialize repository and configure tools',
 					priority: 'high'
 				},
 				{
 					id: 'dev2',
-					title: 'Create Components',
-					description: 'Build reusable UI components',
+					title: 'create components',
+					description: 'build reusable ui components',
 					priority: 'medium'
 				}
 			]
 		},
 		{
 			id: 'group2',
-			title: 'Design Tasks',
-			description: 'UI/UX design related tasks',
+			title: 'design tasks',
+			description: 'ui/ux design related tasks',
 			items: [
 				{
 					id: 'design1',
-					title: 'Color Palette',
-					description: 'Define brand colors and variants',
+					title: 'color palette',
+					description: 'define brand colors and variants',
 					priority: 'high'
 				},
 				{
 					id: 'design2',
-					title: 'Typography',
-					description: 'Select and implement fonts',
+					title: 'typography',
+					description: 'select and implement fonts',
 					priority: 'low'
 				}
 			]
@@ -90,107 +90,112 @@
 
 		if (!sourceGroup || !targetGroup) return;
 
-		// Remove from source
 		sourceGroup.items = sourceGroup.items.filter((item: DraggedItem) => item.id !== draggedItem.id);
 
-		// Add to target
 		targetGroup.items = [
 			...targetGroup.items.slice(0, targetIndex),
 			draggedItem,
 			...targetGroup.items.slice(targetIndex)
 		];
 
-		// Force reactivity
 		groups = [...groups];
 	}
 
-	const getPriorityColor = (priority: Item['priority']) => {
+	const getPriorityMarker = (priority: Item['priority']) => {
 		return {
-			low: 'bg-blue-50 text-blue-700',
-			medium: 'bg-yellow-50 text-yellow-700',
-			high: 'bg-red-50 text-red-700'
+			low: 'bg-swiss-gray',
+			medium: 'bg-swiss-dark-gray',
+			high: 'bg-swiss-red'
 		}[priority];
 	};
 </script>
 
-<div class="min-h-screen bg-gray-50 p-8">
-	<h1 class="mb-8 text-2xl font-bold text-gray-900">Nested Containers</h1>
+<div class="min-h-screen pt-20 md:pt-0">
+	<!-- Header -->
+	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black md:text-4xl">nested containers</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+			drag items within groups and between different groups
+		</p>
+	</header>
 
-	<div class="flex flex-col gap-6">
-		{#each groups as group, groupIndex (group.id)}
-			<div
-				use:droppable={{
-					container: groupIndex.toString(),
-					callbacks: { onDrop: handleGroupDrop }
-				}}
-				animate:flip={{ duration: 200 }}
-			>
+	<!-- Content -->
+	<div class="p-8 md:p-16">
+		<div class="grid gap-8 md:grid-cols-2">
+			{#each groups as group, groupIndex (group.id)}
 				<div
-					use:draggable={{
+					use:droppable={{
 						container: groupIndex.toString(),
-						dragData: group
+						callbacks: { onDrop: handleGroupDrop }
 					}}
-					class="svelte-dnd-touch-feedback rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200"
-					in:fade={{ duration: 150 }}
-					out:fade={{ duration: 150 }}
+					animate:flip={{ duration: 200 }}
 				>
-					<!-- Group Header -->
-					<div class="mb-4 flex items-center justify-between">
-						<div>
-							<h2 class="font-semibold text-gray-900">{group.title}</h2>
-							<p class="text-sm text-gray-500">{group.description}</p>
-						</div>
-						<span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-sm text-gray-600">
-							{group.items.length}
-						</span>
-					</div>
-
-					<!-- Group Items -->
-					<div class="space-y-3">
-						{#each group.items as item, itemIndex (item.id)}
-							<div
-								use:droppable={{
-									container: `${group.id}:${itemIndex}`,
-									callbacks: {
-										onDrop: (state: DragDropState<DraggedItem>) => handleItemDrop(group.id, state)
-									}
-								}}
-							>
-								<div
-									use:draggable={{
-										container: `${group.id}:${itemIndex}`,
-										dragData: item
-									}}
-									class="svelte-dnd-touch-feedback cursor-move rounded-lg bg-white p-3 shadow-sm ring-1
-                                           ring-gray-200 transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
-								>
-									<div class="mb-2 flex items-start justify-between gap-2">
-										<h3 class="font-medium text-gray-900">{item.title}</h3>
-										<span
-											class={`rounded-full px-2 py-0.5 text-xs font-medium ${getPriorityColor(
-												item.priority
-											)}`}
-										>
-											{item.priority}
-										</span>
-									</div>
-									<p class="text-sm text-gray-500">{item.description}</p>
+					<div
+						use:draggable={{
+							container: groupIndex.toString(),
+							dragData: group
+						}}
+						class="svelte-dnd-touch-feedback border border-swiss-black bg-white"
+						in:fade={{ duration: 150 }}
+						out:fade={{ duration: 150 }}
+					>
+						<!-- Group Header -->
+						<div class="border-b border-swiss-black p-6">
+							<div class="flex items-start justify-between">
+								<div>
+									<h2 class="text-lg text-swiss-black">{group.title}</h2>
+									<p class="mt-1 text-xs text-swiss-mid-gray">{group.description}</p>
 								</div>
+								<span class="text-xs text-swiss-mid-gray"
+									>{group.items.length.toString().padStart(2, '0')}</span
+								>
 							</div>
-						{/each}
+						</div>
+
+						<!-- Group Items -->
+						<div class="divide-y divide-swiss-gray">
+							{#each group.items as item, itemIndex (item.id)}
+								<div
+									use:droppable={{
+										container: `${group.id}:${itemIndex}`,
+										callbacks: {
+											onDrop: (state: DragDropState<DraggedItem>) => handleItemDrop(group.id, state)
+										}
+									}}
+								>
+									<div
+										use:draggable={{
+											container: `${group.id}:${itemIndex}`,
+											dragData: item
+										}}
+										class="svelte-dnd-touch-feedback cursor-move bg-white p-6 transition-all hover:bg-swiss-gray"
+									>
+										<div class="flex items-start justify-between">
+											<div>
+												<h3 class="text-sm text-swiss-black">{item.title}</h3>
+												<p class="mt-1 text-xs text-swiss-mid-gray">{item.description}</p>
+											</div>
+											<div class="h-2 w-2 {getPriorityMarker(item.priority)}"></div>
+										</div>
+									</div>
+								</div>
+							{/each}
+						</div>
 					</div>
 				</div>
-			</div>
-		{/each}
+			{/each}
+		</div>
 	</div>
 </div>
 
 <style>
 	:global(.dragging) {
-		@apply opacity-50 shadow-lg ring-2 ring-blue-400;
+		opacity: 0.5;
+		outline: 1px solid #0a0a0a;
 	}
 
 	:global(.drag-over) {
-		@apply bg-blue-50 ring-2 ring-blue-400;
+		background-color: #f5f5f5;
+		outline: 1px dashed #a3a3a3;
 	}
 </style>

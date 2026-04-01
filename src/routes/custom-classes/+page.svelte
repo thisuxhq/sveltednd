@@ -14,20 +14,20 @@
 	const items = $state<Item[]>([
 		{
 			id: '1',
-			title: 'Design System Updates',
-			description: 'Update color palette and component library',
+			title: 'design system updates',
+			description: 'update color palette and component library',
 			priority: 'high'
 		},
 		{
 			id: '2',
-			title: 'User Research',
-			description: 'Conduct interviews with 5 key customers',
+			title: 'user research',
+			description: 'conduct interviews with 5 key customers',
 			priority: 'medium'
 		},
 		{
 			id: '3',
-			title: 'API Documentation',
-			description: 'Document new endpoints and examples',
+			title: 'api documentation',
+			description: 'document new endpoints and examples',
 			priority: 'low'
 		}
 	]);
@@ -43,31 +43,28 @@
 		}
 	}
 
-	const getPriorityColor = (priority: Item['priority']) => {
+	const getPriorityMarker = (priority: Item['priority']) => {
 		return {
-			low: 'bg-blue-50 text-blue-700',
-			medium: 'bg-yellow-50 text-yellow-700',
-			high: 'bg-red-50 text-red-700'
+			low: 'bg-swiss-gray',
+			medium: 'bg-swiss-dark-gray',
+			high: 'bg-swiss-red'
 		}[priority];
-	};
-
-	const dragStyles = {
-		low: 'bg-gradient-to-r from-sky-400/30 via-blue-400/20 to-indigo-400/30 backdrop-blur-lg',
-		medium:
-			'bg-gradient-to-r from-amber-400/30 via-orange-400/20 to-yellow-400/30 backdrop-blur-lg',
-		high: 'bg-gradient-to-r from-rose-400/30 via-red-400/20 to-pink-400/30 backdrop-blur-lg'
 	};
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-8">
-	<div class="mb-8 flex flex-col gap-2">
-		<h1 class="text-2xl font-bold text-gray-900">Custom classes</h1>
-		<p class="text-gray-600">You can add custom classes to the draggable and droppable elements.</p>
-	</div>
+<div class="min-h-screen pt-20 md:pt-0">
+	<!-- Header -->
+	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black md:text-4xl">custom classes</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+			add custom classes to draggable and droppable elements
+		</p>
+	</header>
 
-	<div class="w-80">
-		<div class="rounded-xl bg-white/40 p-4 shadow-lg ring-1 ring-white/60 backdrop-blur-xl">
-			<div class="space-y-4">
+	<!-- Content -->
+	<div class="p-8 md:p-16">
+		<div class="max-w-xl">
+			<div class="space-y-0 border border-swiss-black">
 				{#each items as item, index (item.id)}
 					<div
 						use:draggable={{ container: index.toString(), dragData: item }}
@@ -75,40 +72,26 @@
 							container: index.toString(),
 							callbacks: { onDrop: handleDrop },
 							attributes: {
-								draggingClass: 'scale-105 rotate-2 !shadow-2xl !ring-2 ring-blue-500/50 z-50',
-								dragOverClass: 'scale-98 -rotate-1 !shadow-inner !ring-2 ring-emerald-500/50'
+								draggingClass: '!outline-1 !outline-swiss-black !bg-swiss-gray',
+								dragOverClass: '!outline-1 !outline-dashed !outline-swiss-mid-gray'
 							}
 						}}
 						animate:flip={{ duration: 400, easing: cubicOut }}
 						in:fade={{ duration: 300 }}
 						out:fade={{ duration: 200 }}
-						class="group relative cursor-move rounded-lg p-4
-                               shadow-md ring-1 ring-white/60
-                               backdrop-blur-md transition-all duration-500
-                               ease-out hover:-rotate-1 hover:scale-[1.02]
-                               hover:shadow-xl active:shadow-inner
-                               {dragStyles[item.priority]}"
+						class="group cursor-move border-b border-swiss-black bg-white p-8 transition-all last:border-b-0 hover:bg-swiss-gray"
 					>
-						<div class="relative overflow-hidden rounded-md">
-							<!-- Enhanced gradient overlay -->
-							<div
-								class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/20 opacity-0
-                                      transition-all duration-500 group-hover:opacity-100"
-							/>
-
-							<!-- Kanban card content -->
-							<div class="relative z-10 space-y-2">
-								<div class="flex items-start justify-between">
-									<h3 class="font-medium text-gray-900">{item.title}</h3>
-									<span
-										class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium
-													 {getPriorityColor(item.priority)}"
-									>
-										{item.priority}
-									</span>
+						<div class="flex items-start justify-between">
+							<div class="flex items-start gap-6">
+								<span class="text-xs text-swiss-mid-gray"
+									>{(index + 1).toString().padStart(2, '0')}</span
+								>
+								<div>
+									<h3 class="text-xl text-swiss-black">{item.title}</h3>
+									<p class="mt-2 text-sm text-swiss-mid-gray">{item.description}</p>
 								</div>
-								<p class="text-sm text-gray-600">{item.description}</p>
 							</div>
+							<div class="h-3 w-3 {getPriorityMarker(item.priority)}"></div>
 						</div>
 					</div>
 				{/each}
@@ -119,29 +102,6 @@
 
 <style>
 	:global(.dragging) {
-		@apply opacity-60;
-		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-	}
-
-	@keyframes pulse {
-		0%,
-		100% {
-			opacity: 0.6;
-		}
-		50% {
-			opacity: 0.8;
-		}
-	}
-
-	:global(.drag-over) {
-		@apply bg-blue-50;
-	}
-
-	/* Add custom scaling utility */
-	.scale-102 {
-		transform: scale(1.02);
-	}
-	.scale-98 {
-		transform: scale(0.98);
+		opacity: 0.6;
 	}
 </style>

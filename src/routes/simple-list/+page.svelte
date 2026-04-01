@@ -13,20 +13,20 @@
 	const items = $state<Item[]>([
 		{
 			id: '1',
-			title: 'Design System Updates',
-			description: 'Update color palette and component library',
+			title: 'design system updates',
+			description: 'update color palette and component library',
 			priority: 'high'
 		},
 		{
 			id: '2',
-			title: 'User Research',
-			description: 'Conduct interviews with 5 key customers',
+			title: 'user research',
+			description: 'conduct interviews with 5 key customers',
 			priority: 'medium'
 		},
 		{
 			id: '3',
-			title: 'API Documentation',
-			description: 'Document new endpoints and examples',
+			title: 'api documentation',
+			description: 'document new endpoints and examples',
 			priority: 'low'
 		}
 	]);
@@ -44,24 +44,28 @@
 		}
 	}
 
-	const getPriorityColor = (priority: Item['priority']) => {
+	const getPriorityMarker = (priority: Item['priority']) => {
 		return {
-			low: 'bg-blue-50 text-blue-700',
-			medium: 'bg-yellow-50 text-yellow-700',
-			high: 'bg-red-50 text-red-700'
+			low: 'bg-swiss-gray',
+			medium: 'bg-swiss-dark-gray',
+			high: 'bg-swiss-red'
 		}[priority];
 	};
 </script>
 
-<div class="min-h-screen bg-gray-50 p-8">
-	<div class="mb-8 flex flex-col gap-2">
-		<h1 class="text-2xl font-bold text-gray-900">Sortable List</h1>
-		<p class="text-gray-600">Drag and drop items to reorder them in the list.</p>
-	</div>
+<div class="min-h-screen pt-20 md:pt-0">
+	<!-- Header -->
+	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black md:text-4xl">simple list</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+			drag and drop items to reorder them in the list
+		</p>
+	</header>
 
-	<div class="w-80">
-		<div class="rounded-xl bg-gray-100 p-4 shadow-sm ring-1 ring-gray-200">
-			<div class="space-y-3">
+	<!-- Content -->
+	<div class="p-8 md:p-16">
+		<div class="max-w-2xl">
+			<div class="border border-swiss-black">
 				{#each items as item, index (item.id)}
 					<div
 						use:draggable={{ container: index.toString(), dragData: item }}
@@ -72,24 +76,20 @@
 						animate:flip={{ duration: 200 }}
 						in:fade={{ duration: 150 }}
 						out:fade={{ duration: 150 }}
-						class="svelte-dnd-touch-feedback cursor-move rounded-lg bg-white p-3 shadow-sm ring-1
-                               ring-gray-200 transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
+						class="svelte-dnd-touch-feedback group cursor-move border-b border-swiss-black bg-white p-6 transition-all last:border-b-0 hover:bg-swiss-gray"
 					>
-						<div class="mb-2 flex items-start justify-between gap-2">
-							<h3 class="font-medium text-gray-900">
-								{item.title}
-							</h3>
-							<span
-								class={`rounded-full px-2 py-0.5 text-xs font-medium ${getPriorityColor(
-									item.priority
-								)}`}
+						<div class="flex items-start gap-6">
+							<span class="text-xs text-swiss-mid-gray"
+								>{(index + 1).toString().padStart(2, '0')}</span
 							>
-								{item.priority}
-							</span>
+							<div class="flex-1">
+								<div class="mb-2 flex items-start justify-between">
+									<h3 class="text-lg text-swiss-black">{item.title}</h3>
+									<div class="h-2 w-2 {getPriorityMarker(item.priority)}"></div>
+								</div>
+								<p class="text-sm text-swiss-mid-gray">{item.description}</p>
+							</div>
 						</div>
-						<p class="text-sm text-gray-500">
-							{item.description}
-						</p>
 					</div>
 				{/each}
 			</div>
@@ -99,10 +99,12 @@
 
 <style>
 	:global(.dragging) {
-		@apply opacity-50 shadow-lg ring-2 ring-blue-400;
+		opacity: 0.5;
+		outline: 1px solid #0a0a0a;
 	}
 
 	:global(.drag-over) {
-		@apply bg-blue-50;
+		background-color: #f5f5f5;
+		outline: 1px dashed #a3a3a3;
 	}
 </style>

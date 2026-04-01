@@ -10,10 +10,10 @@
 	}
 
 	let images = $state<ImageItem[]>([
-		{ id: '1', url: 'https://picsum.photos/200/300?1' },
-		{ id: '2', url: 'https://picsum.photos/200/300?2' },
-		{ id: '3', url: 'https://picsum.photos/200/300?3' },
-		{ id: '4', url: 'https://picsum.photos/200/300?4' }
+		{ id: '1', url: 'https://picsum.photos/300/400?1' },
+		{ id: '2', url: 'https://picsum.photos/300/400?2' },
+		{ id: '3', url: 'https://picsum.photos/300/400?3' },
+		{ id: '4', url: 'https://picsum.photos/300/400?4' }
 	]);
 
 	function handleDrop(state: DragDropState<ImageItem>) {
@@ -28,56 +28,59 @@
 	}
 </script>
 
-<div class="flex min-h-screen flex-col gap-4 p-8">
-	<div class="flex flex-col gap-2">
-		<h1 class="text-2xl font-bold">Horizontal Image Gallery</h1>
-		<p class="text-gray-600">Drag and drop images to rearrange them in the gallery.</p>
-	</div>
+<div class="min-h-screen pt-20 md:pt-0">
+	<!-- Header -->
+	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black md:text-4xl">horizontal scroll</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+			drag and drop images to rearrange them in the gallery
+		</p>
+	</header>
 
-	<div class="flex gap-4 overflow-x-auto p-4">
-		{#each images as image, index (image.id)}
-			<div
-				use:draggable={{ container: index.toString(), dragData: image }}
-				use:droppable={{
-					container: index.toString(),
-					direction: 'horizontal',
-					callbacks: { onDrop: handleDrop }
-				}}
-				class="svelte-dnd-touch-feedback relative p-4"
-				animate:flip={{ duration: 200 }}
-				in:fade={{ duration: 150 }}
-				out:fade={{ duration: 150 }}
-			>
+	<!-- Content -->
+	<div class="p-8 md:p-16">
+		<div class="flex gap-6 overflow-x-auto pb-8">
+			{#each images as image, index (image.id)}
 				<div
-					class="group relative h-[300px] w-[200px] cursor-move overflow-hidden rounded-xl
-						transition-transform hover:scale-105"
+					use:draggable={{ container: index.toString(), dragData: image }}
+					use:droppable={{
+						container: index.toString(),
+						direction: 'horizontal',
+						callbacks: { onDrop: handleDrop }
+					}}
+					class="svelte-dnd-touch-feedback relative flex-none p-4"
+					animate:flip={{ duration: 200 }}
+					in:fade={{ duration: 150 }}
+					out:fade={{ duration: 150 }}
 				>
-					<img
-						src={image.url}
-						alt=""
-						class="h-full w-full object-cover transition-transform duration-700
-							group-hover:scale-105"
-					/>
+					<div
+						class="group relative h-[400px] w-[300px] cursor-move overflow-hidden border border-swiss-black"
+					>
+						<img
+							src={image.url}
+							alt=""
+							class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+						/>
+					</div>
+					<div class="mt-4 text-center">
+						<span class="text-xs text-swiss-mid-gray"
+							>{(index + 1).toString().padStart(2, '0')}</span
+						>
+					</div>
 				</div>
-
-				<div
-					class="absolute -bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white/90
-						px-4 py-1.5 text-sm font-medium text-zinc-600 backdrop-blur-sm
-						transition-all group-hover:bg-white"
-				>
-					{index + 1}
-				</div>
-			</div>
-		{/each}
+			{/each}
+		</div>
 	</div>
 </div>
 
 <style>
 	:global(.dragging) {
-		@apply opacity-50 shadow-lg ring-2 ring-blue-400;
+		opacity: 0.5;
+		outline: 1px solid #0a0a0a;
 	}
 
 	:global(.drag-over) {
-		@apply bg-blue-50;
+		background-color: #f5f5f5;
+		outline: 1px dashed #a3a3a3;
 	}
 </style>

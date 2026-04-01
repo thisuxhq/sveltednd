@@ -7,10 +7,10 @@
 	}
 
 	let items = $state<Item[]>([
-		{ id: '1', title: 'This list is interactive' },
-		{ id: '2', title: 'You can drag and drop items' },
-		{ id: '3', title: 'You can also select items' },
-		{ id: '4', title: 'You can also delete items' }
+		{ id: '1', title: 'this list is interactive' },
+		{ id: '2', title: 'you can drag and drop items' },
+		{ id: '3', title: 'you can also select items' },
+		{ id: '4', title: 'you can also delete items' }
 	]);
 
 	function handleDelete(id: string) {
@@ -18,8 +18,8 @@
 	}
 
 	function handleSelect(id: string) {
-		console.log('Selected item:', id);
-		alert('Selected item: ' + id);
+		console.log('selected item:', id);
+		alert('selected item: ' + id);
 	}
 
 	function handleDrop(state: DragDropState<Item>) {
@@ -31,50 +31,68 @@
 
 		const [movedItem] = items.splice(sourceIndex, 1);
 		items.splice(targetIndex, 0, movedItem);
-		items = [...items]; // Force reactivity
+		items = [...items];
 	}
 </script>
 
-<div class="container mx-auto p-8">
-	<div class="mb-8 flex flex-col gap-2">
-		<h1 class="text-2xl font-bold">Interactive Draggable List</h1>
-		<p class="text-gray-600">
-			Try clicking the items or delete buttons while also being able to drag and reorder the list.
+<div class="min-h-screen pt-20 md:pt-0">
+	<!-- Header -->
+	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black md:text-4xl">interactive elements</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+			click items or buttons while also being able to drag and reorder
 		</p>
-	</div>
+	</header>
 
-	<div class="space-y-2">
-		{#each items as item, index (item.id)}
-			<div
-				use:droppable={{
-					container: index.toString(),
-					callbacks: {
-						onDrop: handleDrop
-					}
-				}}
-				use:draggable={{
-					container: index.toString(),
-					dragData: item,
-					interactive: ['[data-delete-btn]', '[data-select-btn]', '.interactive']
-				}}
-				class="flex items-center justify-between rounded-lg bg-white p-4 shadow transition-all hover:shadow-md"
-			>
-				<button
-					data-select-btn
-					class="interactive flex-1 text-left hover:text-blue-600"
-					onclick={() => handleSelect(item.id)}
-				>
-					{item.title}
-				</button>
+	<!-- Content -->
+	<div class="p-8 md:p-16">
+		<div class="max-w-2xl">
+			<div class="divide-y divide-swiss-black border border-swiss-black">
+				{#each items as item, index (item.id)}
+					<div
+						use:droppable={{
+							container: index.toString(),
+							callbacks: {
+								onDrop: handleDrop
+							}
+						}}
+						use:draggable={{
+							container: index.toString(),
+							dragData: item,
+							interactive: ['[data-delete-btn]', '[data-select-btn]', '.interactive']
+						}}
+						class="flex items-center justify-between bg-white p-6 transition-colors hover:bg-swiss-gray"
+					>
+						<div class="flex items-center gap-6">
+							<span class="text-xs text-swiss-mid-gray"
+								>{(index + 1).toString().padStart(2, '0')}</span
+							>
+							<button
+								data-select-btn
+								class="interactive text-swiss-black transition-colors hover:text-swiss-red"
+								onclick={() => handleSelect(item.id)}
+							>
+								{item.title}
+							</button>
+						</div>
 
-				<button
-					data-delete-btn
-					class="ml-2 text-red-500 hover:text-red-700"
-					onclick={() => handleDelete(item.id)}
-				>
-					Delete
-				</button>
+						<button
+							data-delete-btn
+							class="interactive text-xs text-swiss-mid-gray transition-colors hover:text-swiss-red"
+							onclick={() => handleDelete(item.id)}
+						>
+							delete
+						</button>
+					</div>
+				{/each}
 			</div>
-		{/each}
+		</div>
 	</div>
 </div>
+
+<style>
+	:global(.dragging) {
+		opacity: 0.5;
+		outline: 1px solid #0a0a0a;
+	}
+</style>

@@ -5,168 +5,143 @@
 	let { children } = $props();
 
 	const examples = [
-		{ path: '/', title: 'Kanban Board' },
-		{ path: '/simple-list', title: 'Simple List' },
-		{ path: '/horizontal-scroll', title: 'Horizontal Scroll' },
-		{ path: '/grid-sort', title: 'Grid Sort' },
-		{ path: '/nested', title: 'Nested Containers' },
-		{ path: '/multiple', title: 'Multiple' },
-		{ path: '/custom-classes', title: 'Custom Classes' },
-		{ path: '/drag-handle', title: 'Drag Handle' },
-		{ path: '/interactive-elements', title: 'Interactives' },
-		{ path: '/conditional-check', title: 'Conditional Check' }
+		{ path: '/', title: 'kanban board', number: '01' },
+		{ path: '/simple-list', title: 'simple list', number: '02' },
+		{ path: '/horizontal-scroll', title: 'horizontal scroll', number: '03' },
+		{ path: '/grid-sort', title: 'grid sort', number: '04' },
+		{ path: '/nested', title: 'nested containers', number: '05' },
+		{ path: '/multiple', title: 'multiple', number: '06' },
+		{ path: '/custom-classes', title: 'custom classes', number: '07' },
+		{ path: '/drag-handle', title: 'drag handle', number: '08' },
+		{ path: '/interactive-elements', title: 'interactive elements', number: '09' },
+		{ path: '/conditional-check', title: 'conditional check', number: '10' }
 	];
 
 	const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');
 </script>
 
-<div class="flex min-h-screen bg-gray-100">
-	<!-- Sidebar -->
-	<aside class="hidden w-64 border-r bg-white md:block">
+<div class="flex min-h-screen">
+	<!-- Swiss Grid Sidebar -->
+	<aside class="hidden w-72 border-r border-swiss-black bg-white md:block">
 		<div class="flex h-full flex-col">
-			<!-- Logo section -->
-			<div class="border-b p-4">
-				<div class="flex flex-col space-y-1">
-					<h1 class="text-primary text-xl font-semibold">SvelteDnD</h1>
-					<a href="https://thisux.com" target="_blank" class="hover:text-primary text-xs"
-						>by ThisUX</a
-					>
+			<!-- Logo section with geometric accent -->
+			<div class="border-b border-swiss-black p-8">
+				<div class="flex items-start justify-between">
+					<div>
+						<div class="mb-2 h-3 w-3 bg-swiss-red"></div>
+						<h1 class="text-2xl tracking-tight text-swiss-black">sveltednd</h1>
+						<p class="mt-1 text-sm text-swiss-mid-gray">drag & drop library</p>
+					</div>
+					<div class="text-right">
+						<span class="text-xs text-swiss-mid-gray">v0.0.20</span>
+					</div>
 				</div>
 			</div>
 
-			<!-- Navigation links -->
-			<div class="flex-1 overflow-y-auto p-4">
-				{#each examples as { path, title }}
+			<!-- Navigation with numbers -->
+			<div class="flex-1 overflow-y-auto">
+				<div class="border-b border-swiss-black px-8 py-4">
+					<span class="text-xs text-swiss-mid-gray">examples</span>
+				</div>
+				{#each examples as { path, title, number }}
 					<a
 						href={path}
 						class={cn(
-							'block rounded px-3 py-2 text-sm font-medium transition-colors',
-							'hover:text-primary hover:bg-gray-100',
-							$page.url.pathname === path ? 'text-primary bg-gray-100' : 'text-gray-600'
+							'group flex items-baseline gap-4 border-b border-swiss-gray px-8 py-4 transition-colors',
+							'hover:bg-swiss-gray',
+							$page.url.pathname === path
+								? 'bg-swiss-gray text-swiss-black'
+								: 'text-swiss-dark-gray'
 						)}
 					>
-						{title}
+						<span class="text-xs text-swiss-mid-gray">{number}</span>
+						<span class="text-sm">{title}</span>
 					</a>
 				{/each}
 			</div>
 
-			<!-- Sidebar footer with GitHub and NPM buttons -->
-			<div class="border-t p-4">
-				<div class="flex gap-2">
+			<!-- Footer links -->
+			<div class="border-t border-swiss-black p-8">
+				<div class="flex gap-6">
 					<a
 						href="https://github.com/thisuxhq/sveltednd"
 						target="_blank"
-						class="flex-1 rounded-md bg-gray-900 px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
+						class="text-sm text-swiss-dark-gray transition-colors hover:text-swiss-black"
 					>
-						GitHub
+						github →
 					</a>
 					<a
 						href="https://www.npmjs.com/package/@thisux/sveltednd"
 						target="_blank"
-						class="flex-1 rounded-md bg-[#CB3837] px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-[#B02E2E]"
+						class="text-sm text-swiss-dark-gray transition-colors hover:text-swiss-red"
 					>
-						NPM
+						npm →
 					</a>
 				</div>
 			</div>
 		</div>
 	</aside>
 
-	<!-- Main content -->
-	<div class="flex-1">
+	<!-- Main content area -->
+	<main class="flex-1 bg-white">
 		{@render children()}
-	</div>
+	</main>
 </div>
 
-<!-- Mobile bottom navigation -->
-<nav class="sticky bottom-0 border-t bg-white px-8 py-4 md:hidden">
-	<div class="flex gap-4 overflow-x-auto whitespace-nowrap">
-		<div class="flex-1 overflow-hidden">
-			<div class="flex gap-4 overflow-x-auto whitespace-nowrap">
-				{#each examples as { path, title }}
-					<a
-						href={path}
-						class={cn(
-							'rounded px-3 py-1 text-sm hover:bg-gray-100',
-							$page.url.pathname === path ? 'text-primary rounded-md bg-gray-100' : ''
-						)}
-					>
-						{title}
-					</a>
-				{/each}
-			</div>
+<!-- Mobile header -->
+<header class="fixed left-0 right-0 top-0 z-50 border-b border-swiss-black bg-white md:hidden">
+	<div class="flex items-center justify-between px-4 py-3">
+		<div class="flex items-center gap-2">
+			<div class="h-2 w-2 bg-swiss-red"></div>
+			<span class="text-lg">sveltednd</span>
 		</div>
+		<span class="text-xs text-swiss-mid-gray">v0.0.20</span>
+	</div>
+</header>
+
+<!-- Mobile navigation -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-swiss-black bg-white md:hidden">
+	<div class="flex gap-1 overflow-x-auto px-2 py-2">
+		{#each examples as { path, title }}
+			<a
+				href={path}
+				class={cn(
+					'whitespace-nowrap px-3 py-2 text-xs transition-colors',
+					$page.url.pathname === path ? 'bg-swiss-black text-white' : 'text-swiss-dark-gray'
+				)}
+			>
+				{title}
+			</a>
+		{/each}
 	</div>
 </nav>
 
-<!-- Redesigned floating badge -->
+<!-- Swiss Grid geometric accent - static badge -->
 <footer class="fixed bottom-8 right-8 z-50 hidden md:block">
-	<div
-		class="group relative overflow-hidden rounded-lg border bg-white/90 px-6 py-4 shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-white/95"
-	>
-		<div class="flex flex-col items-start gap-3">
-			<div class="flex items-center gap-2">
-				<div class="h-2 w-2 rounded-full bg-green-500"></div>
-				<span class="text-sm font-medium text-green-600">Available for Projects</span>
-			</div>
-			<div class="space-y-1">
-				<h3 class="text-sm font-medium text-gray-900">Let's build something amazing</h3>
-				<p class="text-sm text-gray-500">We're a product design & development studio</p>
-			</div>
+	<div class="flex items-center gap-3">
+		<div class="h-px w-12 bg-swiss-black"></div>
+		<div class="flex items-center gap-2 border border-swiss-black bg-white px-4 py-2">
+			<div class="h-2 w-2 bg-swiss-red"></div>
+			<span class="text-xs text-swiss-dark-gray">available for projects</span>
 			<a
 				href="https://thisux.com"
-				class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+				class="ml-2 text-xs text-swiss-black hover:text-swiss-red"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
-				Book a call
-				<svg
-					class="h-4 w-4 transition-transform group-hover:translate-x-1"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M14 5l7 7m0 0l-7 7m7-7H3"
-					/>
-				</svg>
+				thisux.com →
 			</a>
 		</div>
 	</div>
 </footer>
 
-<!-- Static text on mobile (above bottom nav) -->
-<div class="flex flex-col items-center justify-center gap-1 border-t bg-white px-4 py-3 md:hidden">
-	<div class="flex items-center gap-2">
-		<div class="h-2 w-2 rounded-full bg-green-500"></div>
-		<span class="text-xs font-medium text-green-600">Available for Projects</span>
+<!-- Mobile badge -->
+<div class="fixed bottom-20 left-4 right-4 z-40 md:hidden">
+	<div class="flex items-center justify-between border border-swiss-black bg-white px-4 py-3">
+		<div class="flex items-center gap-2">
+			<div class="h-2 w-2 bg-swiss-red"></div>
+			<span class="text-xs text-swiss-dark-gray">available for projects</span>
+		</div>
+		<a href="https://thisux.com" class="text-xs text-swiss-black" target="_blank"> thisux.com → </a>
 	</div>
-	<a
-		href="https://cal.com/imsanju/15min"
-		class="hover:text-primary text-xs font-medium text-gray-900"
-		target="_blank"
-	>
-		Book a call
-	</a>
 </div>
-
-<style>
-	footer {
-		animation: float 6s ease-in-out infinite;
-	}
-
-	@keyframes float {
-		0% {
-			transform: translateY(0px);
-		}
-		50% {
-			transform: translateY(-10px);
-		}
-		100% {
-			transform: translateY(0px);
-		}
-	}
-</style>

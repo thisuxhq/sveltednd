@@ -120,7 +120,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * Returns the CSS indicator class and the logical drop position ('before' |
 	 * 'after') so callers don't have to re-derive either.
 	 */
-	function getNearestEdge(clientY: number, clientX: number): {
+	function getNearestEdge(
+		clientY: number,
+		clientX: number
+	): {
 		edgeClass: 'drop-before' | 'drop-after' | 'drop-left' | 'drop-right';
 		position: 'before' | 'after';
 	} {

@@ -16,36 +16,36 @@
 	let tasks = $state<Task[]>([
 		{
 			id: '1',
-			title: 'Design System Updates',
-			description: 'Update color palette and component library',
+			title: 'design system updates',
+			description: 'update color palette and component library',
 			status: 'todo',
 			priority: 'high'
 		},
 		{
 			id: '2',
-			title: 'User Research',
-			description: 'Conduct interviews with 5 key customers',
+			title: 'user research',
+			description: 'conduct interviews with 5 key customers',
 			status: 'in-progress',
 			priority: 'medium'
 		},
 		{
 			id: '3',
-			title: 'API Documentation',
-			description: 'Document new endpoints and examples',
+			title: 'api documentation',
+			description: 'document new endpoints and examples',
 			status: 'todo',
 			priority: 'low'
 		},
 		{
 			id: '4',
-			title: 'Performance Audit',
-			description: 'Analyze and optimize load times',
+			title: 'performance audit',
+			description: 'analyze and optimize load times',
 			status: 'in-progress',
 			priority: 'high'
 		},
 		{
 			id: '5',
-			title: 'Bug Fixes',
-			description: 'Fix reported authentication issues',
+			title: 'bug fixes',
+			description: 'fix reported authentication issues',
 			status: 'done',
 			priority: 'high'
 		}
@@ -61,9 +61,8 @@
 
 	async function handleDrop(state: DragDropState<Task>) {
 		const { draggedItem, targetContainer } = state;
-		if (!targetContainer) return; // Prevent self-placement
+		if (!targetContainer) return;
 
-		// Update the task's status to the target container
 		tasks = tasks.map((task: Task) => {
 			if (task.id === draggedItem.id) {
 				task.status = targetContainer as TaskStatus;
@@ -72,87 +71,89 @@
 		});
 	}
 
-	const getPriorityColor = (priority: Task['priority']) => {
+	const getPriorityMarker = (priority: Task['priority']) => {
 		return {
-			low: 'bg-blue-50 text-blue-700',
-			medium: 'bg-yellow-50 text-yellow-700',
-			high: 'bg-red-50 text-red-700'
+			low: 'bg-swiss-gray',
+			medium: 'bg-swiss-dark-gray',
+			high: 'bg-swiss-red'
 		}[priority];
 	};
 </script>
 
-<div class="min-h-screen overflow-hidden bg-gray-50 p-8">
-	<div class="mb-8 flex flex-col gap-2">
-		<h1 class="text-2xl font-bold text-gray-900">Kanban Board</h1>
-		<p class="text-gray-600">Drag and drop tasks between columns to reorder them in the board.</p>
-	</div>
+<div class="min-h-screen pt-20 md:pt-0">
+	<!-- Header -->
+	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black md:text-4xl">kanban board</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+			drag and drop tasks between columns to update their status
+		</p>
+	</header>
 
-	<div class="flex gap-6 overflow-x-auto p-2">
-		{#each tasksByStatus as { status, items }}
-			<div class="w-80 flex-none">
-				<div
-					class="rounded-xl bg-gray-100 p-4 shadow-sm ring-1 ring-gray-200"
-					use:droppable={{
-						// The container is the status of the task. e.g. 'todo', 'in-progress', 'done'
-						container: status,
-						// When a task is dropped, the handleDrop function is called to update the task's status
-						callbacks: { onDrop: handleDrop }
-					}}
-				>
-					<div class="mb-4 flex items-center justify-between">
-						<h2 class="font-semibold capitalize text-gray-900">
-							{status.replace('-', ' ')}
-						</h2>
-						<span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-sm text-gray-600">
-							{items.length}
-						</span>
+	<!-- Content -->
+	<div class="p-8 md:p-16">
+		<div class="grid gap-8 md:grid-cols-3">
+			{#each tasksByStatus as { status, items }}
+				<div class="flex flex-col">
+					<!-- Column Header -->
+					<div class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4">
+						<h2 class="text-lg text-swiss-black">{status.replace('-', ' ')}</h2>
+						<span class="text-xs text-swiss-mid-gray"
+							>{items.length.toString().padStart(2, '0')}</span
+						>
 					</div>
 
-					<div class="space-y-3">
-						{#each items as task (task.id)}
-							<div
-								use:draggable={{
-									// The container is the status of the task. e.g. 'todo', 'in-progress', 'done'
-									container: status,
-									// The dragData is the task that is being dragged
-									dragData: task
-								}}
-								animate:flip={{ duration: 200 }}
-								in:fade={{ duration: 150 }}
-								out:fade={{ duration: 150 }}
-								class="svelte-dnd-touch-feedback cursor-move rounded-lg bg-white p-3 shadow-sm ring-1
-                                       ring-gray-200 transition-all duration-200 hover:shadow-md hover:ring-2 hover:ring-blue-200"
-							>
-								<div class="mb-2 flex items-start justify-between gap-2">
-									<h3 class="font-medium text-gray-900">
-										{task.title}
-									</h3>
-									<span
-										class={`rounded-full px-2 py-0.5 text-xs font-medium ${getPriorityColor(
-											task.priority
-										)}`}
-									>
-										{task.priority}
-									</span>
+					<!-- Drop Zone -->
+					<div
+						class="flex-1 border border-swiss-gray p-4"
+						use:droppable={{
+							container: status,
+							callbacks: { onDrop: handleDrop }
+						}}
+					>
+						<div class="space-y-4">
+							{#each items as task (task.id)}
+								<div
+									use:draggable={{
+										container: status,
+										dragData: task
+									}}
+									animate:flip={{ duration: 200 }}
+									in:fade={{ duration: 150 }}
+									out:fade={{ duration: 150 }}
+									class="svelte-dnd-touch-feedback group cursor-move border border-swiss-black bg-white p-4 transition-all hover:shadow-lg"
+								>
+									<div class="mb-3 flex items-start justify-between">
+										<h3 class="text-sm text-swiss-black">{task.title}</h3>
+										<div class="h-2 w-2 {getPriorityMarker(task.priority)}"></div>
+									</div>
+									<p class="text-xs leading-relaxed text-swiss-mid-gray">{task.description}</p>
+									<div class="mt-3 border-t border-swiss-gray pt-3">
+										<span class="text-xs text-swiss-mid-gray">{task.priority}</span>
+									</div>
 								</div>
-								<p class="text-sm text-gray-500">
-									{task.description}
-								</p>
+							{/each}
+						</div>
+
+						{#if items.length === 0}
+							<div class="flex h-32 items-center justify-center">
+								<p class="text-xs text-swiss-mid-gray">drop tasks here</p>
 							</div>
-						{/each}
+						{/if}
 					</div>
 				</div>
-			</div>
-		{/each}
+			{/each}
+		</div>
 	</div>
 </div>
 
 <style>
 	:global(.dragging) {
-		@apply opacity-50 shadow-lg ring-2 ring-blue-400;
+		opacity: 0.5;
+		outline: 1px solid #0a0a0a;
 	}
 
 	:global(.drag-over) {
-		@apply bg-blue-50 ring-2 ring-blue-400;
+		background-color: #f5f5f5;
+		outline: 1px dashed #a3a3a3;
 	}
 </style>
