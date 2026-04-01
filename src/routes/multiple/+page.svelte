@@ -77,9 +77,9 @@
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
-	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
-		<h1 class="text-3xl text-swiss-black md:text-4xl">multiple containers</h1>
-		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black dark:text-white md:text-4xl">multiple containers</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray dark:text-white/60">
 			drag team members between columns to manage your team
 		</p>
 	</header>
@@ -89,15 +89,17 @@
 		<div class="grid gap-8 lg:grid-cols-2">
 			<!-- Available Profiles Column -->
 			<div>
-				<div class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4">
-					<h2 class="text-lg text-swiss-black">available members</h2>
-					<span class="text-xs text-swiss-mid-gray"
+				<div
+					class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4 dark:border-white/20"
+				>
+					<h2 class="text-lg text-swiss-black dark:text-white">available members</h2>
+					<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 						>{profiles.length.toString().padStart(2, '0')}</span
 					>
 				</div>
 
 				<div
-					class="border border-swiss-gray p-6"
+					class="border border-swiss-gray p-6 dark:border-white/10"
 					use:droppable={{ container: 'available', callbacks: { onDrop: handleDrop } }}
 				>
 					<div class="grid grid-cols-3 gap-4">
@@ -107,7 +109,7 @@
 								animate:flip={{ duration: 200 }}
 								in:fade={{ duration: 150 }}
 								out:fade={{ duration: 150 }}
-								class="group cursor-move border border-swiss-gray bg-white p-4 transition-all hover:border-swiss-black"
+								class="group cursor-move border border-swiss-gray bg-white p-4 transition-all hover:border-swiss-black dark:border-white/10 dark:bg-swiss-black dark:hover:border-white/50"
 							>
 								<img
 									src={getAvatarUrl(profile.email, 100)}
@@ -115,8 +117,8 @@
 									class="mb-3 aspect-square w-full"
 								/>
 								<div class="text-center">
-									<h3 class="text-sm text-swiss-black">{profile.name}</h3>
-									<p class="text-xs text-swiss-mid-gray">{profile.role}</p>
+									<h3 class="text-sm text-swiss-black dark:text-white">{profile.name}</h3>
+									<p class="text-xs text-swiss-mid-gray dark:text-white/60">{profile.role}</p>
 								</div>
 							</div>
 						{/each}
@@ -126,15 +128,17 @@
 
 			<!-- Selected Profiles Column -->
 			<div>
-				<div class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4">
-					<h2 class="text-lg text-swiss-black">selected members</h2>
-					<span class="text-xs text-swiss-mid-gray"
+				<div
+					class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4 dark:border-white/20"
+				>
+					<h2 class="text-lg text-swiss-black dark:text-white">selected members</h2>
+					<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 						>{selectedProfiles.length.toString().padStart(2, '0')}</span
 					>
 				</div>
 
 				<div
-					class="border border-swiss-gray p-6"
+					class="border border-swiss-gray p-6 dark:border-white/10"
 					use:droppable={{ container: 'selected', callbacks: { onDrop: handleDrop } }}
 				>
 					<div class="space-y-4">
@@ -144,20 +148,20 @@
 								animate:flip={{ duration: 200 }}
 								in:fade={{ duration: 150 }}
 								out:fade={{ duration: 150 }}
-								class="group flex cursor-move items-center gap-4 border border-swiss-gray bg-white p-4 transition-all hover:border-swiss-black"
+								class="group flex cursor-move items-center gap-4 border border-swiss-gray bg-white p-4 transition-all hover:border-swiss-black dark:border-white/10 dark:bg-swiss-black dark:hover:border-white/50"
 							>
 								<img src={getAvatarUrl(profile.email, 64)} alt={profile.name} class="h-16 w-16" />
 								<div class="flex-1">
-									<h3 class="text-sm text-swiss-black">{profile.name}</h3>
-									<p class="text-xs text-swiss-mid-gray">{profile.role}</p>
-									<p class="text-xs text-swiss-mid-gray">{profile.location}</p>
+									<h3 class="text-sm text-swiss-black dark:text-white">{profile.name}</h3>
+									<p class="text-xs text-swiss-mid-gray dark:text-white/60">{profile.role}</p>
+									<p class="text-xs text-swiss-mid-gray dark:text-white/60">{profile.location}</p>
 								</div>
 							</div>
 						{/each}
 
 						{#if selectedProfiles.length === 0}
 							<div class="flex h-32 items-center justify-center">
-								<p class="text-xs text-swiss-mid-gray">drop team members here</p>
+								<p class="text-xs text-swiss-mid-gray dark:text-white/60">drop team members here</p>
 							</div>
 						{/if}
 					</div>
@@ -176,5 +180,15 @@
 	:global(.drag-over) {
 		background-color: #f5f5f5;
 		outline: 1px dashed #a3a3a3;
+	}
+
+	.dark :global(.dragging) {
+		opacity: 0.5;
+		outline: 1px solid rgba(255, 255, 255, 0.5);
+	}
+
+	.dark :global(.drag-over) {
+		background-color: rgba(255, 255, 255, 0.1);
+		outline: 1px dashed rgba(255, 255, 255, 0.3);
 	}
 </style>

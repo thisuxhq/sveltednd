@@ -15,12 +15,23 @@
 		font-weight: 500;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
 	}
 
 	body {
 		font-weight: 500;
 		color: var(--swiss-black);
 		background: white;
+		transition:
+			background-color 0.3s ease,
+			color 0.3s ease;
+	}
+
+	html.dark body {
+		color: white;
+		background: var(--swiss-black);
 	}
 
 	h1,
@@ -32,10 +43,19 @@
 		font-weight: 500;
 		letter-spacing: -0.02em;
 	}
+
+	/* Smooth transitions for all theme-aware elements */
+	*,
+	*::before,
+	*::after {
+		transition-property: background-color, border-color, color;
+		transition-duration: 0.3s;
+		transition-timing-function: ease;
+	}
 }
 
 @layer utilities {
-	/* Clean, subtle DnD styles */
+	/* Clean, subtle DnD styles - light mode */
 	.dragging {
 		opacity: 0.5;
 		outline: 1px solid #0a0a0a;
@@ -44,6 +64,17 @@
 	.drag-over {
 		background-color: #f5f5f5;
 		outline: 1px dashed #a3a3a3;
+	}
+
+	/* DnD styles - dark mode */
+	.dark .dragging {
+		opacity: 0.5;
+		outline: 1px solid rgba(255, 255, 255, 0.5);
+	}
+
+	.dark .drag-over {
+		background-color: rgba(255, 255, 255, 0.1);
+		outline: 1px dashed rgba(255, 255, 255, 0.3);
 	}
 }
 

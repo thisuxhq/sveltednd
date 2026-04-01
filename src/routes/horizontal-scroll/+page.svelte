@@ -30,9 +30,9 @@
 
 <div class="h-screen overflow-hidden pt-20 md:pt-0">
 	<!-- Header -->
-	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
-		<h1 class="text-3xl text-swiss-black md:text-4xl">horizontal scroll</h1>
-		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black dark:text-white md:text-4xl">horizontal scroll</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray dark:text-white/60">
 			drag and drop images to rearrange them in the gallery
 		</p>
 	</header>
@@ -54,7 +54,7 @@
 					out:fade={{ duration: 150 }}
 				>
 					<div
-						class="group relative h-[400px] w-[300px] cursor-move overflow-hidden border border-swiss-black"
+						class="group relative h-[400px] w-[300px] cursor-move overflow-hidden border border-swiss-black dark:border-white/20"
 					>
 						<img
 							src={image.url}
@@ -63,7 +63,7 @@
 						/>
 					</div>
 					<div class="mt-4 text-center">
-						<span class="text-xs text-swiss-mid-gray"
+						<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 							>{(index + 1).toString().padStart(2, '0')}</span
 						>
 					</div>
@@ -82,5 +82,15 @@
 	:global(.drag-over) {
 		background-color: #f5f5f5;
 		outline: 1px dashed #a3a3a3;
+	}
+
+	.dark :global(.dragging) {
+		opacity: 0.5;
+		outline: 1px solid rgba(255, 255, 255, 0.5);
+	}
+
+	.dark :global(.drag-over) {
+		background-color: rgba(255, 255, 255, 0.1);
+		outline: 1px dashed rgba(255, 255, 255, 0.3);
 	}
 </style>

@@ -50,9 +50,9 @@
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
-	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
-		<h1 class="text-3xl text-swiss-black md:text-4xl">conditional check</h1>
-		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black dark:text-white md:text-4xl">conditional check</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray dark:text-white/60">
 			drop the red fruits in the target zone. other colors will be rejected.
 		</p>
 	</header>
@@ -62,32 +62,36 @@
 		<div class="grid gap-8 md:grid-cols-2">
 			<!-- Source Container -->
 			<div>
-				<div class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4">
-					<h2 class="text-lg text-swiss-black">available fruits</h2>
-					<span class="text-xs text-swiss-mid-gray"
+				<div
+					class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4 dark:border-white/20"
+				>
+					<h2 class="text-lg text-swiss-black dark:text-white">available fruits</h2>
+					<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 						>{sourceFruits.length.toString().padStart(2, '0')}</span
 					>
 				</div>
 				<div
-					class="min-h-[400px] border border-swiss-gray p-6"
+					class="min-h-[400px] border border-swiss-gray p-6 dark:border-white/10"
 					use:droppable={{ container: 'source' }}
 				>
 					{#if isSourceEmpty}
 						<div class="flex h-full items-center justify-center">
-							<p class="text-xs text-swiss-mid-gray">all fruits have been sorted</p>
+							<p class="text-xs text-swiss-mid-gray dark:text-white/60">
+								all fruits have been sorted
+							</p>
 						</div>
 					{:else}
 						<div class="space-y-2">
 							{#each sourceFruits as fruit}
 								<div
 									use:draggable={{ container: 'source', dragData: fruit }}
-									class="group flex items-center justify-between border p-4 transition-all hover:border-swiss-black {fruit.color ===
+									class="group flex items-center justify-between border p-4 transition-all hover:border-swiss-black dark:hover:border-white/50 {fruit.color ===
 									'red'
-										? 'border-swiss-red bg-swiss-red/5'
-										: 'border-swiss-gray bg-white'}"
+										? 'border-swiss-red bg-swiss-red/5 dark:border-swiss-red'
+										: 'border-swiss-gray bg-white dark:border-white/20 dark:bg-swiss-black'}"
 								>
-									<span class="text-sm text-swiss-black">{fruit.name}</span>
-									<span class="text-xs text-swiss-mid-gray">{fruit.color}</span>
+									<span class="text-sm text-swiss-black dark:text-white">{fruit.name}</span>
+									<span class="text-xs text-swiss-mid-gray dark:text-white/60">{fruit.color}</span>
 								</div>
 							{/each}
 						</div>
@@ -97,9 +101,11 @@
 
 			<!-- Target Container -->
 			<div>
-				<div class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4">
-					<h2 class="text-lg text-swiss-black">red fruits only</h2>
-					<span class="text-xs text-swiss-mid-gray"
+				<div
+					class="mb-6 flex items-baseline justify-between border-b border-swiss-black pb-4 dark:border-white/20"
+				>
+					<h2 class="text-lg text-swiss-black dark:text-white">red fruits only</h2>
+					<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 						>{targetFruits.length.toString().padStart(2, '0')}</span
 					>
 				</div>
@@ -107,8 +113,8 @@
 					class="min-h-[400px] border p-6 transition-all {dndState.isDragging
 						? dndState.invalidDrop
 							? 'border-swiss-red bg-swiss-red/5'
-							: 'border-swiss-black bg-swiss-gray'
-						: 'border-swiss-gray'}"
+							: 'border-swiss-black bg-swiss-gray dark:border-white/20 dark:bg-white/10'
+						: 'border-swiss-gray dark:border-white/10'}"
 					use:droppable={{
 						container: 'target',
 						callbacks: dragDropCallbacks,
@@ -119,15 +125,15 @@
 				>
 					{#if isTargetEmpty}
 						<div class="flex h-full items-center justify-center">
-							<p class="text-xs text-swiss-mid-gray">drop red fruits here</p>
+							<p class="text-xs text-swiss-mid-gray dark:text-white/60">drop red fruits here</p>
 						</div>
 					{:else}
 						<div class="space-y-2">
 							{#each targetFruits as fruit}
 								<div
-									class="flex items-center justify-between border border-swiss-red bg-swiss-red/5 p-4"
+									class="flex items-center justify-between border border-swiss-red bg-swiss-red/5 p-4 dark:border-swiss-red"
 								>
-									<span class="text-sm text-swiss-black">{fruit.name}</span>
+									<span class="text-sm text-swiss-black dark:text-white">{fruit.name}</span>
 									<span class="text-xs text-swiss-red">{fruit.color}</span>
 								</div>
 							{/each}
@@ -144,6 +150,13 @@
 		outline: 1px solid #0a0a0a;
 	}
 	.invalid-drop {
+		outline: 1px solid #dc2626;
+	}
+
+	.dark .valid-drop {
+		outline: 1px solid rgba(255, 255, 255, 0.5);
+	}
+	.dark .invalid-drop {
 		outline: 1px solid #dc2626;
 	}
 </style>

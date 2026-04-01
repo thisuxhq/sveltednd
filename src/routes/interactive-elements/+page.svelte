@@ -37,9 +37,9 @@
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
-	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
-		<h1 class="text-3xl text-swiss-black md:text-4xl">interactive elements</h1>
-		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black dark:text-white md:text-4xl">interactive elements</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray dark:text-white/60">
 			click items or buttons while also being able to drag and reorder
 		</p>
 	</header>
@@ -47,7 +47,9 @@
 	<!-- Content -->
 	<div class="p-8 md:p-16">
 		<div class="max-w-2xl">
-			<div class="divide-y divide-swiss-black border border-swiss-black">
+			<div
+				class="divide-y divide-swiss-black border border-swiss-black dark:divide-white/20 dark:border-white/20"
+			>
 				{#each items as item, index (item.id)}
 					<div
 						use:droppable={{
@@ -61,15 +63,15 @@
 							dragData: item,
 							interactive: ['[data-delete-btn]', '[data-select-btn]', '.interactive']
 						}}
-						class="flex items-center justify-between bg-white p-6 transition-colors hover:bg-swiss-gray"
+						class="flex items-center justify-between bg-white p-6 transition-colors hover:bg-swiss-gray dark:bg-swiss-black dark:hover:bg-white/10"
 					>
 						<div class="flex items-center gap-6">
-							<span class="text-xs text-swiss-mid-gray"
+							<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 								>{(index + 1).toString().padStart(2, '0')}</span
 							>
 							<button
 								data-select-btn
-								class="interactive text-swiss-black transition-colors hover:text-swiss-red"
+								class="interactive text-swiss-black transition-colors hover:text-swiss-red dark:text-white"
 								onclick={() => handleSelect(item.id)}
 							>
 								{item.title}
@@ -78,7 +80,7 @@
 
 						<button
 							data-delete-btn
-							class="interactive text-xs text-swiss-mid-gray transition-colors hover:text-swiss-red"
+							class="interactive text-xs text-swiss-mid-gray transition-colors hover:text-swiss-red dark:text-white/60"
 							onclick={() => handleDelete(item.id)}
 						>
 							delete
@@ -94,5 +96,10 @@
 	:global(.dragging) {
 		opacity: 0.5;
 		outline: 1px solid #0a0a0a;
+	}
+
+	.dark :global(.dragging) {
+		opacity: 0.5;
+		outline: 1px solid rgba(255, 255, 255, 0.5);
 	}
 </style>

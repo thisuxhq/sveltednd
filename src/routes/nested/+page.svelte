@@ -103,8 +103,8 @@
 
 	const getPriorityMarker = (priority: Item['priority']) => {
 		return {
-			low: 'bg-swiss-gray',
-			medium: 'bg-swiss-dark-gray',
+			low: 'bg-swiss-gray dark:bg-white/20',
+			medium: 'bg-swiss-dark-gray dark:bg-white/40',
 			high: 'bg-swiss-red'
 		}[priority];
 	};
@@ -112,9 +112,9 @@
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
-	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
-		<h1 class="text-3xl text-swiss-black md:text-4xl">nested containers</h1>
-		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray">
+	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
+		<h1 class="text-3xl text-swiss-black dark:text-white md:text-4xl">nested containers</h1>
+		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray dark:text-white/60">
 			drag items within groups and between different groups
 		</p>
 	</header>
@@ -135,25 +135,27 @@
 							container: groupIndex.toString(),
 							dragData: group
 						}}
-						class="svelte-dnd-touch-feedback border border-swiss-black bg-white"
+						class="svelte-dnd-touch-feedback border border-swiss-black bg-white dark:border-white/20 dark:bg-swiss-black"
 						in:fade={{ duration: 150 }}
 						out:fade={{ duration: 150 }}
 					>
 						<!-- Group Header -->
-						<div class="border-b border-swiss-black p-6">
+						<div class="border-b border-swiss-black p-6 dark:border-white/20">
 							<div class="flex items-start justify-between">
 								<div>
-									<h2 class="text-lg text-swiss-black">{group.title}</h2>
-									<p class="mt-1 text-xs text-swiss-mid-gray">{group.description}</p>
+									<h2 class="text-lg text-swiss-black dark:text-white">{group.title}</h2>
+									<p class="mt-1 text-xs text-swiss-mid-gray dark:text-white/60">
+										{group.description}
+									</p>
 								</div>
-								<span class="text-xs text-swiss-mid-gray"
+								<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 									>{group.items.length.toString().padStart(2, '0')}</span
 								>
 							</div>
 						</div>
 
 						<!-- Group Items -->
-						<div class="divide-y divide-swiss-gray">
+						<div class="divide-y divide-swiss-gray dark:divide-white/10">
 							{#each group.items as item, itemIndex (item.id)}
 								<div
 									use:droppable={{
@@ -168,12 +170,14 @@
 											container: `${group.id}:${itemIndex}`,
 											dragData: item
 										}}
-										class="svelte-dnd-touch-feedback cursor-move bg-white p-6 transition-all hover:bg-swiss-gray"
+										class="svelte-dnd-touch-feedback cursor-move bg-white p-6 transition-all hover:bg-swiss-gray dark:bg-swiss-black dark:hover:bg-white/10"
 									>
 										<div class="flex items-start justify-between">
 											<div>
-												<h3 class="text-sm text-swiss-black">{item.title}</h3>
-												<p class="mt-1 text-xs text-swiss-mid-gray">{item.description}</p>
+												<h3 class="text-sm text-swiss-black dark:text-white">{item.title}</h3>
+												<p class="mt-1 text-xs text-swiss-mid-gray dark:text-white/60">
+													{item.description}
+												</p>
 											</div>
 											<div class="h-2 w-2 {getPriorityMarker(item.priority)}"></div>
 										</div>
@@ -197,5 +201,15 @@
 	:global(.drag-over) {
 		background-color: #f5f5f5;
 		outline: 1px dashed #a3a3a3;
+	}
+
+	.dark :global(.dragging) {
+		opacity: 0.5;
+		outline: 1px solid rgba(255, 255, 255, 0.5);
+	}
+
+	.dark :global(.drag-over) {
+		background-color: rgba(255, 255, 255, 0.1);
+		outline: 1px dashed rgba(255, 255, 255, 0.3);
 	}
 </style>
