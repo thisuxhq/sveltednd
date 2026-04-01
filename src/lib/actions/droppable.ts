@@ -328,6 +328,29 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	}
 
 	/**
+	 * Handles the global dragenter event.
+	 *
+	 * The dragEnterCounter can get out of sync — especially when the same element
+	 * has both use:draggable and use:droppable — causing drag-over classes to stick.
+	 *
+	 * Whenever the cursor enters any element in the document, we check if it's
+	 * still inside this droppable. If not, we force cleanup immediately rather
+	 * than waiting for a dragleave that may never arrive.
+	 */
+	function handleDocumentDragEnter(event: DragEvent) {
+		if (dragEnterCounter === 0) return;
+		if (node.contains(event.target as Node)) return;
+		dragEnterCounter = 0;
+		node.classList.remove(...dragOverClass);
+		clearDropIndicator();
+		if (dndState.targetContainer === options.container) {
+			dndState.targetContainer = null;
+			dndState.targetElement = null;
+		}
+		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+	}
+
+	/**
 	 * Handles the global dragend event.
 	 *
 	 * When a drag is cancelled (Escape key, dropped outside any droppable, etc.),
@@ -441,6 +464,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	node.addEventListener('drop', handleDrop);
 	node.addEventListener('dragstart-on-container', handleDragStartOnContainer as EventListener);
 
+	// Global dragenter: cleans up if the cursor moves to an element outside this droppable,
+	// fixing counter desync that causes drag-over class to stick (issue #22)
+	document.addEventListener('dragenter', handleDocumentDragEnter);
+
 	// Global dragend: cleans up drag-over state when the drag ends without a drop
 	// on this element (cancelled drag, dropped outside, etc.)
 	document.addEventListener('dragend', handleGlobalDragEnd);
@@ -477,6 +504,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 				'dragstart-on-container',
 				handleDragStartOnContainer as EventListener
 			);
+			document.removeEventListener('dragenter', handleDocumentDragEnter);
 			document.removeEventListener('dragend', handleGlobalDragEnd);
 			node.removeEventListener('pointerover', handlePointerOver);
 			node.removeEventListener('pointermove', handlePointerMove);
