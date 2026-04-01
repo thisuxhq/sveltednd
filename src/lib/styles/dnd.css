@@ -1,46 +1,134 @@
-/* Base draggable styles */
+/**
+ * Core styles for @thisux/sveltednd
+ *
+ * These provide the essential visual feedback for drag and drop operations.
+ * The classes are applied automatically by the draggable and droppable actions,
+ * but you can customize them via the attributes options or override in your own CSS.
+ *
+ * The design goals:
+ * - Clear visual indication of drag state
+ * - Intuitive drop position indicators
+ * - Mobile-friendly touch handling
+ * - Minimal but functional defaults (easy to override)
+ */
+
+/* =============================================================================
+   DRAGGABLE STYLES
+   Applied to elements that can be dragged
+   ========================================================================== */
+
+/**
+ * Base styles for all draggable elements.
+ *
+ * touch-action: none prevents the browser from scrolling when the user
+ * tries to drag on a touch device. Without this, touch-dragging would
+ * just scroll the page.
+ *
+ * user-select: none prevents text selection while dragging. Without this,
+ * rapidly clicking/dragging would select text instead of moving items.
+ */
 .svelte-dnd-draggable {
-	touch-action: none; /* Prevents touch scrolling while dragging */
-	user-select: none; /* Prevents text selection during drag */
+	touch-action: none;
+	user-select: none;
 }
 
-/* Active dragging state */
+/**
+ * Applied while an element is actively being dragged.
+ *
+ * By default we dim the item slightly and show a grabbing cursor.
+ * This gives the user immediate feedback that their drag started.
+ */
 .svelte-dnd-dragging {
 	opacity: 0.5;
 	cursor: grabbing;
 }
 
-/* Draggable hover state */
+/**
+ * Hover state for draggable elements (when not dragging).
+ *
+ * Shows a grab cursor to indicate the item can be dragged.
+ * The :hover pseudo-class only applies when not dragging.
+ */
 .svelte-dnd-draggable:hover {
 	cursor: grab;
 }
 
-/* Droppable area styles */
+/* =============================================================================
+   DROPPABLE STYLES
+   Applied to containers that accept drops
+   ========================================================================== */
+
+/**
+ * Base styles for drop zone containers.
+ *
+ * position: relative creates a positioning context for any absolute
+ * positioned children (like drop indicators).
+ */
 .svelte-dnd-droppable {
 	position: relative;
 }
 
-/* Active drop target */
+/**
+ * Applied when an item is being dragged over a valid drop zone.
+ *
+ * The dashed green border provides a clear "this is a valid target"
+ * visual cue without being too aggressive.
+ */
 .svelte-dnd-drop-target {
 	outline: 2px dashed #4caf50;
 }
 
-/* Invalid drop target */
+/**
+ * Applied when dragging over an invalid drop zone.
+ *
+ * The dashed red border indicates "you can't drop here" - useful for
+ * conditional drop zones that sometimes accept items.
+ */
 .svelte-dnd-invalid-target {
 	outline: 2px dashed #f44336;
 }
 
-/* Drop preview/placeholder */
+/**
+ * Style for a placeholder showing where the dragged item will appear.
+ *
+ * Typically used when you want to show a "ghost" of the item's future position
+ * in a list, rather than just a line indicator.
+ */
 .svelte-dnd-placeholder {
 	border: 2px dashed #9e9e9e;
 }
 
-/* Drop position indicators */
+/* =============================================================================
+   DROP POSITION INDICATORS
+   The blue lines showing exactly where an item will be inserted
+   ========================================================================== */
+
+/**
+ * Base styles for drop position indicators.
+ *
+ * These classes are applied to show where an item will drop:
+ * - drop-before: line appears above this element
+ * - drop-after: line appears below this element
+ *
+ * We use position: relative on the element, then absolute positioning
+ * on the pseudo-elements to draw the lines without affecting layout.
+ */
 .drop-before,
 .drop-after {
 	position: relative;
 }
 
+/**
+ * The actual blue lines - implemented as pseudo-elements.
+ *
+ * Why pseudo-elements?
+ * - No extra DOM nodes needed (cleaner component structure)
+ * - Positioned relative to the target element
+ * - Easy to animate or style consistently
+ *
+ * pointer-events: none ensures the line doesn't intercept mouse events,
+ * which could interfere with the drag detection.
+ */
 .drop-before::before,
 .drop-after::after {
 	content: '';
@@ -48,27 +136,45 @@
 	left: 0;
 	right: 0;
 	height: 2px;
-	background-color: #3b82f6;
+	background-color: #3b82f6; /* Nice blue that stands out */
 	border-radius: 1px;
 	z-index: 10;
 	pointer-events: none;
 }
 
+/* Line appears just above the element */
 .drop-before::before {
 	top: -1px;
 }
 
+/* Line appears just below the element */
 .drop-after::after {
 	bottom: -1px;
 }
 
-/* Media queries for responsive design */
+/* =============================================================================
+   RESPONSIVE ADJUSTMENTS
+   Mobile and small screen optimizations
+   ========================================================================== */
+
 @media (max-width: 600px) {
+	/**
+	 * On mobile, ensure draggable items take full width.
+	 *
+	 * touch-action: none is especially important here - without it,
+	 * touch-dragging would scroll the page instead of moving items.
+	 */
 	.svelte-dnd-draggable {
 		width: 100%;
-		touch-action: none; /* Prevents scrolling during drag */
+		touch-action: none;
 	}
 
+	/**
+	 * Add some breathing room to drop zones on small screens.
+	 *
+	 * Touch interfaces need larger hit targets, so extra padding helps
+	 * users actually hit the drop zone they intended.
+	 */
 	.svelte-dnd-droppable {
 		padding: 10px;
 	}

@@ -25,12 +25,14 @@ bun run test:unit -- --run src/lib/actions/draggable.spec.ts  # Single test file
 The library exports three things from `src/lib/index.ts`: two Svelte actions (`draggable`, `droppable`) and one reactive state object (`dndState`).
 
 **How it works:**
+
 1. `draggable` action attaches drag event listeners (both HTML5 and pointer events) to an element
 2. When dragging starts, it updates the global `dndState` (Svelte 5 `$state` rune in `src/lib/stores/dnd.svelte.ts`) and dispatches custom events
 3. `droppable` action listens for dragenter/dragleave/dragover/drop events and pointer events, updates `dndState.targetContainer`, and fires callbacks
 4. Application handles reordering in the `onDrop` callback
 
 **Key source files:**
+
 - `src/lib/actions/draggable.ts` - Drag action with handle support and interactive element blocking
 - `src/lib/actions/droppable.ts` - Drop action with nested element counter tracking (dragEnterCounter)
 - `src/lib/stores/dnd.svelte.ts` - Global reactive state (~11 lines)
