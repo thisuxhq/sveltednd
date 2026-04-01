@@ -40,12 +40,12 @@
 
 			<!-- Navigation with numbers -->
 			<div class="flex-1 overflow-y-auto">
-				<div class="border-b border-swiss-black"></div>
-				{#each examples as { path, title, number }}
+				{#each examples as { path, title, number }, index}
 					<a
 						href={path}
 						class={cn(
-							'group flex items-baseline gap-4 border-b border-swiss-gray px-8 py-4 transition-colors',
+							'group flex items-baseline gap-4 border-b px-8 py-4 transition-colors',
+							index === 0 ? 'border-swiss-black' : 'border-swiss-gray',
 							'hover:bg-swiss-gray',
 							$page.url.pathname === path
 								? 'bg-swiss-gray text-swiss-black'
