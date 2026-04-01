@@ -15,29 +15,30 @@ const DEFAULT_INTERACTIVE_SELECTORS = [
 
 export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	const draggingClass = (options.attributes?.draggingClass || DEFAULT_DRAGGING_CLASS).split(' ');
-	let initialX: number;
-	let initialY: number;
 
 	function isInteractiveElement(target: HTMLElement): boolean {
-		// Combine default selectors with user-provided ones
 		const interactiveSelectors = [...DEFAULT_INTERACTIVE_SELECTORS, ...(options.interactive || [])];
-
-		// Check if the target or its parents match any of the interactive selectors
 		return interactiveSelectors.some(
 			(selector) => target.matches(selector) || target.closest(selector)
 		);
 	}
 
 	function isHandleElement(target: HTMLElement): boolean {
-		if (!options.handle) return true; // No handle specified - entire element is handle
+		if (!options.handle) return true;
 		return target.matches(options.handle) || !!target.closest(options.handle);
 	}
 
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
 
-		// Only start drag if clicking on handle element
-		if (!isHandleElement(event.target as HTMLElement)) {
+		const target = event.target as HTMLElement;
+
+		if (!isHandleElement(target)) {
+			event.preventDefault();
+			return;
+		}
+
+		if (!options.handle && isInteractiveElement(target)) {
 			event.preventDefault();
 			return;
 		}
@@ -55,7 +56,6 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		node.classList.add(...draggingClass);
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 
-		// **Dispatch the custom event that bubbles up to the container**
 		const customEvent = new CustomEvent('dragstart-on-container', { bubbles: true });
 		node.dispatchEvent(customEvent);
 	}
@@ -64,7 +64,6 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		node.classList.remove(...draggingClass);
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
-		// Reset state
 		dndState.isDragging = false;
 		dndState.draggedItem = null;
 		dndState.sourceContainer = '';
@@ -74,52 +73,47 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	function handlePointerDown(event: PointerEvent) {
 		if (options.disabled) return;
 
-		// Only start drag if clicking on handle element
-		if (!isHandleElement(event.target as HTMLElement)) {
-			return;
-		}
+		if (!isHandleElement(event.target as HTMLElement)) return;
 
-		// If the target is an interactive element, don't start dragging
-		if (isInteractiveElement(event.target as HTMLElement)) {
-			return;
-		}
-
-		// Store initial pointer position
-		initialX = event.clientX;
-		initialY = event.clientY;
+		if (!options.handle && isInteractiveElement(event.target as HTMLElement)) return;
 
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
 		dndState.sourceContainer = options.container;
 		dndState.targetContainer = null;
 
-		node.setPointerCapture(event.pointerId);
 		node.classList.add(...draggingClass);
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
+
+		// Use document-level listeners so pointerover/pointerout fire normally on droppables.
+		// setPointerCapture would redirect all pointer events to this node, breaking hover detection.
+		document.addEventListener('pointermove', handlePointerMove);
+		document.addEventListener('pointerup', handlePointerUp);
 	}
 
-	function handlePointerMove(event: PointerEvent) {
+	function handlePointerMove(_event: PointerEvent) {
 		if (!dndState.isDragging) return;
-
-		// Optional: Update visual feedback or position
 	}
 
 	function handlePointerUp(event: PointerEvent) {
 		if (!dndState.isDragging) return;
 
-		node.releasePointerCapture(event.pointerId);
+		document.removeEventListener('pointermove', handlePointerMove);
+		document.removeEventListener('pointerup', handlePointerUp);
+
 		node.classList.remove(...draggingClass);
 
-		// Dispatch custom event before cleanup so droppable can handle the drop
-		const customEvent = new CustomEvent('pointerdrop-on-container', {
-			bubbles: true,
-			detail: { dragData: options.dragData }
-		});
-		node.dispatchEvent(customEvent);
+		// Dispatch on the element actually under the cursor so bubbling reaches the correct droppable.
+		const dropTarget = document.elementFromPoint(event.clientX, event.clientY) ?? node;
+		dropTarget.dispatchEvent(
+			new CustomEvent('pointerdrop-on-container', {
+				bubbles: true,
+				detail: { dragData: options.dragData }
+			})
+		);
 
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
-		// Reset state
 		dndState.isDragging = false;
 		dndState.draggedItem = null;
 		dndState.sourceContainer = '';
@@ -130,8 +124,6 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	node.addEventListener('dragstart', handleDragStart);
 	node.addEventListener('dragend', handleDragEnd);
 	node.addEventListener('pointerdown', handlePointerDown);
-	node.addEventListener('pointermove', handlePointerMove);
-	node.addEventListener('pointerup', handlePointerUp);
 
 	return {
 		update(newOptions: DraggableOptions<T>) {
@@ -143,8 +135,9 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			node.removeEventListener('dragstart', handleDragStart);
 			node.removeEventListener('dragend', handleDragEnd);
 			node.removeEventListener('pointerdown', handlePointerDown);
-			node.removeEventListener('pointermove', handlePointerMove);
-			node.removeEventListener('pointerup', handlePointerUp);
+			// Clean up document listeners in case destroyed mid-drag
+			document.removeEventListener('pointermove', handlePointerMove);
+			document.removeEventListener('pointerup', handlePointerUp);
 		}
 	};
 }

@@ -32,13 +32,15 @@
 	]);
 
 	function handleDrop(state: DragDropState<Item>) {
-		const { draggedItem, targetContainer } = state;
+		const { draggedItem, targetContainer, dropPosition } = state;
 		const dragIndex = items.findIndex((item: Item) => item.id === draggedItem.id);
-		const dropIndex = parseInt(targetContainer ?? '0');
+		let dropIndex = parseInt(targetContainer ?? '0');
+		if (dropPosition === 'after') dropIndex += 1;
 
 		if (dragIndex !== -1 && !isNaN(dropIndex)) {
 			const [item] = items.splice(dragIndex, 1);
-			items.splice(dropIndex, 0, item);
+			const adjusted = dragIndex < dropIndex ? dropIndex - 1 : dropIndex;
+			items.splice(adjusted, 0, item);
 		}
 	}
 

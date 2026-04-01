@@ -12,6 +12,7 @@
 		{ path: '/nested', title: 'Nested Containers' },
 		{ path: '/multiple', title: 'Multiple' },
 		{ path: '/custom-classes', title: 'Custom Classes' },
+		{ path: '/drag-handle', title: 'Drag Handle' },
 		{ path: '/interactive-elements', title: 'Interactives' },
 		{ path: '/conditional-check', title: 'Conditional Check' }
 	];

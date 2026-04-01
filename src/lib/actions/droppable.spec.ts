@@ -61,24 +61,19 @@ describe('droppable', () => {
 				attributes: { dragOverClass: 'drag-over' }
 			});
 
-			const onDragLeave = vi.fn();
-			const action2 = droppable(node, {
-				container: 'test2',
-				callbacks: { onDragLeave },
-				attributes: { dragOverClass: 'drag-over-test' }
-			});
-
 			// Simulate rapid enter/leave that could cause negative counter
 			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
 			node.dispatchEvent(new DragEvent('dragleave', { bubbles: true }));
 			node.dispatchEvent(new DragEvent('dragleave', { bubbles: true })); // Extra leave
 
-			// Should not have class after leaves
-			// The fix ensures counter doesn't stay negative
-			expect(node.classList.contains('drag-over-test') || true).toBe(true);
+			// Class should be removed despite extra leave
+			expect(node.classList.contains('drag-over')).toBe(false);
+
+			// A new enter after the negative counter should still work
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
+			expect(node.classList.contains('drag-over')).toBe(true);
 
 			action.destroy();
-			action2.destroy();
 		});
 
 		it('should keep drag-over class when nested elements trigger dragleave', () => {
