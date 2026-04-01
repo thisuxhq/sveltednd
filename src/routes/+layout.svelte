@@ -110,14 +110,14 @@
 
 <!-- Mobile header -->
 <header
-	class="fixed left-0 right-0 top-0 z-50 border-b border-swiss-black bg-white dark:border-white/20 dark:bg-swiss-black md:hidden"
+	class="fixed left-0 right-0 top-0 z-40 border-b border-swiss-black bg-white dark:border-white/20 dark:bg-swiss-black md:hidden"
 >
 	<div class="flex items-center justify-between px-4 py-3">
 		<div class="flex items-center gap-2">
 			<div class="h-2 w-2 bg-swiss-red"></div>
 			<span class="text-lg dark:text-white">sveltednd</span>
+			<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.0.20</span>
 		</div>
-		<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.0.20</span>
 	</div>
 </header>
 
