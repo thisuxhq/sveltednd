@@ -28,7 +28,7 @@
 	}
 </script>
 
-<div class="h-screen pt-20 md:pt-0">
+<div class="h-screen overflow-hidden pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 md:px-16 md:py-16">
 		<h1 class="text-3xl text-swiss-black md:text-4xl">horizontal scroll</h1>
