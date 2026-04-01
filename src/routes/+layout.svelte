@@ -25,7 +25,7 @@
 	<aside class="hidden w-72 border-r border-swiss-black bg-white md:block">
 		<div class="flex h-full flex-col">
 			<!-- Logo section with geometric accent -->
-			<div class="border-b border-swiss-black p-8">
+			<div class="border-b border-swiss-black p-8 pb-10">
 				<div class="flex items-start justify-between">
 					<div>
 						<div class="mb-2 h-3 w-3 bg-swiss-red"></div>
@@ -40,7 +40,7 @@
 
 			<!-- Navigation with numbers -->
 			<div class="flex-1 overflow-y-auto">
-				<div class="border-b border-swiss-black px-8 py-4">
+				<div class="border-b border-swiss-black px-8 py-[1.125rem]">
 					<span class="text-xs text-swiss-mid-gray">examples</span>
 				</div>
 				{#each examples as { path, title, number }}
