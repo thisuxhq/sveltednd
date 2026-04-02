@@ -356,6 +356,34 @@ describe('draggable', () => {
 	});
 
 	describe('General functionality', () => {
+		it('should NOT reset drag state when pointercancel fires during HTML5 drag (desktop)', () => {
+			const onDragEnd = vi.fn();
+			const action = draggable(node, {
+				container: 'test',
+				attributes: { draggingClass: 'dragging' },
+				callbacks: { onDragEnd }
+			});
+
+			// Simulate desktop sequence: pointerdown → dragstart → pointercancel (browser takes over)
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			expect(dndState.isDragging).toBe(true);
+
+			// dragstart marks html5DragActive = true
+			node.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true }));
+			expect(dndState.sourceContainer).toBe('test');
+
+			// pointercancel fires because browser took over for HTML5 drag — must be ignored
+			document.dispatchEvent(new PointerEvent('pointercancel', { bubbles: false, pointerId: 1 }));
+
+			// State must be preserved — HTML5 drag is still in progress
+			expect(dndState.isDragging).toBe(true);
+			expect(dndState.sourceContainer).toBe('test');
+			expect(node.classList.contains('dragging')).toBe(true);
+			expect(onDragEnd).not.toHaveBeenCalled();
+
+			action.destroy();
+		});
+
 		it('should reset drag state when pointercancel fires (mobile gesture takeover)', () => {
 			const onDragEnd = vi.fn();
 			const action = draggable(node, {

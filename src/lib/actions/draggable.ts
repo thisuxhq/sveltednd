@@ -81,6 +81,17 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	let pointerDownTarget: HTMLElement | null = null;
 
 	/**
+	 * Tracks whether the HTML5 drag API is currently active.
+	 *
+	 * On desktop, the browser fires `pointercancel` when it takes over the pointer
+	 * for an HTML5 drag operation. Without this flag, our `pointercancel` handler
+	 * would reset drag state mid-drag, clearing sourceContainer before the drop fires.
+	 *
+	 * Set to true on dragstart, false on dragend.
+	 */
+	let html5DragActive = false;
+
+	/**
 	 * Checks if the clicked element (or its parent) is an interactive element.
 	 *
 	 * We walk up the DOM tree because the user might click on a span inside a button,
@@ -139,6 +150,9 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			return;
 		}
 
+		// Mark HTML5 drag as active so pointercancel is ignored during this drag
+		html5DragActive = true;
+
 		// Update global state - this triggers reactive updates across all components
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
@@ -170,6 +184,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 * This fires whether the drop succeeded or was cancelled.
 	 */
 	function handleDragEnd() {
+		html5DragActive = false;
 		node.classList.remove(...draggingClass);
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
@@ -218,7 +233,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Set up document-level tracking for the drag operation
 		document.addEventListener('pointermove', handlePointerMove);
 		document.addEventListener('pointerup', handlePointerUp);
-		document.addEventListener('pointercancel', handlePointerUp);
+		document.addEventListener('pointercancel', handlePointerCancel);
 	}
 
 	/**
@@ -233,6 +248,21 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	}
 
 	/**
+	 * Handles pointercancel - fires when the browser takes over the pointer gesture.
+	 *
+	 * On desktop, the browser fires pointercancel when the HTML5 drag API takes over.
+	 * We must ignore it in that case — html5DragActive tracks whether we're in an HTML5
+	 * drag so we can bail out without resetting state mid-drag.
+	 *
+	 * On mobile/touch, pointercancel fires when the browser decides to scroll or apply
+	 * palm rejection. In that case we DO want to reset state (same as pointerup).
+	 */
+	function handlePointerCancel(event: PointerEvent) {
+		if (html5DragActive) return;
+		handlePointerUp(event);
+	}
+
+	/**
 	 * Handles pointerup - the "drop" moment in pointer mode.
 	 *
 	 * We figure out what element is under the cursor using elementFromPoint,
@@ -244,7 +274,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Clean up our document listeners
 		document.removeEventListener('pointermove', handlePointerMove);
 		document.removeEventListener('pointerup', handlePointerUp);
-		document.removeEventListener('pointercancel', handlePointerUp);
+		document.removeEventListener('pointercancel', handlePointerCancel);
 
 		// Remove visual dragging styles
 		node.classList.remove(...draggingClass);
@@ -335,7 +365,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			// Safety cleanup: if component unmounts mid-drag, these might still be attached
 			document.removeEventListener('pointermove', handlePointerMove);
 			document.removeEventListener('pointerup', handlePointerUp);
-			document.removeEventListener('pointercancel', handlePointerUp);
+			document.removeEventListener('pointercancel', handlePointerCancel);
 		}
 	};
 }
