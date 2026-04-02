@@ -2,6 +2,8 @@
 
 Thanks for wanting to contribute to **@thisux/sveltednd**! We’re happy to have you. Please follow these simple guidelines to make it easier for everyone.
 
+> **CI runs automatically** on every PR. All lint, type-check, and test checks must pass before merging.
+
 ---
 
 ## How to Get Started
