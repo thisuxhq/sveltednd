@@ -405,11 +405,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * started — triggers cleanup on this drop zone.
 	 */
 	function handleGlobalDragEnd() {
+		wasOver = false;
 		if (dragEnterCounter === 0) return;
 		dragEnterCounter = 0;
 		node.classList.remove(...dragOverClass);
 		clearDropIndicator();
-		wasOver = false;
 	}
 
 	/**
@@ -426,51 +426,6 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		wasOver = false;
 	}
 
-	/**
-	 * Handles pointerover - pointer mode version of dragenter.
-	 *
-	 * Unlike HTML5 drag events, pointer events fire on the element
-	 * the cursor is actually over. We check if we're in a drag
-	 * operation and update state accordingly.
-	 */
-	function handlePointerOver(event: PointerEvent) {
-		if (options.disabled || !dndState.isDragging) return;
-
-		dndState.targetContainer = options.container;
-		node.classList.add(...dragOverClass);
-		updateDropIndicator(event.clientY, event.clientX);
-		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
-	}
-
-	/**
-	 * Handles pointermove - pointer mode version of dragover.
-	 *
-	 * Only updates if we're currently the active target container.
-	 * Updates the drop position indicator as the cursor moves.
-	 */
-	function handlePointerMove(event: PointerEvent) {
-		if (options.disabled || !dndState.isDragging) return;
-		if (dndState.targetContainer !== options.container) return;
-
-		updateDropIndicator(event.clientY, event.clientX);
-	}
-
-	/**
-	 * Handles pointerout - pointer mode version of dragleave.
-	 *
-	 * When the pointer leaves this element, we clean up our state
-	 * and notify the consumer.
-	 */
-	function handlePointerOut(event: PointerEvent) {
-		if (options.disabled || !dndState.isDragging) return;
-
-		if (dndState.targetContainer === options.container) {
-			dndState.targetContainer = null;
-		}
-		node.classList.remove(...dragOverClass);
-		clearDropIndicator();
-		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-	}
 
 	/**
 	 * Handles pointerdrop-on-container custom event.
