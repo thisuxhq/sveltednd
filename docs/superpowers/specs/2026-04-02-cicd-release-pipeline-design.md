@@ -11,11 +11,11 @@ Automate testing on every PR and npm publishing on every release, driven by conv
 
 ## Trigger Summary
 
-| Event | CI runs | Release PR updated | npm published |
-|---|---|---|---|
-| PR opened / push to PR branch | ✅ | — | — |
-| Merge to `main` (fix/feat commit) | ✅ | ✅ | — |
-| Merge the Release PR to `main` | ✅ | ✅ (closes itself) | ✅ |
+| Event                             | CI runs | Release PR updated | npm published |
+| --------------------------------- | ------- | ------------------ | ------------- |
+| PR opened / push to PR branch     | ✅      | —                  | —             |
+| Merge to `main` (fix/feat commit) | ✅      | ✅                 | —             |
+| Merge the Release PR to `main`    | ✅      | ✅ (closes itself) | ✅            |
 
 ---
 
@@ -26,6 +26,7 @@ Automate testing on every PR and npm publishing on every release, driven by conv
 **Purpose:** Gate PRs. Catch lint, type, and test failures before they reach main.
 
 **Steps:**
+
 1. Checkout repo
 2. Set up Bun
 3. `bun install --frozen-lockfile`
@@ -62,6 +63,7 @@ Uses `google-github-actions/release-please-action@v4`.
 Only runs when a release was actually created (i.e. the Release PR was merged). Skipped on all other merges.
 
 **Steps:**
+
 1. Checkout repo at the release tag
 2. Set up Bun
 3. `bun install --frozen-lockfile`
@@ -77,16 +79,16 @@ Only runs when a release was actually created (i.e. the Release PR was merged). 
 
 ```json
 {
-  "packages": {
-    ".": {
-      "package-name": "@thisux/sveltednd",
-      "release-type": "node",
-      "changelog-path": "CHANGELOG.md",
-      "bump-minor-pre-major": true,
-      "draft": false,
-      "prerelease": false
-    }
-  }
+	"packages": {
+		".": {
+			"package-name": "@thisux/sveltednd",
+			"release-type": "node",
+			"changelog-path": "CHANGELOG.md",
+			"bump-minor-pre-major": true,
+			"draft": false,
+			"prerelease": false
+		}
+	}
 }
 ```
 
@@ -104,8 +106,8 @@ Tells release-please the last released version so it computes the next bump corr
 
 ## Secrets Required
 
-| Secret | Where to create | Purpose |
-|---|---|---|
+| Secret      | Where to create                                 | Purpose                        |
+| ----------- | ----------------------------------------------- | ------------------------------ |
 | `NPM_TOKEN` | npmjs.com → Access Tokens → **Automation** type | Publishes to npm, bypasses 2FA |
 
 The default `GITHUB_TOKEN` (auto-provided by Actions) is used for release-please — no extra setup needed.
@@ -114,14 +116,14 @@ The default `GITHUB_TOKEN` (auto-provided by Actions) is used for release-please
 
 ## Conventional Commit → Version Bump Mapping
 
-| Commit prefix | Bump (pre-1.0) | Bump (post-1.0) | CHANGELOG section |
-|---|---|---|---|
-| `fix:` | patch | patch | Bug Fixes |
-| `feat:` | minor | minor | Features |
-| `feat!:` or `BREAKING CHANGE:` | minor* | major | ⚠️ Breaking Changes |
-| `docs:`, `chore:`, `refactor:` | none | none | (omitted or misc) |
+| Commit prefix                  | Bump (pre-1.0) | Bump (post-1.0) | CHANGELOG section   |
+| ------------------------------ | -------------- | --------------- | ------------------- |
+| `fix:`                         | patch          | patch           | Bug Fixes           |
+| `feat:`                        | minor          | minor           | Features            |
+| `feat!:` or `BREAKING CHANGE:` | minor\*        | major           | ⚠️ Breaking Changes |
+| `docs:`, `chore:`, `refactor:` | none           | none            | (omitted or misc)   |
 
-*`bump-minor-pre-major` prevents a breaking change from jumping to `1.0.0` prematurely.
+\*`bump-minor-pre-major` prevents a breaking change from jumping to `1.0.0` prematurely.
 
 ---
 

@@ -1,12 +1,12 @@
 {
-  "packages": {
-    ".": {
-      "package-name": "@thisux/sveltednd",
-      "release-type": "node",
-      "changelog-path": "CHANGELOG.md",
-      "bump-minor-pre-major": true,
-      "draft": false,
-      "prerelease": false
-    }
-  }
+	"packages": {
+		".": {
+			"package-name": "@thisux/sveltednd",
+			"release-type": "node",
+			"changelog-path": "CHANGELOG.md",
+			"bump-minor-pre-major": true,
+			"draft": false,
+			"prerelease": false
+		}
+	}
 }

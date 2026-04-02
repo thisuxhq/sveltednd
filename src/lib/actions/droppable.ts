@@ -426,7 +426,6 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		wasOver = false;
 	}
 
-
 	/**
 	 * Handles pointerdrop-on-container custom event.
 	 *
