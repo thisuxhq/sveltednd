@@ -28,13 +28,15 @@ The library exports three things from `src/lib/index.ts`: two Svelte actions (`d
 
 1. `draggable` action attaches drag event listeners (both HTML5 and pointer events) to an element
 2. When dragging starts, it updates the global `dndState` (Svelte 5 `$state` rune in `src/lib/stores/dnd.svelte.ts`) and dispatches custom events
-3. `droppable` action listens for dragenter/dragleave/dragover/drop events and pointer events, updates `dndState.targetContainer`, and fires callbacks
-4. Application handles reordering in the `onDrop` callback
+3. On desktop, `pointercancel` fires when the browser takes over the pointer for HTML5 drag — an `html5DragActive` flag prevents this from resetting state mid-drag
+4. `droppable` action listens for dragenter/dragleave/dragover/drop events (HTML5 path) and a document-level `pointermove` + `getBoundingClientRect` (pointer/touch path), updates `dndState.targetContainer`, and fires callbacks
+5. On touch devices, `pointerover`/`pointerout` don't fire on elements beneath the finger, so hover detection uses coordinate-based bounds checking instead
+6. Application handles reordering in the `onDrop` callback
 
 **Key source files:**
 
 - `src/lib/actions/draggable.ts` - Drag action with handle support and interactive element blocking
-- `src/lib/actions/droppable.ts` - Drop action with nested element counter tracking (dragEnterCounter)
+- `src/lib/actions/droppable.ts` - Drop action with nested element counter tracking (dragEnterCounter) and coordinate-based touch hover detection (wasOver + getBoundingClientRect)
 - `src/lib/stores/dnd.svelte.ts` - Global reactive state (~11 lines)
 - `src/lib/types/index.ts` - All TypeScript interfaces (`DragDropState<T>`, `DraggableOptions<T>`, etc.)
 - `src/lib/styles/dnd.css` - Default CSS classes (`dragging`, `drag-over`)
