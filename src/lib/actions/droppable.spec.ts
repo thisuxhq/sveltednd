@@ -419,8 +419,39 @@ describe('droppable', () => {
 		});
 	});
 
-	describe('Pointer events for touch/mouse fallback', () => {
-		it('should call onDragEnter on pointerover when dragging', () => {
+	describe('Pointer events for touch/mouse fallback (document pointermove)', () => {
+		beforeEach(() => {
+			// Give the node a known bounding rect: x:10, y:10 → x:110, y:110
+			vi.spyOn(node, 'getBoundingClientRect').mockReturnValue({
+				left: 10, top: 10, right: 110, bottom: 110,
+				width: 100, height: 100, x: 10, y: 10,
+				toJSON: () => ({})
+			});
+		});
+
+		function dispatchDocumentPointerMove(clientX: number, clientY: number) {
+			const event = new PointerEvent('pointermove', { bubbles: false, cancelable: false });
+			Object.defineProperty(event, 'clientX', { value: clientX });
+			Object.defineProperty(event, 'clientY', { value: clientY });
+			document.dispatchEvent(event);
+		}
+
+		it('should set targetContainer and add drag-over class when pointer enters bounds', () => {
+			const action = droppable(node, {
+				container: 'test',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+
+			dndState.isDragging = true;
+			dispatchDocumentPointerMove(60, 60); // inside 10-110 bounds
+
+			expect(dndState.targetContainer).toBe('test');
+			expect(node.classList.contains('drag-over')).toBe(true);
+
+			action.destroy();
+		});
+
+		it('should call onDragEnter only once when pointer enters bounds', () => {
 			const onDragEnter = vi.fn();
 			const action = droppable(node, {
 				container: 'test',
@@ -428,27 +459,30 @@ describe('droppable', () => {
 			});
 
 			dndState.isDragging = true;
-			node.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+			dispatchDocumentPointerMove(60, 60); // enter
+			dispatchDocumentPointerMove(70, 70); // still inside — should not fire again
 
-			expect(onDragEnter).toHaveBeenCalled();
+			expect(onDragEnter).toHaveBeenCalledTimes(1);
+
 			action.destroy();
 		});
 
-		it('should not call onDragEnter on pointerover when not dragging', () => {
+		it('should not call onDragEnter when pointer is outside bounds', () => {
 			const onDragEnter = vi.fn();
 			const action = droppable(node, {
 				container: 'test',
 				callbacks: { onDragEnter }
 			});
 
-			dndState.isDragging = false;
-			node.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+			dndState.isDragging = true;
+			dispatchDocumentPointerMove(5, 5); // outside bounds (left: 10)
 
 			expect(onDragEnter).not.toHaveBeenCalled();
+
 			action.destroy();
 		});
 
-		it('should call onDragLeave on pointerout when dragging', () => {
+		it('should call onDragLeave and clear targetContainer when pointer leaves bounds', () => {
 			const onDragLeave = vi.fn();
 			const action = droppable(node, {
 				container: 'test',
@@ -456,10 +490,49 @@ describe('droppable', () => {
 			});
 
 			dndState.isDragging = true;
-			dndState.targetContainer = 'test';
-			node.dispatchEvent(new PointerEvent('pointerout', { bubbles: true }));
+			dispatchDocumentPointerMove(60, 60); // enter
+			dispatchDocumentPointerMove(5, 5);  // leave
 
-			expect(onDragLeave).toHaveBeenCalled();
+			expect(onDragLeave).toHaveBeenCalledTimes(1);
+			expect(dndState.targetContainer).toBeNull();
+			expect(node.classList.contains('drag-over')).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should not fire any events when not dragging', () => {
+			const onDragEnter = vi.fn();
+			const onDragLeave = vi.fn();
+			const action = droppable(node, {
+				container: 'test',
+				callbacks: { onDragEnter, onDragLeave }
+			});
+
+			dndState.isDragging = false;
+			dispatchDocumentPointerMove(60, 60);
+
+			expect(onDragEnter).not.toHaveBeenCalled();
+			expect(onDragLeave).not.toHaveBeenCalled();
+
+			action.destroy();
+		});
+
+		it('should not call onDragLeave when leaving a different container', () => {
+			const onDragLeave = vi.fn();
+			const action = droppable(node, {
+				container: 'test',
+				callbacks: { onDragLeave }
+			});
+
+			dndState.isDragging = true;
+			dndState.targetContainer = 'other-container'; // something else is active
+			dispatchDocumentPointerMove(60, 60); // enter this node
+			dndState.targetContainer = 'other-container'; // simulate another container taking over
+			dispatchDocumentPointerMove(5, 5);  // leave this node bounds
+
+			// onDragLeave should not fire because targetContainer !== 'test'
+			expect(onDragLeave).not.toHaveBeenCalled();
+
 			action.destroy();
 		});
 	});

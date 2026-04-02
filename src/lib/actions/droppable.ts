@@ -89,6 +89,12 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	let indicatorClass: 'drop-before' | 'drop-after' | 'drop-left' | 'drop-right' = 'drop-before';
 
 	/**
+	 * Tracks whether the pointer was inside this droppable on the previous
+	 * pointermove tick. Used to fire onDragEnter/onDragLeave on transitions only.
+	 */
+	let wasOver = false;
+
+	/**
 	 * Calculates whether the drop should be positioned before or after the target.
 	 *
 	 * For vertical lists: compares cursor Y against the element's vertical midpoint.
@@ -222,6 +228,44 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			indicatorNode = null;
 		}
 		dndState.dropPosition = null;
+	}
+
+	/**
+	 * Handles document-level pointermove for touch-compatible hover detection.
+	 *
+	 * pointerover/pointerout do not fire on elements beneath the finger during
+	 * a touch drag — the pointer stays captured to the element where touch began.
+	 * This handler uses getBoundingClientRect to detect hover by coordinates,
+	 * which works on both mouse and touch devices.
+	 *
+	 * Fires onDragEnter/onDragLeave callbacks only on the transition between
+	 * inside/outside, not on every pointermove tick.
+	 */
+	function handleDocumentPointerMove(event: PointerEvent) {
+		if (options.disabled || !dndState.isDragging) return;
+
+		const rect = node.getBoundingClientRect();
+		const isOver =
+			event.clientX >= rect.left &&
+			event.clientX <= rect.right &&
+			event.clientY >= rect.top &&
+			event.clientY <= rect.bottom;
+
+		if (isOver) {
+			dndState.targetContainer = options.container;
+			node.classList.add(...dragOverClass);
+			updateDropIndicator(event.clientY, event.clientX);
+			if (!wasOver) {
+				options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
+			}
+		} else if (wasOver && dndState.targetContainer === options.container) {
+			dndState.targetContainer = null;
+			node.classList.remove(...dragOverClass);
+			clearDropIndicator();
+			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+		}
+
+		wasOver = isOver;
 	}
 
 	/**
@@ -361,6 +405,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * started — triggers cleanup on this drop zone.
 	 */
 	function handleGlobalDragEnd() {
+		wasOver = false;
 		if (dragEnterCounter === 0) return;
 		dragEnterCounter = 0;
 		node.classList.remove(...dragOverClass);
@@ -378,53 +423,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		dragEnterCounter = 0;
 		node.classList.remove(...dragOverClass);
 		clearDropIndicator();
+		wasOver = false;
 	}
 
-	/**
-	 * Handles pointerover - pointer mode version of dragenter.
-	 *
-	 * Unlike HTML5 drag events, pointer events fire on the element
-	 * the cursor is actually over. We check if we're in a drag
-	 * operation and update state accordingly.
-	 */
-	function handlePointerOver(event: PointerEvent) {
-		if (options.disabled || !dndState.isDragging) return;
-
-		dndState.targetContainer = options.container;
-		node.classList.add(...dragOverClass);
-		updateDropIndicator(event.clientY, event.clientX);
-		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
-	}
-
-	/**
-	 * Handles pointermove - pointer mode version of dragover.
-	 *
-	 * Only updates if we're currently the active target container.
-	 * Updates the drop position indicator as the cursor moves.
-	 */
-	function handlePointerMove(event: PointerEvent) {
-		if (options.disabled || !dndState.isDragging) return;
-		if (dndState.targetContainer !== options.container) return;
-
-		updateDropIndicator(event.clientY, event.clientX);
-	}
-
-	/**
-	 * Handles pointerout - pointer mode version of dragleave.
-	 *
-	 * When the pointer leaves this element, we clean up our state
-	 * and notify the consumer.
-	 */
-	function handlePointerOut(event: PointerEvent) {
-		if (options.disabled || !dndState.isDragging) return;
-
-		if (dndState.targetContainer === options.container) {
-			dndState.targetContainer = null;
-		}
-		node.classList.remove(...dragOverClass);
-		clearDropIndicator();
-		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-	}
 
 	/**
 	 * Handles pointerdrop-on-container custom event.
@@ -473,9 +474,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	document.addEventListener('dragend', handleGlobalDragEnd);
 
 	// Pointer events for custom drag support
-	node.addEventListener('pointerover', handlePointerOver);
-	node.addEventListener('pointermove', handlePointerMove);
-	node.addEventListener('pointerout', handlePointerOut);
+	document.addEventListener('pointermove', handleDocumentPointerMove);
 	node.addEventListener('pointerdrop-on-container', handlePointerDropOnContainer as EventListener);
 
 	// Return Svelte action lifecycle methods
@@ -506,9 +505,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			);
 			document.removeEventListener('dragenter', handleDocumentDragEnter);
 			document.removeEventListener('dragend', handleGlobalDragEnd);
-			node.removeEventListener('pointerover', handlePointerOver);
-			node.removeEventListener('pointermove', handlePointerMove);
-			node.removeEventListener('pointerout', handlePointerOut);
+			document.removeEventListener('pointermove', handleDocumentPointerMove);
 			node.removeEventListener(
 				'pointerdrop-on-container',
 				handlePointerDropOnContainer as EventListener

@@ -218,6 +218,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Set up document-level tracking for the drag operation
 		document.addEventListener('pointermove', handlePointerMove);
 		document.addEventListener('pointerup', handlePointerUp);
+		document.addEventListener('pointercancel', handlePointerUp);
 	}
 
 	/**
@@ -243,6 +244,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Clean up our document listeners
 		document.removeEventListener('pointermove', handlePointerMove);
 		document.removeEventListener('pointerup', handlePointerUp);
+		document.removeEventListener('pointercancel', handlePointerUp);
 
 		// Remove visual dragging styles
 		node.classList.remove(...draggingClass);
@@ -333,6 +335,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			// Safety cleanup: if component unmounts mid-drag, these might still be attached
 			document.removeEventListener('pointermove', handlePointerMove);
 			document.removeEventListener('pointerup', handlePointerUp);
+			document.removeEventListener('pointercancel', handlePointerUp);
 		}
 	};
 }
