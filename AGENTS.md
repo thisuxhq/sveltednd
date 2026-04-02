@@ -120,3 +120,32 @@ src/
 - Library exports via `svelte-package` to `dist/`
 - Test files: `*.spec.ts` or `*.test.ts` in `src/`
 - Never commit to main directly - use feature branches
+- All commits **must** follow Conventional Commits format — enforced by `commit-msg` hook
+
+## Commit Convention
+
+Format: `type(scope): description`
+
+| Type       | When to use                                           |
+| ---------- | ----------------------------------------------------- |
+| `feat`     | New user-facing feature (triggers minor version bump) |
+| `fix`      | Bug fix (triggers patch bump)                         |
+| `docs`     | Documentation only (no release)                       |
+| `chore`    | Tooling, deps, config (no release)                    |
+| `refactor` | Code restructure, no behavior change (no release)     |
+| `test`     | Adding or fixing tests (no release)                   |
+| `ci`       | CI/CD changes (no release)                            |
+| `style`    | Formatting only (no release)                          |
+
+Breaking changes: append `!` → `feat!: ...` or add `BREAKING CHANGE:` footer (triggers major bump post-1.0, minor pre-1.0).
+
+Examples:
+
+```
+feat: add keyboard drag support
+fix: prevent stuck drag state on mobile
+docs: update README with touch examples
+chore: bump dependencies
+```
+
+The `commit-msg` hook (Husky + commitlint) will reject non-conforming commits. Run `bun install` to ensure hooks are installed.

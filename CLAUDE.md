@@ -53,3 +53,23 @@ The library exports three things from `src/lib/index.ts`: two Svelte actions (`d
 - Files: kebab-case. Functions: camelCase. Types: PascalCase. Constants: UPPER_SNAKE_CASE
 - Test files use `*.spec.ts` pattern, colocated with source
 - Use feature branches, never commit to main directly
+- All commits **must** follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced by Husky + commitlint
+
+## Commit Convention
+
+Format: `type(scope): description`
+
+| Type       | When to use                          |
+| ---------- | ------------------------------------ |
+| `feat`     | New user-facing feature              |
+| `fix`      | Bug fix                              |
+| `docs`     | Documentation only                   |
+| `chore`    | Tooling, deps, config                |
+| `refactor` | Code restructure, no behavior change |
+| `test`     | Adding or fixing tests               |
+| `ci`       | CI/CD changes                        |
+| `style`    | Formatting only                      |
+
+Examples: `feat: add keyboard drag support`, `fix: prevent stuck drag state on mobile`
+
+The `commit-msg` hook will reject commits that don't follow this format.
