@@ -344,14 +344,16 @@ import '$lib/styles/dnd.css';
 
 The library is built on three files:
 
-- `src/lib/actions/draggable.ts` — Dual-mode drag: HTML5 `dragstart`/`dragend` + `pointerdown`/`pointermove`/`pointerup`. Tracks the actual clicked element for correct interactive-child detection. On pointerup, uses `document.elementFromPoint` to find the drop target and dispatches a custom `pointerdrop-on-container` event.
-- `src/lib/actions/droppable.ts` — Drop zone implementation. Uses a `dragEnterCounter` to correctly handle nested element bubbling. For drop indicators, uses a sibling-transfer strategy (vertical/horizontal) and nearest-edge normalised detection (grid). Listens for both native drag events and the custom `pointerdrop-on-container` event. Also listens at `document` level for `dragend` to clean up orphaned hover classes if a drag is cancelled.
+- `src/lib/actions/draggable.ts` — Dual-mode drag: HTML5 `dragstart`/`dragend` + `pointerdown`/`pointermove`/`pointerup`. Tracks the actual clicked element for correct interactive-child detection. On pointerup, uses `document.elementFromPoint` to find the drop target and dispatches a custom `pointerdrop-on-container` event. Handles `pointercancel` for mobile gesture cancellation (scroll takeover, palm rejection) using a dedicated handler that checks `html5DragActive` — so desktop HTML5 drag (which also fires `pointercancel` when the browser takes over) is correctly ignored.
+- `src/lib/actions/droppable.ts` — Drop zone implementation. Uses a `dragEnterCounter` to correctly handle nested element bubbling. For drop indicators, uses a sibling-transfer strategy (vertical/horizontal) and nearest-edge normalised detection (grid). Listens for both native drag events and the custom `pointerdrop-on-container` event. Also listens at `document` level for `dragend` to clean up orphaned hover classes and for `pointermove` to track hover position using `getBoundingClientRect` — this is required for touch/mobile where `pointerover`/`pointerout` do not fire on elements beneath the finger. A `wasOver` boolean per droppable fires `onDragEnter`/`onDragLeave` only on transitions.
 - `src/lib/stores/dnd.svelte.ts` — 11-line file. Just a `$state` object. Global so droppables don't need prop drilling.
 
 ### Touch/Mobile Notes
 
 - The `draggable` action sets `touch-action: none` and `user-select: none` inline on the element. This is critical — without `touch-action: none`, touch gestures trigger scroll instead of pointer events, breaking mobile drag entirely.
-- Pointer capture (`setPointerCapture`) is intentionally NOT used. Using it would redirect all pointer events to the dragged element, preventing droppables from receiving `pointerover` events. Instead, document-level `pointermove`/`pointerup` listeners track the drag while normal event bubbling continues.
+- Pointer capture (`setPointerCapture`) is intentionally NOT used. Using it would redirect all pointer events to the dragged element and prevent coordinate-based hover detection from working correctly. Instead, document-level `pointermove`/`pointerup` listeners track the drag.
+- On touch devices, `pointerover`/`pointerout` do not fire on elements beneath the finger during a drag — only on the element where the touch started. The droppable uses document-level `pointermove` + `getBoundingClientRect` to detect hover by coordinates instead, which works on both mouse and touch.
+- On desktop, the browser fires `pointercancel` immediately after `dragstart` to release the pointer for the HTML5 drag. The `draggable` action guards against this with an `html5DragActive` flag so the pointer-cancel path does not reset state mid-drag.
 
 ## TypeScript
 
