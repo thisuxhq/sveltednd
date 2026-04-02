@@ -12,11 +12,11 @@
 
 ## Files
 
-| File | Action | Purpose |
-|---|---|---|
-| `.github/workflows/ci.yml` | Create | Lint + type-check + test on every PR and push |
-| `.github/workflows/release.yml` | Create | release-please bot + npm publish on main |
-| `release-please-config.json` | Create | Tells release-please the package name, type, changelog path |
+| File                            | Action | Purpose                                                      |
+| ------------------------------- | ------ | ------------------------------------------------------------ |
+| `.github/workflows/ci.yml`      | Create | Lint + type-check + test on every PR and push                |
+| `.github/workflows/release.yml` | Create | release-please bot + npm publish on main                     |
+| `release-please-config.json`    | Create | Tells release-please the package name, type, changelog path  |
 | `.release-please-manifest.json` | Create | Tracks last released version (0.1.2) so next bump is correct |
 
 ---
@@ -24,6 +24,7 @@
 ### Task 1: Create the CI workflow
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: Create the workflow directories**
@@ -88,6 +89,7 @@ git commit -m "ci: add CI workflow for lint, type-check, and tests"
 ### Task 2: Create the release-please config files
 
 **Files:**
+
 - Create: `release-please-config.json`
 - Create: `.release-please-manifest.json`
 
@@ -97,16 +99,16 @@ Create `release-please-config.json` in the repo root:
 
 ```json
 {
-  "packages": {
-    ".": {
-      "package-name": "@thisux/sveltednd",
-      "release-type": "node",
-      "changelog-path": "CHANGELOG.md",
-      "bump-minor-pre-major": true,
-      "draft": false,
-      "prerelease": false
-    }
-  }
+	"packages": {
+		".": {
+			"package-name": "@thisux/sveltednd",
+			"release-type": "node",
+			"changelog-path": "CHANGELOG.md",
+			"bump-minor-pre-major": true,
+			"draft": false,
+			"prerelease": false
+		}
+	}
 }
 ```
 
@@ -143,6 +145,7 @@ git commit -m "ci: add release-please config and manifest"
 ### Task 3: Create the release workflow
 
 **Files:**
+
 - Create: `.github/workflows/release.yml`
 
 - [ ] **Step 1: Write `release.yml`**
@@ -197,6 +200,7 @@ jobs:
 ```
 
 **How it works:**
+
 - `release-please` job runs on every push to main. It reads conventional commits and keeps a Release PR up to date. When the Release PR is merged, it creates a GitHub Release and sets `release_created = true`.
 - `publish` job only runs when `release_created` is true. It builds and publishes. On normal feature/fix merges, this job is skipped.
 
