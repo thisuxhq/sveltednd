@@ -30,7 +30,7 @@
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
 		"test": "bun run test:unit -- --run",
-		"prepare": "husky"
+		"prepare": "node --eval \"if (process.env.CI) process.exit(0)\" && husky || true"
 	},
 	"files": [
 		"dist",
