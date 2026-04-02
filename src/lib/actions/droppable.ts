@@ -238,8 +238,8 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * This handler uses getBoundingClientRect to detect hover by coordinates,
 	 * which works on both mouse and touch devices.
 	 *
-	 * Fires onDragEnter/onDragLeave callbacks only on the transition between
-	 * inside/outside, not on every pointermove tick.
+	 * Fires onDragOver on every tick while inside, and onDragEnter/onDragLeave
+	 * only on the transition between inside/outside.
 	 */
 	function handleDocumentPointerMove(event: PointerEvent) {
 		if (options.disabled || !dndState.isDragging) return;
@@ -255,6 +255,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			dndState.targetContainer = options.container;
 			node.classList.add(...dragOverClass);
 			updateDropIndicator(event.clientY, event.clientX);
+			options.callbacks?.onDragOver?.(dndState as DragDropState<T>);
 			if (!wasOver) {
 				options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 			}

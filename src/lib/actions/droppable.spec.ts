@@ -523,6 +523,92 @@ describe('droppable', () => {
 			action.destroy();
 		});
 
+		it('should call onDragOver on every pointermove while inside bounds', () => {
+			const onDragOver = vi.fn();
+			const action = droppable(node, {
+				container: 'test',
+				callbacks: { onDragOver }
+			});
+
+			dndState.isDragging = true;
+			dispatchDocumentPointerMove(60, 60); // first tick inside
+			dispatchDocumentPointerMove(70, 70); // second tick inside
+			dispatchDocumentPointerMove(80, 80); // third tick inside
+
+			expect(onDragOver).toHaveBeenCalledTimes(3);
+
+			action.destroy();
+		});
+
+		it('should not call onDragOver when pointer is outside bounds', () => {
+			const onDragOver = vi.fn();
+			const action = droppable(node, {
+				container: 'test',
+				callbacks: { onDragOver }
+			});
+
+			dndState.isDragging = true;
+			dispatchDocumentPointerMove(5, 5); // outside
+			dispatchDocumentPointerMove(200, 200); // outside
+
+			expect(onDragOver).not.toHaveBeenCalled();
+
+			action.destroy();
+		});
+
+		it('should stop calling onDragOver after pointer leaves bounds', () => {
+			const onDragOver = vi.fn();
+			const action = droppable(node, {
+				container: 'test',
+				callbacks: { onDragOver }
+			});
+
+			dndState.isDragging = true;
+			dispatchDocumentPointerMove(60, 60); // inside
+			dispatchDocumentPointerMove(70, 70); // inside
+			dispatchDocumentPointerMove(5, 5); // outside
+			dispatchDocumentPointerMove(3, 3); // outside
+
+			expect(onDragOver).toHaveBeenCalledTimes(2);
+
+			action.destroy();
+		});
+
+		it('should allow invalidDrop validation via onDragOver on pointer path', () => {
+			const action = droppable(node, {
+				container: 'test',
+				callbacks: {
+					onDragOver: () => {
+						dndState.invalidDrop = true;
+					}
+				}
+			});
+
+			dndState.isDragging = true;
+			dndState.invalidDrop = false;
+			dispatchDocumentPointerMove(60, 60);
+
+			expect(dndState.invalidDrop).toBe(true);
+
+			action.destroy();
+		});
+
+		it('should not call onDragOver when disabled', () => {
+			const onDragOver = vi.fn();
+			const action = droppable(node, {
+				container: 'test',
+				disabled: true,
+				callbacks: { onDragOver }
+			});
+
+			dndState.isDragging = true;
+			dispatchDocumentPointerMove(60, 60);
+
+			expect(onDragOver).not.toHaveBeenCalled();
+
+			action.destroy();
+		});
+
 		it('should not call onDragLeave when leaving a different container', () => {
 			const onDragLeave = vi.fn();
 			const action = droppable(node, {

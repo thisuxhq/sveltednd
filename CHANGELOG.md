@@ -2,10 +2,9 @@
 
 ## [0.2.2](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.1...sveltednd-v0.2.2) (2026-04-02)
 
-
 ### Bug Fixes
 
-* remove publish script that caused double build in CI ([1c6f4e3](https://github.com/thisuxhq/sveltednd/commit/1c6f4e37f30ce4a45f5fd42f1ab2a4645b7ad715))
+- remove publish script that caused double build in CI ([1c6f4e3](https://github.com/thisuxhq/sveltednd/commit/1c6f4e37f30ce4a45f5fd42f1ab2a4645b7ad715))
 
 ## [0.2.1](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.0...sveltednd-v0.2.1) (2026-04-02)
 

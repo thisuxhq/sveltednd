@@ -61,12 +61,15 @@
 						use:draggable={{
 							container: index.toString(),
 							dragData: item,
+							handle: '[data-drag-handle]',
 							interactive: ['[data-delete-btn]', '[data-select-btn]', '.interactive']
 						}}
 						class="flex items-center justify-between bg-white p-6 transition-colors hover:bg-swiss-gray dark:bg-swiss-black dark:hover:bg-white/10"
 					>
 						<div class="flex items-center gap-6">
-							<span class="text-xs text-swiss-mid-gray dark:text-white/60"
+							<span
+								data-drag-handle
+								class="cursor-grab text-xs text-swiss-mid-gray dark:text-white/60"
 								>{(index + 1).toString().padStart(2, '0')}</span
 							>
 							<button
