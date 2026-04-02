@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.2...sveltednd-v0.2.3) (2026-04-02)
+
+
+### Bug Fixes
+
+* fire onDragOver callback on pointer/touch path and add drag handle to interactive demo ([d0a6fb3](https://github.com/thisuxhq/sveltednd/commit/d0a6fb3aba7a02771f6d8046ebd58ea914956af6)), closes [#46](https://github.com/thisuxhq/sveltednd/issues/46) [#47](https://github.com/thisuxhq/sveltednd/issues/47)
+
 ## [0.2.2](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.1...sveltednd-v0.2.2) (2026-04-02)
 
 ### Bug Fixes
