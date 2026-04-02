@@ -11,13 +11,13 @@ Thanks for wanting to contribute to **@thisux/sveltednd**! We’re happy to have
    ```bash
    git clone https://github.com/thisuxhq/sveltednd.git
    cd sveltednd
-   npm install
+   bun install
    ```
 
 2. Run these commands to check everything works:
-   - **`npm run dev`**: Starts the development server.
-   - **`npm run build`**: Builds the library.
-   - **`npm run test`**: Runs all tests.
+   - **`bun run dev`**: Starts the development server.
+   - **`bun run build`**: Builds the library.
+   - **`bun run test`**: Runs all tests.
 
 ## Code of Conduct
 
@@ -54,13 +54,13 @@ If you find a bug or want to suggest a new feature, [open an issue here](https:/
 - Run **Prettier** and **ESLint** to keep code clean:
 
   ```bash
-  npm run format
-  npm run lint
+  bun run format
+  bun run lint
   ```
 
 - **Use TypeScript** to catch errors:
   ```bash
-  npm run check
+  bun run check
   ```
 
 ## Testing
@@ -68,7 +68,7 @@ If you find a bug or want to suggest a new feature, [open an issue here](https:/
 Please write or update tests for any changes you make. To run tests:
 
 ```bash
-npm run test
+bun run test
 ```
 
 ## Documentation
