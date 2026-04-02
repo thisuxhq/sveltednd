@@ -3,6 +3,11 @@ name: Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. sveltednd-v0.2.0)'
+        required: true
 
 permissions:
   contents: write
@@ -11,6 +16,7 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
@@ -22,13 +28,15 @@ jobs:
           manifest-file: .release-please-manifest.json
 
   publish:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    needs: [release-please]
+    if: |
+      (github.event_name == 'push' && needs.release-please.outputs.release_created == 'true') ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.release-please.outputs.tag_name }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || needs.release-please.outputs.tag_name }}
 
       - uses: oven-sh/setup-bun@v2
         with:
