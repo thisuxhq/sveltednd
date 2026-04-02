@@ -30,8 +30,10 @@ jobs:
   publish:
     needs: [release-please]
     if: |
-      (github.event_name == 'push' && needs.release-please.outputs.release_created == 'true') ||
-      github.event_name == 'workflow_dispatch'
+      always() && (
+        (github.event_name == 'push' && needs.release-please.result == 'success' && needs.release-please.outputs.release_created == 'true') ||
+        github.event_name == 'workflow_dispatch'
+      )
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
