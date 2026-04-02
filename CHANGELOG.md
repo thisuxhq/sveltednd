@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.0...sveltednd-v0.2.1) (2026-04-02)
+
+
+### Bug Fixes
+
+* skip husky in CI to prevent publish failure ([7f42b79](https://github.com/thisuxhq/sveltednd/commit/7f42b79648e506144ff8c0163ffad8ee79f163b9))
+
 ## [0.2.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.1.2...sveltednd-v0.2.0) (2026-04-02)
 
 
