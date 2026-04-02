@@ -37,6 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUSKY: 0
+      CI: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,7 +53,8 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Setup npm auth
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+
       - name: Publish to npm
         run: bun publish --access public
-        env:
-          BUN_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
