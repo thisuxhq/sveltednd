@@ -62,7 +62,7 @@
 
 			<!-- Navigation with numbers -->
 			<div class="flex-1 overflow-y-auto">
-				{#each examples as { path, title, number }, index}
+				{#each examples as { path, title, number }, index (path)}
 					<a
 						href={path}
 						class={cn(
@@ -126,7 +126,7 @@
 	class="fixed bottom-0 left-0 right-0 z-50 border-t border-swiss-black bg-white dark:border-white/20 dark:bg-swiss-black md:hidden"
 >
 	<div class="flex gap-1 overflow-x-auto px-2 py-2">
-		{#each examples as { path, title }}
+		{#each examples as { path, title } (path)}
 			<a
 				href={path}
 				class={cn(

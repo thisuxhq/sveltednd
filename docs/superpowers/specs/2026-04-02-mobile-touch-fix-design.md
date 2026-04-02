@@ -22,6 +22,7 @@ Chosen for minimal surface area: two files changed, zero API changes, no cross-m
 ### `src/lib/actions/droppable.ts`
 
 **Remove** three node-level pointer listeners that are broken on touch:
+
 - `pointerover` → `handlePointerOver`
 - `pointermove` → `handlePointerMove`
 - `pointerout` → `handlePointerOut`
@@ -32,32 +33,32 @@ Chosen for minimal surface area: two files changed, zero API changes, no cross-m
 let wasOver = false;
 
 function handleDocumentPointerMove(event: PointerEvent) {
-    if (!dndState.isDragging) return;
+	if (!dndState.isDragging) return;
 
-    const rect = node.getBoundingClientRect();
-    const isOver =
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom;
+	const rect = node.getBoundingClientRect();
+	const isOver =
+		event.clientX >= rect.left &&
+		event.clientX <= rect.right &&
+		event.clientY >= rect.top &&
+		event.clientY <= rect.bottom;
 
-    if (isOver) {
-        dndState.targetContainer = options.container;
-        node.classList.add(...dragOverClass);
-        updateDropIndicator(event.clientY, event.clientX);
-        if (!wasOver) {
-            options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
-        }
-    } else {
-        if (wasOver && dndState.targetContainer === options.container) {
-            dndState.targetContainer = null;
-            node.classList.remove(...dragOverClass);
-            clearDropIndicator();
-            options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-        }
-    }
+	if (isOver) {
+		dndState.targetContainer = options.container;
+		node.classList.add(...dragOverClass);
+		updateDropIndicator(event.clientY, event.clientX);
+		if (!wasOver) {
+			options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
+		}
+	} else {
+		if (wasOver && dndState.targetContainer === options.container) {
+			dndState.targetContainer = null;
+			node.classList.remove(...dragOverClass);
+			clearDropIndicator();
+			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+		}
+	}
 
-    wasOver = isOver;
+	wasOver = isOver;
 }
 ```
 
@@ -66,6 +67,7 @@ function handleDocumentPointerMove(event: PointerEvent) {
 - Early-exits when `!dndState.isDragging` so idle overhead is a single boolean check.
 
 Register/remove in setup and `destroy()`:
+
 ```ts
 document.addEventListener('pointermove', handleDocumentPointerMove);
 // destroy:
@@ -81,6 +83,7 @@ document.addEventListener('pointercancel', handlePointerUp);
 ```
 
 Remove it in `handlePointerUp` and `destroy()`:
+
 ```ts
 document.removeEventListener('pointercancel', handlePointerUp);
 ```

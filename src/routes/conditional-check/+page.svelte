@@ -82,7 +82,7 @@
 						</div>
 					{:else}
 						<div class="space-y-2">
-							{#each sourceFruits as fruit}
+							{#each sourceFruits as fruit (fruit.name)}
 								<div
 									use:draggable={{ container: 'source', dragData: fruit }}
 									class="group flex items-center justify-between border p-4 transition-all hover:border-swiss-black dark:hover:border-white/50 {fruit.color ===
@@ -129,7 +129,7 @@
 						</div>
 					{:else}
 						<div class="space-y-2">
-							{#each targetFruits as fruit}
+							{#each targetFruits as fruit (fruit.name)}
 								<div
 									class="flex items-center justify-between border border-swiss-red bg-swiss-red/5 p-4 dark:border-swiss-red"
 								>

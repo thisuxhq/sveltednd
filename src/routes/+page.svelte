@@ -92,7 +92,7 @@
 	<!-- Content -->
 	<div class="h-[calc(100vh-200px)] overflow-x-auto p-8 md:p-16">
 		<div class="flex h-full gap-8">
-			{#each tasksByStatus as { status, items }}
+			{#each tasksByStatus as { status, items } (status)}
 				<div class="flex w-80 flex-none flex-col">
 					<!-- Column Header -->
 					<div

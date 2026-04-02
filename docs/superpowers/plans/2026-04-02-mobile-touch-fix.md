@@ -13,6 +13,7 @@
 ### Task 1: Fix `pointercancel` — draggable loses stuck drag state on mobile
 
 **Files:**
+
 - Modify: `src/lib/actions/draggable.ts`
 - Test: `src/lib/actions/draggable.spec.ts`
 
@@ -22,28 +23,28 @@ Add this test inside the `describe('General functionality')` block in `src/lib/a
 
 ```ts
 it('should reset drag state when pointercancel fires (mobile gesture takeover)', () => {
-  const onDragEnd = vi.fn();
-  const action = draggable(node, {
-    container: 'test',
-    attributes: { draggingClass: 'dragging' },
-    callbacks: { onDragEnd }
-  });
+	const onDragEnd = vi.fn();
+	const action = draggable(node, {
+		container: 'test',
+		attributes: { draggingClass: 'dragging' },
+		callbacks: { onDragEnd }
+	});
 
-  // Start a drag
-  node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
-  expect(dndState.isDragging).toBe(true);
-  expect(node.classList.contains('dragging')).toBe(true);
+	// Start a drag
+	node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+	expect(dndState.isDragging).toBe(true);
+	expect(node.classList.contains('dragging')).toBe(true);
 
-  // Browser cancels the gesture (e.g. scroll detected on mobile)
-  document.dispatchEvent(new PointerEvent('pointercancel', { bubbles: false, pointerId: 1 }));
+	// Browser cancels the gesture (e.g. scroll detected on mobile)
+	document.dispatchEvent(new PointerEvent('pointercancel', { bubbles: false, pointerId: 1 }));
 
-  expect(dndState.isDragging).toBe(false);
-  expect(dndState.draggedItem).toBeNull();
-  expect(dndState.sourceContainer).toBe('');
-  expect(node.classList.contains('dragging')).toBe(false);
-  expect(onDragEnd).toHaveBeenCalledTimes(1);
+	expect(dndState.isDragging).toBe(false);
+	expect(dndState.draggedItem).toBeNull();
+	expect(dndState.sourceContainer).toBe('');
+	expect(node.classList.contains('dragging')).toBe(false);
+	expect(onDragEnd).toHaveBeenCalledTimes(1);
 
-  action.destroy();
+	action.destroy();
 });
 ```
 
@@ -62,7 +63,7 @@ In `src/lib/actions/draggable.ts`, find `handlePointerDown` (around line 196). A
 ```ts
 document.addEventListener('pointermove', handlePointerMove);
 document.addEventListener('pointerup', handlePointerUp);
-document.addEventListener('pointercancel', handlePointerUp);   // ← add this line
+document.addEventListener('pointercancel', handlePointerUp); // ← add this line
 ```
 
 In `handlePointerUp` (around line 240), after the two `removeEventListener` calls, add:
@@ -70,7 +71,7 @@ In `handlePointerUp` (around line 240), after the two `removeEventListener` call
 ```ts
 document.removeEventListener('pointermove', handlePointerMove);
 document.removeEventListener('pointerup', handlePointerUp);
-document.removeEventListener('pointercancel', handlePointerUp);  // ← add this line
+document.removeEventListener('pointercancel', handlePointerUp); // ← add this line
 ```
 
 In `destroy()` (around line 326), after the two document `removeEventListener` calls, add:
@@ -78,7 +79,7 @@ In `destroy()` (around line 326), after the two document `removeEventListener` c
 ```ts
 document.removeEventListener('pointermove', handlePointerMove);
 document.removeEventListener('pointerup', handlePointerUp);
-document.removeEventListener('pointercancel', handlePointerUp);  // ← add this line
+document.removeEventListener('pointercancel', handlePointerUp); // ← add this line
 ```
 
 - [ ] **Step 4: Run the test to confirm it passes**
@@ -101,6 +102,7 @@ git commit -m "fix: handle pointercancel to reset stuck drag state on mobile"
 ### Task 2: Fix hover detection — replace `pointerover`/`pointerout` with document `pointermove` in droppable
 
 **Files:**
+
 - Modify: `src/lib/actions/droppable.ts`
 - Test: `src/lib/actions/droppable.spec.ts`
 
@@ -112,121 +114,127 @@ Replace the entire `describe('Pointer events for touch/mouse fallback', ...)` bl
 
 ```ts
 describe('Pointer events for touch/mouse fallback (document pointermove)', () => {
-  beforeEach(() => {
-    // Give the node a known bounding rect: x:10, y:10 → x:110, y:110
-    vi.spyOn(node, 'getBoundingClientRect').mockReturnValue({
-      left: 10, top: 10, right: 110, bottom: 110,
-      width: 100, height: 100, x: 10, y: 10,
-      toJSON: () => ({})
-    });
-  });
+	beforeEach(() => {
+		// Give the node a known bounding rect: x:10, y:10 → x:110, y:110
+		vi.spyOn(node, 'getBoundingClientRect').mockReturnValue({
+			left: 10,
+			top: 10,
+			right: 110,
+			bottom: 110,
+			width: 100,
+			height: 100,
+			x: 10,
+			y: 10,
+			toJSON: () => ({})
+		});
+	});
 
-  function dispatchDocumentPointerMove(clientX: number, clientY: number) {
-    const event = new PointerEvent('pointermove', { bubbles: false, cancelable: false });
-    Object.defineProperty(event, 'clientX', { value: clientX });
-    Object.defineProperty(event, 'clientY', { value: clientY });
-    document.dispatchEvent(event);
-  }
+	function dispatchDocumentPointerMove(clientX: number, clientY: number) {
+		const event = new PointerEvent('pointermove', { bubbles: false, cancelable: false });
+		Object.defineProperty(event, 'clientX', { value: clientX });
+		Object.defineProperty(event, 'clientY', { value: clientY });
+		document.dispatchEvent(event);
+	}
 
-  it('should set targetContainer and add drag-over class when pointer enters bounds', () => {
-    const action = droppable(node, {
-      container: 'test',
-      attributes: { dragOverClass: 'drag-over' }
-    });
+	it('should set targetContainer and add drag-over class when pointer enters bounds', () => {
+		const action = droppable(node, {
+			container: 'test',
+			attributes: { dragOverClass: 'drag-over' }
+		});
 
-    dndState.isDragging = true;
-    dispatchDocumentPointerMove(60, 60); // inside 10-110 bounds
+		dndState.isDragging = true;
+		dispatchDocumentPointerMove(60, 60); // inside 10-110 bounds
 
-    expect(dndState.targetContainer).toBe('test');
-    expect(node.classList.contains('drag-over')).toBe(true);
+		expect(dndState.targetContainer).toBe('test');
+		expect(node.classList.contains('drag-over')).toBe(true);
 
-    action.destroy();
-  });
+		action.destroy();
+	});
 
-  it('should call onDragEnter only once when pointer enters bounds', () => {
-    const onDragEnter = vi.fn();
-    const action = droppable(node, {
-      container: 'test',
-      callbacks: { onDragEnter }
-    });
+	it('should call onDragEnter only once when pointer enters bounds', () => {
+		const onDragEnter = vi.fn();
+		const action = droppable(node, {
+			container: 'test',
+			callbacks: { onDragEnter }
+		});
 
-    dndState.isDragging = true;
-    dispatchDocumentPointerMove(60, 60); // enter
-    dispatchDocumentPointerMove(70, 70); // still inside — should not fire again
+		dndState.isDragging = true;
+		dispatchDocumentPointerMove(60, 60); // enter
+		dispatchDocumentPointerMove(70, 70); // still inside — should not fire again
 
-    expect(onDragEnter).toHaveBeenCalledTimes(1);
+		expect(onDragEnter).toHaveBeenCalledTimes(1);
 
-    action.destroy();
-  });
+		action.destroy();
+	});
 
-  it('should not call onDragEnter when pointer is outside bounds', () => {
-    const onDragEnter = vi.fn();
-    const action = droppable(node, {
-      container: 'test',
-      callbacks: { onDragEnter }
-    });
+	it('should not call onDragEnter when pointer is outside bounds', () => {
+		const onDragEnter = vi.fn();
+		const action = droppable(node, {
+			container: 'test',
+			callbacks: { onDragEnter }
+		});
 
-    dndState.isDragging = true;
-    dispatchDocumentPointerMove(5, 5); // outside bounds (left: 10)
+		dndState.isDragging = true;
+		dispatchDocumentPointerMove(5, 5); // outside bounds (left: 10)
 
-    expect(onDragEnter).not.toHaveBeenCalled();
+		expect(onDragEnter).not.toHaveBeenCalled();
 
-    action.destroy();
-  });
+		action.destroy();
+	});
 
-  it('should call onDragLeave and clear targetContainer when pointer leaves bounds', () => {
-    const onDragLeave = vi.fn();
-    const action = droppable(node, {
-      container: 'test',
-      callbacks: { onDragLeave }
-    });
+	it('should call onDragLeave and clear targetContainer when pointer leaves bounds', () => {
+		const onDragLeave = vi.fn();
+		const action = droppable(node, {
+			container: 'test',
+			callbacks: { onDragLeave }
+		});
 
-    dndState.isDragging = true;
-    dispatchDocumentPointerMove(60, 60); // enter
-    dispatchDocumentPointerMove(5, 5);  // leave
+		dndState.isDragging = true;
+		dispatchDocumentPointerMove(60, 60); // enter
+		dispatchDocumentPointerMove(5, 5); // leave
 
-    expect(onDragLeave).toHaveBeenCalledTimes(1);
-    expect(dndState.targetContainer).toBeNull();
-    expect(node.classList.contains('drag-over')).toBe(false);
+		expect(onDragLeave).toHaveBeenCalledTimes(1);
+		expect(dndState.targetContainer).toBeNull();
+		expect(node.classList.contains('drag-over')).toBe(false);
 
-    action.destroy();
-  });
+		action.destroy();
+	});
 
-  it('should not fire any events when not dragging', () => {
-    const onDragEnter = vi.fn();
-    const onDragLeave = vi.fn();
-    const action = droppable(node, {
-      container: 'test',
-      callbacks: { onDragEnter, onDragLeave }
-    });
+	it('should not fire any events when not dragging', () => {
+		const onDragEnter = vi.fn();
+		const onDragLeave = vi.fn();
+		const action = droppable(node, {
+			container: 'test',
+			callbacks: { onDragEnter, onDragLeave }
+		});
 
-    dndState.isDragging = false;
-    dispatchDocumentPointerMove(60, 60);
+		dndState.isDragging = false;
+		dispatchDocumentPointerMove(60, 60);
 
-    expect(onDragEnter).not.toHaveBeenCalled();
-    expect(onDragLeave).not.toHaveBeenCalled();
+		expect(onDragEnter).not.toHaveBeenCalled();
+		expect(onDragLeave).not.toHaveBeenCalled();
 
-    action.destroy();
-  });
+		action.destroy();
+	});
 
-  it('should not call onDragLeave when leaving a different container', () => {
-    const onDragLeave = vi.fn();
-    const action = droppable(node, {
-      container: 'test',
-      callbacks: { onDragLeave }
-    });
+	it('should not call onDragLeave when leaving a different container', () => {
+		const onDragLeave = vi.fn();
+		const action = droppable(node, {
+			container: 'test',
+			callbacks: { onDragLeave }
+		});
 
-    dndState.isDragging = true;
-    dndState.targetContainer = 'other-container'; // something else is active
-    dispatchDocumentPointerMove(60, 60); // enter this node
-    dndState.targetContainer = 'other-container'; // simulate another container taking over
-    dispatchDocumentPointerMove(5, 5);  // leave this node bounds
+		dndState.isDragging = true;
+		dndState.targetContainer = 'other-container'; // something else is active
+		dispatchDocumentPointerMove(60, 60); // enter this node
+		dndState.targetContainer = 'other-container'; // simulate another container taking over
+		dispatchDocumentPointerMove(5, 5); // leave this node bounds
 
-    // onDragLeave should not fire because targetContainer !== 'test'
-    expect(onDragLeave).not.toHaveBeenCalled();
+		// onDragLeave should not fire because targetContainer !== 'test'
+		expect(onDragLeave).not.toHaveBeenCalled();
 
-    action.destroy();
-  });
+		action.destroy();
+	});
 });
 ```
 
@@ -265,30 +273,30 @@ After the `clearDropIndicator` function (around line 225), add the new handler:
  * inside/outside, not on every pointermove tick.
  */
 function handleDocumentPointerMove(event: PointerEvent) {
-  if (options.disabled || !dndState.isDragging) return;
+	if (options.disabled || !dndState.isDragging) return;
 
-  const rect = node.getBoundingClientRect();
-  const isOver =
-    event.clientX >= rect.left &&
-    event.clientX <= rect.right &&
-    event.clientY >= rect.top &&
-    event.clientY <= rect.bottom;
+	const rect = node.getBoundingClientRect();
+	const isOver =
+		event.clientX >= rect.left &&
+		event.clientX <= rect.right &&
+		event.clientY >= rect.top &&
+		event.clientY <= rect.bottom;
 
-  if (isOver) {
-    dndState.targetContainer = options.container;
-    node.classList.add(...dragOverClass);
-    updateDropIndicator(event.clientY, event.clientX);
-    if (!wasOver) {
-      options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
-    }
-  } else if (wasOver && dndState.targetContainer === options.container) {
-    dndState.targetContainer = null;
-    node.classList.remove(...dragOverClass);
-    clearDropIndicator();
-    options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-  }
+	if (isOver) {
+		dndState.targetContainer = options.container;
+		node.classList.add(...dragOverClass);
+		updateDropIndicator(event.clientY, event.clientX);
+		if (!wasOver) {
+			options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
+		}
+	} else if (wasOver && dndState.targetContainer === options.container) {
+		dndState.targetContainer = null;
+		node.classList.remove(...dragOverClass);
+		clearDropIndicator();
+		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+	}
 
-  wasOver = isOver;
+	wasOver = isOver;
 }
 ```
 
@@ -324,11 +332,11 @@ In `src/lib/actions/droppable.ts`, find `handleGlobalDragEnd` (around line 363).
 
 ```ts
 function handleGlobalDragEnd() {
-  if (dragEnterCounter === 0) return;
-  dragEnterCounter = 0;
-  node.classList.remove(...dragOverClass);
-  clearDropIndicator();
-  wasOver = false;  // ← add this
+	if (dragEnterCounter === 0) return;
+	dragEnterCounter = 0;
+	node.classList.remove(...dragOverClass);
+	clearDropIndicator();
+	wasOver = false; // ← add this
 }
 ```
 
@@ -336,11 +344,11 @@ Find `handleDragStartOnContainer` (around line 376). Add `wasOver = false;` at t
 
 ```ts
 function handleDragStartOnContainer() {
-  if (options.disabled) return;
-  dragEnterCounter = 0;
-  node.classList.remove(...dragOverClass);
-  clearDropIndicator();
-  wasOver = false;  // ← add this
+	if (options.disabled) return;
+	dragEnterCounter = 0;
+	node.classList.remove(...dragOverClass);
+	clearDropIndicator();
+	wasOver = false; // ← add this
 }
 ```
 

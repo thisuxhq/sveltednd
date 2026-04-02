@@ -423,8 +423,14 @@ describe('droppable', () => {
 		beforeEach(() => {
 			// Give the node a known bounding rect: x:10, y:10 → x:110, y:110
 			vi.spyOn(node, 'getBoundingClientRect').mockReturnValue({
-				left: 10, top: 10, right: 110, bottom: 110,
-				width: 100, height: 100, x: 10, y: 10,
+				left: 10,
+				top: 10,
+				right: 110,
+				bottom: 110,
+				width: 100,
+				height: 100,
+				x: 10,
+				y: 10,
 				toJSON: () => ({})
 			});
 		});
@@ -491,7 +497,7 @@ describe('droppable', () => {
 
 			dndState.isDragging = true;
 			dispatchDocumentPointerMove(60, 60); // enter
-			dispatchDocumentPointerMove(5, 5);  // leave
+			dispatchDocumentPointerMove(5, 5); // leave
 
 			expect(onDragLeave).toHaveBeenCalledTimes(1);
 			expect(dndState.targetContainer).toBeNull();
@@ -528,7 +534,7 @@ describe('droppable', () => {
 			dndState.targetContainer = 'other-container'; // something else is active
 			dispatchDocumentPointerMove(60, 60); // enter this node
 			dndState.targetContainer = 'other-container'; // simulate another container taking over
-			dispatchDocumentPointerMove(5, 5);  // leave this node bounds
+			dispatchDocumentPointerMove(5, 5); // leave this node bounds
 
 			// onDragLeave should not fire because targetContainer !== 'test'
 			expect(onDragLeave).not.toHaveBeenCalled();
