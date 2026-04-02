@@ -356,6 +356,31 @@ describe('draggable', () => {
 	});
 
 	describe('General functionality', () => {
+		it('should reset drag state when pointercancel fires (mobile gesture takeover)', () => {
+			const onDragEnd = vi.fn();
+			const action = draggable(node, {
+				container: 'test',
+				attributes: { draggingClass: 'dragging' },
+				callbacks: { onDragEnd }
+			});
+
+			// Start a drag
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			expect(dndState.isDragging).toBe(true);
+			expect(node.classList.contains('dragging')).toBe(true);
+
+			// Browser cancels the gesture (e.g. scroll detected on mobile)
+			document.dispatchEvent(new PointerEvent('pointercancel', { bubbles: false, pointerId: 1 }));
+
+			expect(dndState.isDragging).toBe(false);
+			expect(dndState.draggedItem).toBeNull();
+			expect(dndState.sourceContainer).toBe('');
+			expect(node.classList.contains('dragging')).toBe(false);
+			expect(onDragEnd).toHaveBeenCalledTimes(1);
+
+			action.destroy();
+		});
+
 		it('should set node.draggable based on disabled option', () => {
 			const action = draggable(node, { container: 'test', disabled: true });
 			expect(node.draggable).toBe(false);
