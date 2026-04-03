@@ -75,6 +75,20 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Multiple Containers - SvelteDnD Examples</title>
+	<meta
+		name="description"
+		content="Drag items between multiple containers. Perfect for team management, task boards, and multi-column layouts."
+	/>
+	<meta property="og:title" content="Multiple Containers - SvelteDnD" />
+	<meta property="og:description" content="Multi-container drag and drop example with SvelteDnD" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/multiple" />
+	<meta name="twitter:title" content="Multiple Containers - SvelteDnD" />
+	<meta name="twitter:description" content="Multi-container drag and drop example with SvelteDnD" />
+</svelte:head>
+
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

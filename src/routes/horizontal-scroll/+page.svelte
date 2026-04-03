@@ -28,6 +28,26 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Horizontal Scroll Gallery - SvelteDnD Examples</title>
+	<meta
+		name="description"
+		content="Create horizontal scrolling galleries with drag and drop reordering. Perfect for image galleries and carousel layouts."
+	/>
+	<meta property="og:title" content="Horizontal Scroll Gallery - SvelteDnD" />
+	<meta
+		property="og:description"
+		content="Horizontal drag and drop gallery example with SvelteDnD"
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/horizontal-scroll" />
+	<meta name="twitter:title" content="Horizontal Scroll Gallery - SvelteDnD" />
+	<meta
+		name="twitter:description"
+		content="Horizontal drag and drop gallery example with SvelteDnD"
+	/>
+</svelte:head>
+
 <div class="h-screen overflow-hidden pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

@@ -40,6 +40,13 @@
 	}
 </script>
 
+<svelte:head>
+	<meta name="author" content="ThisUX" />
+	<meta name="robots" content="index, follow" />
+	<meta property="og:site_name" content="@thisux/sveltednd" />
+	<meta name="twitter:card" content="summary_large_image" />
+</svelte:head>
+
 <div class="flex min-h-screen">
 	<!-- Swiss Grid Sidebar -->
 	<aside

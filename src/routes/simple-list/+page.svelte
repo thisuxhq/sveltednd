@@ -53,6 +53,20 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Simple List Reordering - SvelteDnD Examples</title>
+	<meta
+		name="description"
+		content="Learn how to implement drag and drop list reordering with the SvelteDnD library. Simple, intuitive sorting for any list."
+	/>
+	<meta property="og:title" content="Simple List Reordering - SvelteDnD" />
+	<meta property="og:description" content="Drag and drop list reordering example with SvelteDnD" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/simple-list" />
+	<meta name="twitter:title" content="Simple List Reordering - SvelteDnD" />
+	<meta name="twitter:description" content="Drag and drop list reordering example with SvelteDnD" />
+</svelte:head>
+
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
