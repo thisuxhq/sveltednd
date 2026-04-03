@@ -30,6 +30,7 @@
 
 import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DraggableOptions, DragDropState } from '$lib/types/index.js';
+import { startAutoScroll, stopAutoScroll } from '$lib/utils/auto-scroll.js';
 
 /**
  * Default CSS class applied while dragging.
@@ -169,6 +170,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Visual feedback: add dragging class
 		node.classList.add(...draggingClass);
 
+		startAutoScroll();
+
 		// Notify consumer via callback
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
 
@@ -185,6 +188,9 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 */
 	function handleDragEnd() {
 		html5DragActive = false;
+
+		stopAutoScroll();
+
 		node.classList.remove(...draggingClass);
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
@@ -226,6 +232,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 
 		// Visual feedback
 		node.classList.add(...draggingClass);
+
+		startAutoScroll();
 
 		// Notify consumer
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
@@ -278,6 +286,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 
 		// Remove visual dragging styles
 		node.classList.remove(...draggingClass);
+
+		stopAutoScroll();
 
 		/**
 		 * Find what's actually under the cursor.
