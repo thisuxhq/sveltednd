@@ -163,6 +163,11 @@ export interface DragDropOptions<T = unknown> {
 	 * Useful for read-only modes or permission-based UIs.
 	 */
 	disabled?: boolean;
+	/**
+	 * Whether to auto-scroll scrollable ancestors when dragging near their edges.
+	 * Enabled by default. Set to false to disable for this container.
+	 */
+	autoScroll?: boolean;
 	/** Event callbacks for reacting to drag lifecycle changes */
 	callbacks?: DragDropCallbacks<T>;
 	/** CSS class customization options */
