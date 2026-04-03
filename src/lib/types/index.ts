@@ -62,6 +62,11 @@ export interface DragDropState<T = unknown> {
 	 * Useful for showing visual feedback (e.g., red highlighting).
 	 */
 	invalidDrop?: boolean;
+	/**
+	 * True when the drag was initiated via keyboard (Space/Enter) rather than
+	 * mouse or touch. Use this to conditionally show keyboard-specific UI hints.
+	 */
+	isKeyboardDragging?: boolean;
 }
 
 /**

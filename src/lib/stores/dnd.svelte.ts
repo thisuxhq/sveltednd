@@ -55,5 +55,10 @@ export const dndState = $state<DragDropState>({
 	 * Set to true when hovering over an invalid drop zone.
 	 * Can be used to show red highlighting or other error states.
 	 */
-	invalidDrop: false
+	invalidDrop: false,
+	/**
+	 * True when the drag was initiated via keyboard rather than mouse/touch.
+	 * Droppables use this to become focusable during keyboard drag operations.
+	 */
+	isKeyboardDragging: false
 });

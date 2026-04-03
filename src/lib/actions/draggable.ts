@@ -30,6 +30,7 @@
 
 import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DraggableOptions, DragDropState } from '$lib/types/index.js';
+import { announce, focusNextDroppable, focusPrevDroppable } from '$lib/utils/keyboard.js';
 
 /**
  * Default CSS class applied while dragging.
@@ -307,6 +308,76 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		dndState.targetContainer = null;
 	}
 
+	/**
+	 * Starts a keyboard drag operation.
+	 *
+	 * Sets drag state, applies visual feedback, announces to screen readers,
+	 * and moves focus to the first available drop target.
+	 */
+	function startKeyboardDrag() {
+		dndState.isDragging = true;
+		dndState.isKeyboardDragging = true;
+		dndState.draggedItem = options.dragData;
+		dndState.sourceContainer = options.container;
+		dndState.targetContainer = null;
+		node.setAttribute('aria-grabbed', 'true');
+		node.classList.add(...draggingClass);
+		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
+		announce('Item grabbed. Use Tab or arrow keys to move to a drop zone, then press Space or Enter to drop. Press Escape to cancel.');
+		// Pass node so focusNextDroppable skips the source element itself
+		focusNextDroppable(node);
+	}
+
+	/**
+	 * Cancels an active keyboard drag, restoring focus to the source element.
+	 */
+	function cancelKeyboardDrag() {
+		node.classList.remove(...draggingClass);
+		node.setAttribute('aria-grabbed', 'false');
+		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
+		dndState.isDragging = false;
+		dndState.isKeyboardDragging = false;
+		dndState.draggedItem = null;
+		dndState.sourceContainer = '';
+		dndState.targetContainer = null;
+		announce('Drag cancelled.');
+		node.focus();
+	}
+
+	/**
+	 * Handles keyboard events on the draggable element.
+	 *
+	 * - Space / Enter: start drag (or cancel if already dragging)
+	 * - Escape: cancel an active drag
+	 * - Arrow keys: navigate between drop targets while dragging
+	 */
+	function handleKeyDown(event: KeyboardEvent) {
+		if (options.disabled) return;
+
+		if ((event.key === ' ' || event.key === 'Enter') && !dndState.isDragging) {
+			event.preventDefault();
+			startKeyboardDrag();
+			return;
+		}
+
+		if (event.key === 'Escape' && dndState.isKeyboardDragging) {
+			event.preventDefault();
+			cancelKeyboardDrag();
+			return;
+		}
+
+		// Arrow key navigation between drop targets while dragging
+		if (dndState.isKeyboardDragging) {
+			if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+				event.preventDefault();
+				focusNextDroppable(document.activeElement as HTMLElement);
+			} else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+				event.preventDefault();
+				focusPrevDroppable(document.activeElement as HTMLElement);
+			}
+		}
+	}
+
 	// === Setup: Attach all event listeners ===
 
 	// Enable native HTML5 dragging (unless disabled)
@@ -328,12 +399,20 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		node.style.userSelect = 'none';
 	}
 
+	// Keyboard accessibility: make focusable and label for screen readers
+	if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
+	if (!node.hasAttribute('role')) node.setAttribute('role', 'button');
+	node.setAttribute('aria-grabbed', 'false');
+
 	// HTML5 drag API events
 	node.addEventListener('dragstart', handleDragStart);
 	node.addEventListener('dragend', handleDragEnd);
 
 	// Pointer events for broader device support
 	node.addEventListener('pointerdown', handlePointerDown);
+
+	// Keyboard events for accessibility
+	node.addEventListener('keydown', handleKeyDown);
 
 	// Return Svelte action lifecycle methods
 	return {
@@ -361,6 +440,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			node.removeEventListener('dragstart', handleDragStart);
 			node.removeEventListener('dragend', handleDragEnd);
 			node.removeEventListener('pointerdown', handlePointerDown);
+			node.removeEventListener('keydown', handleKeyDown);
 
 			// Safety cleanup: if component unmounts mid-drag, these might still be attached
 			document.removeEventListener('pointermove', handlePointerMove);

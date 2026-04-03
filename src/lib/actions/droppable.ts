@@ -36,6 +36,13 @@
 
 import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
+import {
+	announce,
+	registerDroppable,
+	unregisterDroppable,
+	focusNextDroppable,
+	focusPrevDroppable
+} from '$lib/utils/keyboard.js';
 
 /**
  * Default CSS class applied when an item is dragged over this element.
@@ -456,7 +463,89 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		}
 	}
 
+	/**
+	 * Handles keyboard events on the droppable element during keyboard drag mode.
+	 *
+	 * - Space / Enter: execute the drop
+	 * - Escape: cancel the drag
+	 * - Arrow keys: navigate to the next/prev droppable
+	 *
+	 * Only active when a keyboard drag is in progress (dndState.isKeyboardDragging).
+	 */
+	async function handleKeyDown(event: KeyboardEvent) {
+		if (!dndState.isKeyboardDragging || options.disabled) return;
+
+		if (event.key === ' ' || event.key === 'Enter') {
+			event.preventDefault();
+			dndState.targetContainer = options.container;
+			node.classList.add(...dragOverClass);
+
+			try {
+				await options.callbacks?.onDrop?.(dndState as DragDropState<T>);
+				announce('Item dropped.');
+			} catch (error) {
+				console.error('Keyboard drop failed:', error);
+			} finally {
+				node.classList.remove(...dragOverClass);
+				clearDropIndicator();
+				dndState.isDragging = false;
+				dndState.isKeyboardDragging = false;
+				dndState.draggedItem = null;
+				dndState.sourceContainer = '';
+				dndState.targetContainer = null;
+			}
+		} else if (event.key === 'Escape') {
+			event.preventDefault();
+			// Dispatch a cancel event — the draggable's own Escape handler will fire
+			// since focus was on this droppable, so we dispatch to document
+			document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+		} else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+			event.preventDefault();
+			focusNextDroppable(node);
+		} else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+			event.preventDefault();
+			focusPrevDroppable(node);
+		}
+	}
+
+	/**
+	 * Handles focus entering this droppable during keyboard drag.
+	 * Updates targetContainer so onDrop knows where to put the item.
+	 */
+	function handleFocus() {
+		if (!dndState.isKeyboardDragging || options.disabled) return;
+		dndState.targetContainer = options.container;
+		dndState.targetElement = node;
+		node.classList.add(...dragOverClass);
+		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
+	}
+
+	/**
+	 * Handles focus leaving this droppable during keyboard drag.
+	 */
+	function handleBlur() {
+		if (!dndState.isKeyboardDragging || options.disabled) return;
+		node.classList.remove(...dragOverClass);
+		clearDropIndicator();
+		if (dndState.targetContainer === options.container) {
+			dndState.targetContainer = null;
+			dndState.targetElement = null;
+		}
+		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+	}
+
+	/**
+	 * Expose this droppable as a Tab stop while a keyboard drag is in progress.
+	 * Without this, container-only droppables (not also draggable) are unreachable via Tab.
+	 * We store the original value so we can restore it when the drag ends.
+	 */
+	const originalTabIndex = node.getAttribute('tabindex');
+	if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
+
 	// === Setup: Attach all event listeners ===
+
+	// Register in the keyboard droppable registry
+	registerDroppable(node);
 
 	// HTML5 drag API events
 	node.addEventListener('dragenter', handleDragEnter);
@@ -477,6 +566,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	document.addEventListener('pointermove', handleDocumentPointerMove);
 	node.addEventListener('pointerdrop-on-container', handlePointerDropOnContainer as EventListener);
 
+	// Keyboard accessibility events
+	node.addEventListener('keydown', handleKeyDown);
+	node.addEventListener('focus', handleFocus);
+	node.addEventListener('blur', handleBlur);
+
 	// Return Svelte action lifecycle methods
 	return {
 		/**
@@ -494,6 +588,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		 * Removes all event listeners and clears any visual indicators.
 		 */
 		destroy() {
+			unregisterDroppable(node);
 			clearDropIndicator();
 			node.removeEventListener('dragenter', handleDragEnter);
 			node.removeEventListener('dragleave', handleDragLeave);
@@ -510,6 +605,12 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 				'pointerdrop-on-container',
 				handlePointerDropOnContainer as EventListener
 			);
+			node.removeEventListener('keydown', handleKeyDown);
+			node.removeEventListener('focus', handleFocus);
+			node.removeEventListener('blur', handleBlur);
+			// Restore original tabindex
+			if (originalTabIndex === null) node.removeAttribute('tabindex');
+			else node.setAttribute('tabindex', originalTabIndex);
 		}
 	};
 }
