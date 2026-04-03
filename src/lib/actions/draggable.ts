@@ -199,6 +199,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		dndState.draggedItem = null;
 		dndState.sourceContainer = '';
 		dndState.targetContainer = null;
+		dndState.invalidDrop = false;
 	}
 
 	/**
@@ -315,6 +316,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		dndState.draggedItem = null;
 		dndState.sourceContainer = '';
 		dndState.targetContainer = null;
+		dndState.invalidDrop = false;
 	}
 
 	// === Setup: Attach all event listeners ===

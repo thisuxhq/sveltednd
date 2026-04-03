@@ -464,4 +464,44 @@ describe('draggable', () => {
 			expect(() => action.destroy()).not.toThrow();
 		});
 	});
+
+	describe('Issue #53 - invalidDrop not reset between drag sessions', () => {
+		it('should reset invalidDrop to false on drag end (HTML5 path)', () => {
+			const action = draggable(node, {
+				container: 'test',
+				dragData: { id: '1' }
+			});
+
+			// Simulate a drag where invalidDrop was set during dragover
+			node.dispatchEvent(
+				new DragEvent('dragstart', { bubbles: true, dataTransfer: new DataTransfer() })
+			);
+			dndState.invalidDrop = true;
+
+			// End the drag
+			node.dispatchEvent(new DragEvent('dragend', { bubbles: true }));
+
+			expect(dndState.invalidDrop).toBe(false);
+			action.destroy();
+		});
+
+		it('should reset invalidDrop to false on pointer up', () => {
+			const action = draggable(node, {
+				container: 'test',
+				dragData: { id: '1' }
+			});
+
+			// Start pointer drag
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			dndState.invalidDrop = true;
+
+			// End pointer drag
+			document.dispatchEvent(
+				new PointerEvent('pointerup', { bubbles: true, pointerId: 1, clientX: 0, clientY: 0 })
+			);
+
+			expect(dndState.invalidDrop).toBe(false);
+			action.destroy();
+		});
+	});
 });
