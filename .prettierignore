@@ -3,5 +3,9 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 
+# Release Please generated files
+.release-please-manifest.json
+CHANGELOG.md
+
 # Claude Code internal files
 .claude/
