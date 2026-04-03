@@ -52,6 +52,20 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Custom CSS Classes - SvelteDnD Examples</title>
+	<meta
+		name="description"
+		content="Customize drag and drop styling with custom CSS classes. Override default dragging and drag-over styles."
+	/>
+	<meta property="og:title" content="Custom CSS Classes - SvelteDnD" />
+	<meta property="og:description" content="Custom styling for drag and drop with SvelteDnD" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/custom-classes" />
+	<meta name="twitter:title" content="Custom CSS Classes - SvelteDnD" />
+	<meta name="twitter:description" content="Custom styling for drag and drop with SvelteDnD" />
+</svelte:head>
+
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

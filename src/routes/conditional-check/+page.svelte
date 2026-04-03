@@ -48,6 +48,20 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Conditional Validation - SvelteDnD Examples</title>
+	<meta
+		name="description"
+		content="Implement conditional drop validation with SvelteDnD. Accept or reject drops based on custom logic and data validation."
+	/>
+	<meta property="og:title" content="Conditional Validation - SvelteDnD" />
+	<meta property="og:description" content="Conditional drop validation example with SvelteDnD" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/conditional-check" />
+	<meta name="twitter:title" content="Conditional Validation - SvelteDnD" />
+	<meta name="twitter:description" content="Conditional drop validation example with SvelteDnD" />
+</svelte:head>
+
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

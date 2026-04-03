@@ -80,6 +80,26 @@
 	};
 </script>
 
+<svelte:head>
+	<title>@thisux/sveltednd - Modern Drag and Drop for Svelte 5</title>
+	<meta
+		name="description"
+		content="A lightweight, type-safe drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's runes system."
+	/>
+	<meta property="og:title" content="@thisux/sveltednd - Modern Drag and Drop for Svelte 5" />
+	<meta
+		property="og:description"
+		content="A lightweight, type-safe drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's runes system."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/" />
+	<meta name="twitter:title" content="@thisux/sveltednd - Modern Drag and Drop for Svelte 5" />
+	<meta
+		name="twitter:description"
+		content="A lightweight, type-safe drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's runes system."
+	/>
+</svelte:head>
+
 <div class="h-screen overflow-hidden pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

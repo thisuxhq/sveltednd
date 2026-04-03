@@ -30,6 +30,20 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Drag Handle - SvelteDnD Examples</title>
+	<meta
+		name="description"
+		content="Restrict drag initiation to specific handles. Keep text selectable while enabling drag via grip icons or buttons."
+	/>
+	<meta property="og:title" content="Drag Handle - SvelteDnD" />
+	<meta property="og:description" content="Handle-based drag initiation example with SvelteDnD" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://sveltednd.thisux.com/drag-handle" />
+	<meta name="twitter:title" content="Drag Handle - SvelteDnD" />
+	<meta name="twitter:description" content="Handle-based drag initiation example with SvelteDnD" />
+</svelte:head>
+
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
