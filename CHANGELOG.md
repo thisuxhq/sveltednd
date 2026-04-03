@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.3...sveltednd-v0.3.0) (2026-04-03)
+
+
+### Features
+
+* add auto-scroll during drag ([#54](https://github.com/thisuxhq/sveltednd/issues/54)) ([434b38b](https://github.com/thisuxhq/sveltednd/commit/434b38b4bd4923cdb7336fc196d738bf6a32b7e9))
+* **seo:** add comprehensive SEO meta tags to all demo routes ([#51](https://github.com/thisuxhq/sveltednd/issues/51)) ([83f3d02](https://github.com/thisuxhq/sveltednd/commit/83f3d023183291d13b247d23c8555ac746481e43))
+
 ## [0.2.3](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.2...sveltednd-v0.2.3) (2026-04-02)
 
 
