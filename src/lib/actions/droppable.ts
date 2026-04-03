@@ -36,6 +36,7 @@
 
 import { dndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
+import { addScrollExclusion, removeScrollExclusion } from '$lib/utils/auto-scroll.js';
 
 /**
  * Default CSS class applied when an item is dragged over this element.
@@ -477,6 +478,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	document.addEventListener('pointermove', handleDocumentPointerMove);
 	node.addEventListener('pointerdrop-on-container', handlePointerDropOnContainer as EventListener);
 
+	// If auto-scroll is explicitly disabled for this container, exclude it
+	if (options.autoScroll === false) {
+		addScrollExclusion(node);
+	}
+
 	// Return Svelte action lifecycle methods
 	return {
 		/**
@@ -485,6 +491,12 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		 * @param newOptions - Updated configuration
 		 */
 		update(newOptions: DragDropOptions<T>) {
+			// Update exclusion if autoScroll option changed
+			if (newOptions.autoScroll === false && options.autoScroll !== false) {
+				addScrollExclusion(node);
+			} else if (newOptions.autoScroll !== false && options.autoScroll === false) {
+				removeScrollExclusion(node);
+			}
 			options = newOptions;
 		},
 
@@ -495,6 +507,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		 */
 		destroy() {
 			clearDropIndicator();
+			removeScrollExclusion(node);
 			node.removeEventListener('dragenter', handleDragEnter);
 			node.removeEventListener('dragleave', handleDragLeave);
 			node.removeEventListener('dragover', handleDragOver);
