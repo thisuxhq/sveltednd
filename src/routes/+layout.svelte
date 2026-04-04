@@ -88,8 +88,23 @@
 			</div>
 
 			<!-- Footer links -->
-			<div class="border-t border-swiss-black p-8 dark:border-white/20">
-				<div class="flex gap-6">
+			<div class="border-t border-swiss-black dark:border-white/20">
+				<div
+					class="flex items-center gap-2 border-b border-swiss-gray px-8 py-4 dark:border-white/10"
+				>
+					<div class="h-2 w-2 bg-swiss-red"></div>
+					<span class="text-xs text-swiss-dark-gray dark:text-white/60">available for projects</span
+					>
+					<a
+						href="https://thisux.com"
+						class="ml-auto text-xs text-swiss-black hover:text-swiss-red dark:text-white dark:hover:text-swiss-red"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						thisux.com →
+					</a>
+				</div>
+				<div class="flex gap-6 px-8 py-4">
 					<a
 						href="https://github.com/thisuxhq/sveltednd"
 						target="_blank"
@@ -157,24 +172,6 @@
 >
 	{isDark ? 'light' : 'dark'}
 </button>
-
-<!-- Swiss Grid badge -->
-<footer class="fixed bottom-8 right-8 z-40 hidden md:block">
-	<div
-		class="flex items-center gap-2 border border-swiss-black bg-white px-4 py-2 dark:border-white/20 dark:bg-swiss-black"
-	>
-		<div class="h-2 w-2 bg-swiss-red"></div>
-		<span class="text-xs text-swiss-dark-gray dark:text-white/60">available for projects</span>
-		<a
-			href="https://thisux.com"
-			class="ml-2 text-xs text-swiss-black hover:text-swiss-red dark:text-white dark:hover:text-swiss-red"
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			thisux.com →
-		</a>
-	</div>
-</footer>
 
 <!-- Mobile badge -->
 <div class="fixed bottom-20 left-4 right-4 z-40 md:hidden">

@@ -2,9 +2,13 @@
 
 > @thisux/sveltednd is a lightweight, TypeScript-first drag and drop library for Svelte 5. It provides two Svelte actions (`draggable`, `droppable`) and a global reactive state object (`dndState`) built on Svelte 5 runes. The library uses a dual-API approach — HTML5 Drag-and-Drop for desktop and Pointer Events for touch/mobile — giving seamless cross-device support with no extra configuration.
 
+Created by [Sanju](https://sanju.sh), founder of [ThisUX Private Limited](https://thisux.com) — a design-led product studio.
+
 Install via npm: `npm install @thisux/sveltednd`
 NPM package: https://www.npmjs.com/package/@thisux/sveltednd
 GitHub: https://github.com/thisuxhq/SvelteDnD
+Author: https://sanju.sh
+Studio: https://thisux.com
 
 ## Demo Pages
 

@@ -469,4 +469,4 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ## Acknowledgment
 
-SvelteDnD is proudly built by [ThisUX](https://thisux.com) — A design-led product studio. If you need help building your next product, [let's talk](https://cal.com/imsanju/15min).
+Created by [Sanju](https://sanju.sh), founder of [ThisUX Private Limited](https://thisux.com) — a design-led product studio. If you need help building your next product, [let's talk](https://cal.com/imsanju/15min).
