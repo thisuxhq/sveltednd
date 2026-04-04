@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.3.0...sveltednd-v0.4.0) (2026-04-04)
+
+
+### Features
+
+* add context7 chat widget to demo site ([f0fe4d1](https://github.com/thisuxhq/sveltednd/commit/f0fe4d1f43b75be3bd68a1ef26f3c72d7bb1b914))
+
 ## [0.3.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.2.3...sveltednd-v0.3.0) (2026-04-03)
 
 
