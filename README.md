@@ -411,6 +411,41 @@ Explore the demo pages for complete working examples:
 - **[Interactive Elements](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/interactive-elements/+page.svelte)** — Forms inside draggable items
 - **[Conditional Check](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/conditional-check/+page.svelte)** — Validation before drop
 
+## Using with Components (Svelte 5.29+)
+
+Svelte actions (`use:draggable`, `use:droppable`) only work on native HTML elements, not components. If you need to use drag and drop on a component, Svelte 5.29+ provides `fromAction` to convert actions into attachments that pass through component props:
+
+```svelte
+<script lang="ts">
+	import { fromAction } from 'svelte/attachments';
+	import { draggable, droppable } from '@thisux/sveltednd';
+</script>
+
+<!-- Works on components that spread props onto their root element -->
+<Card {@attach fromAction(draggable, { container: 'list', dragData: item })}>
+	{item.title}
+</Card>
+
+<Column {@attach fromAction(droppable, { container: 'todo', callbacks: { onDrop: handleDrop } })}>
+	<!-- draggable items -->
+</Column>
+```
+
+The component just needs to spread its props onto a root element:
+
+```svelte
+<!-- Card.svelte -->
+<script>
+	let { children, ...props } = $props();
+</script>
+
+<div {...props}>
+	{@render children?.()}
+</div>
+```
+
+> **Note:** Requires Svelte 5.29 or newer. On older versions, wrap the component in a `<div>` with the action instead.
+
 ## Browser Support
 
 - Chrome/Edge 88+

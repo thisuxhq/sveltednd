@@ -340,6 +340,39 @@ import '$lib/styles/dnd.css';
 {/if}
 ```
 
+## Using with Components (Svelte 5.29+)
+
+Svelte actions only work on native HTML elements, not components. Svelte 5.29 introduced attachments and `fromAction` to bridge this gap. Use `fromAction` from `svelte/attachments` to convert `draggable` or `droppable` into an attachment that passes through component props:
+
+```svelte
+<script>
+  import { fromAction } from 'svelte/attachments';
+  import { draggable, droppable } from '@thisux/sveltednd';
+</script>
+
+<Card {@attach fromAction(draggable, { container: 'list', dragData: item })}>
+  {item.title}
+</Card>
+
+<Column {@attach fromAction(droppable, { container: 'todo', callbacks: { onDrop: handleDrop } })}>
+  {#each items as item}
+    ...
+  {/each}
+</Column>
+```
+
+The receiving component must spread props onto a root element for this to work:
+
+```svelte
+<!-- Card.svelte -->
+<script>
+  let { children, ...props } = $props();
+</script>
+<div {...props}>{@render children?.()}</div>
+```
+
+This requires Svelte 5.29+. On older Svelte 5.x versions, wrap the component in a `<div>` with the action instead.
+
 ## Architecture
 
 The library is built on three files:
