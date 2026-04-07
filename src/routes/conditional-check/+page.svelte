@@ -41,9 +41,6 @@
 
 			sourceFruits = sourceFruits.filter((fruit) => fruit.id !== state.draggedItem.id);
 			targetFruits = [...targetFruits, state.draggedItem];
-		},
-		onDragEnd: () => {
-			dndState.invalidDrop = false;
 		}
 	};
 </script>

@@ -264,6 +264,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			dndState.targetContainer = null;
 			node.classList.remove(...dragOverClass);
 			clearDropIndicator();
+			dndState.invalidDrop = false;
 			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 		}
 
@@ -309,6 +310,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		// Actually leaving - remove visual feedback
 		node.classList.remove(...dragOverClass);
 		clearDropIndicator();
+		dndState.invalidDrop = false;
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 
 		// Clear target state if this was the active container
@@ -389,6 +391,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		dragEnterCounter = 0;
 		node.classList.remove(...dragOverClass);
 		clearDropIndicator();
+		dndState.invalidDrop = false;
 		if (dndState.targetContainer === options.container) {
 			dndState.targetContainer = null;
 			dndState.targetElement = null;
@@ -408,6 +411,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 */
 	function handleGlobalDragEnd() {
 		wasOver = false;
+		dndState.invalidDrop = false;
 		if (dragEnterCounter === 0) return;
 		dragEnterCounter = 0;
 		node.classList.remove(...dragOverClass);
