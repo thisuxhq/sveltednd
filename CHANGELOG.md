@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.0...sveltednd-v0.4.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* reset conditional drop validation state ([211a3bb](https://github.com/thisuxhq/sveltednd/commit/211a3bb8f22b471107f2070803c297781f07831f)), closes [#53](https://github.com/thisuxhq/sveltednd/issues/53)
+
 ## [0.4.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.3.0...sveltednd-v0.4.0) (2026-04-04)
 
 
