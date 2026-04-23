@@ -12,6 +12,7 @@ describe('droppable', () => {
 		dndState.sourceContainer = '';
 		dndState.targetContainer = null;
 		dndState.targetElement = null;
+		dndState.dropPosition = null;
 		dndState.invalidDrop = false;
 		node = document.createElement('div');
 		document.body.appendChild(node);
@@ -140,6 +141,73 @@ describe('droppable', () => {
 			node.dispatchEvent(dropEvent);
 
 			expect(node.classList.contains('drag-over')).toBe(false);
+			action.destroy();
+		});
+	});
+
+	describe('Issue #53 - conditional validation cleanup', () => {
+		it('should replace drag-over class when reactive options change while hovered', () => {
+			const action = droppable(node, {
+				container: 'test',
+				attributes: { dragOverClass: 'valid-drop' }
+			});
+
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
+			expect(node.classList.contains('valid-drop')).toBe(true);
+
+			action.update({
+				container: 'test',
+				attributes: { dragOverClass: 'invalid-drop' }
+			});
+
+			expect(node.classList.contains('valid-drop')).toBe(false);
+			expect(node.classList.contains('invalid-drop')).toBe(true);
+
+			node.dispatchEvent(new DragEvent('dragleave', { bubbles: true }));
+			expect(node.classList.contains('invalid-drop')).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should clear target state even when dragleave target differs from dragenter target', () => {
+			const child = document.createElement('span');
+			node.appendChild(child);
+			const action = droppable(node, { container: 'test' });
+
+			child.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
+			dndState.invalidDrop = true;
+
+			expect(dndState.targetContainer).toBe('test');
+			expect(dndState.targetElement).toBe(child);
+
+			node.dispatchEvent(new DragEvent('dragleave', { bubbles: true }));
+
+			expect(dndState.targetContainer).toBeNull();
+			expect(dndState.targetElement).toBeNull();
+			expect(dndState.invalidDrop).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should clear stale target and validation state on global dragend', () => {
+			const action = droppable(node, {
+				container: 'test',
+				attributes: { dragOverClass: 'invalid-drop' }
+			});
+
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true }));
+			dndState.invalidDrop = true;
+
+			expect(dndState.targetContainer).toBe('test');
+			expect(node.classList.contains('invalid-drop')).toBe(true);
+
+			document.dispatchEvent(new DragEvent('dragend', { bubbles: false }));
+
+			expect(dndState.targetContainer).toBeNull();
+			expect(dndState.targetElement).toBeNull();
+			expect(dndState.invalidDrop).toBe(false);
+			expect(node.classList.contains('invalid-drop')).toBe(false);
+
 			action.destroy();
 		});
 	});
@@ -613,17 +681,20 @@ describe('droppable', () => {
 			const onDragLeave = vi.fn();
 			const action = droppable(node, {
 				container: 'test',
+				attributes: { dragOverClass: 'drag-over' },
 				callbacks: { onDragLeave }
 			});
 
 			dndState.isDragging = true;
 			dndState.targetContainer = 'other-container'; // something else is active
 			dispatchDocumentPointerMove(60, 60); // enter this node
+			expect(node.classList.contains('drag-over')).toBe(true);
 			dndState.targetContainer = 'other-container'; // simulate another container taking over
 			dispatchDocumentPointerMove(5, 5); // leave this node bounds
 
 			// onDragLeave should not fire because targetContainer !== 'test'
 			expect(onDragLeave).not.toHaveBeenCalled();
+			expect(node.classList.contains('drag-over')).toBe(false);
 
 			action.destroy();
 		});

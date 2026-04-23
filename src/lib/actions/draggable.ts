@@ -93,6 +93,47 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	let html5DragActive = false;
 
 	/**
+	 * Starts a new drag from a clean transient state.
+	 *
+	 * Conditional drop validation writes into dndState.invalidDrop. If a previous
+	 * drag was cancelled after hovering an invalid zone, that flag must not leak
+	 * into the next drag.
+	 */
+	function beginDragState() {
+		dndState.isDragging = true;
+		dndState.draggedItem = options.dragData;
+		dndState.sourceContainer = options.container;
+		dndState.targetContainer = null;
+		dndState.targetElement = null;
+		dndState.dropPosition = null;
+		dndState.invalidDrop = false;
+	}
+
+	/**
+	 * Removes document-level pointer listeners used by the custom pointer path.
+	 * HTML5 drags can cancel pointer events without delivering a matching pointerup,
+	 * so the HTML5 cleanup path also calls this.
+	 */
+	function removePointerListeners() {
+		document.removeEventListener('pointermove', handlePointerMove);
+		document.removeEventListener('pointerup', handlePointerUp);
+		document.removeEventListener('pointercancel', handlePointerCancel);
+	}
+
+	/**
+	 * Clears all transient drag state at the end of a drag.
+	 */
+	function endDragState() {
+		dndState.isDragging = false;
+		dndState.draggedItem = null;
+		dndState.sourceContainer = '';
+		dndState.targetContainer = null;
+		dndState.targetElement = null;
+		dndState.dropPosition = null;
+		dndState.invalidDrop = false;
+	}
+
+	/**
 	 * Checks if the clicked element (or its parent) is an interactive element.
 	 *
 	 * We walk up the DOM tree because the user might click on a span inside a button,
@@ -155,10 +196,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		html5DragActive = true;
 
 		// Update global state - this triggers reactive updates across all components
-		dndState.isDragging = true;
-		dndState.draggedItem = options.dragData;
-		dndState.sourceContainer = options.container;
-		dndState.targetContainer = null;
+		beginDragState();
 
 		// Configure the native drag data transfer
 		// We stringify the data so it works across different browser contexts
@@ -188,6 +226,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 */
 	function handleDragEnd() {
 		html5DragActive = false;
+		removePointerListeners();
 
 		stopAutoScroll();
 
@@ -195,10 +234,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
 		// Reset global state
-		dndState.isDragging = false;
-		dndState.draggedItem = null;
-		dndState.sourceContainer = '';
-		dndState.targetContainer = null;
+		endDragState();
 	}
 
 	/**
@@ -225,10 +261,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		if (!options.handle && isInteractiveElement(event.target as HTMLElement)) return;
 
 		// Initialize the drag state (same as HTML5 path)
-		dndState.isDragging = true;
-		dndState.draggedItem = options.dragData;
-		dndState.sourceContainer = options.container;
-		dndState.targetContainer = null;
+		beginDragState();
 
 		// Visual feedback
 		node.classList.add(...draggingClass);
@@ -277,12 +310,10 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 * then dispatch a custom event that droppables listen for.
 	 */
 	function handlePointerUp(event: PointerEvent) {
-		if (!dndState.isDragging) return;
-
 		// Clean up our document listeners
-		document.removeEventListener('pointermove', handlePointerMove);
-		document.removeEventListener('pointerup', handlePointerUp);
-		document.removeEventListener('pointercancel', handlePointerCancel);
+		removePointerListeners();
+
+		if (!dndState.isDragging) return;
 
 		// Remove visual dragging styles
 		node.classList.remove(...draggingClass);
@@ -311,10 +342,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Consumer callback and state cleanup
 		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
 
-		dndState.isDragging = false;
-		dndState.draggedItem = null;
-		dndState.sourceContainer = '';
-		dndState.targetContainer = null;
+		endDragState();
 	}
 
 	// === Setup: Attach all event listeners ===
@@ -373,9 +401,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			node.removeEventListener('pointerdown', handlePointerDown);
 
 			// Safety cleanup: if component unmounts mid-drag, these might still be attached
-			document.removeEventListener('pointermove', handlePointerMove);
-			document.removeEventListener('pointerup', handlePointerUp);
-			document.removeEventListener('pointercancel', handlePointerCancel);
+			removePointerListeners();
 		}
 	};
 }

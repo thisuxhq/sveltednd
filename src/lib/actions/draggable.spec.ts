@@ -12,6 +12,8 @@ describe('draggable', () => {
 		dndState.sourceContainer = '';
 		dndState.targetContainer = null;
 		dndState.targetElement = null;
+		dndState.dropPosition = null;
+		dndState.invalidDrop = false;
 		node = document.createElement('div');
 		document.body.appendChild(node);
 	});
@@ -356,6 +358,56 @@ describe('draggable', () => {
 	});
 
 	describe('General functionality', () => {
+		it('should reset stale validation state when a new drag starts', () => {
+			dndState.targetContainer = 'previous-target';
+			dndState.targetElement = document.createElement('div');
+			dndState.dropPosition = 'after';
+			dndState.invalidDrop = true;
+
+			const action = draggable(node, {
+				container: 'test',
+				dragData: 'test-data'
+			});
+
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+
+			expect(dndState.isDragging).toBe(true);
+			expect(dndState.draggedItem).toBe('test-data');
+			expect(dndState.targetContainer).toBeNull();
+			expect(dndState.targetElement).toBeNull();
+			expect(dndState.dropPosition).toBeNull();
+			expect(dndState.invalidDrop).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should clear validation state when a drag ends', () => {
+			const action = draggable(node, {
+				container: 'test',
+				attributes: { draggingClass: 'dragging' }
+			});
+
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+
+			dndState.targetContainer = 'target';
+			dndState.targetElement = document.createElement('div');
+			dndState.dropPosition = 'before';
+			dndState.invalidDrop = true;
+
+			node.dispatchEvent(new DragEvent('dragend', { bubbles: true }));
+
+			expect(dndState.isDragging).toBe(false);
+			expect(dndState.draggedItem).toBeNull();
+			expect(dndState.sourceContainer).toBe('');
+			expect(dndState.targetContainer).toBeNull();
+			expect(dndState.targetElement).toBeNull();
+			expect(dndState.dropPosition).toBeNull();
+			expect(dndState.invalidDrop).toBe(false);
+			expect(node.classList.contains('dragging')).toBe(false);
+
+			action.destroy();
+		});
+
 		it('should NOT reset drag state when pointercancel fires during HTML5 drag (desktop)', () => {
 			const onDragEnd = vi.fn();
 			const action = draggable(node, {
