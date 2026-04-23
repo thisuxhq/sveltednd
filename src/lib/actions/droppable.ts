@@ -57,7 +57,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * CSS classes to apply when an item is dragged over.
 	 * Supports multiple classes separated by spaces.
 	 */
-	const dragOverClass = (options.attributes?.dragOverClass || DEFAULT_DRAG_OVER_CLASS).split(' ');
+	let dragOverClass = getDragOverClass(options);
 
 	/**
 	 * Counter for tracking dragenter/dragleave events.
@@ -94,6 +94,38 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * pointermove tick. Used to fire onDragEnter/onDragLeave on transitions only.
 	 */
 	let wasOver = false;
+
+	/**
+	 * Reads the current drag-over class list from action options.
+	 *
+	 * The value can be reactive in Svelte templates, so it must be refreshed
+	 * when the action receives updated options.
+	 */
+	function getDragOverClass(currentOptions: DragDropOptions<T>) {
+		return (currentOptions.attributes?.dragOverClass || DEFAULT_DRAG_OVER_CLASS)
+			.split(' ')
+			.filter(Boolean);
+	}
+
+	function addDragOverClass() {
+		if (dragOverClass.length === 0) return;
+		node.classList.add(...dragOverClass);
+	}
+
+	function removeDragOverClass(classes = dragOverClass) {
+		if (classes.length === 0) return;
+		node.classList.remove(...classes);
+	}
+
+	/**
+	 * Clears this droppable's global target state when it owns the active target.
+	 */
+	function clearTargetState() {
+		if (dndState.targetContainer !== options.container) return;
+		dndState.targetContainer = null;
+		dndState.targetElement = null;
+		dndState.invalidDrop = false;
+	}
 
 	/**
 	 * Calculates whether the drop should be positioned before or after the target.
@@ -254,17 +286,20 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 		if (isOver) {
 			dndState.targetContainer = options.container;
-			node.classList.add(...dragOverClass);
+			dndState.targetElement = node;
+			addDragOverClass();
 			updateDropIndicator(event.clientY, event.clientX);
 			options.callbacks?.onDragOver?.(dndState as DragDropState<T>);
 			if (!wasOver) {
 				options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 			}
-		} else if (wasOver && dndState.targetContainer === options.container) {
-			dndState.targetContainer = null;
-			node.classList.remove(...dragOverClass);
+		} else if (wasOver) {
+			removeDragOverClass();
 			clearDropIndicator();
-			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+			if (dndState.targetContainer === options.container) {
+				options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+				clearTargetState();
+			}
 		}
 
 		wasOver = isOver;
@@ -285,7 +320,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		dndState.targetElement = event.target as HTMLElement;
 
 		// Visual feedback: highlight the drop zone
-		node.classList.add(...dragOverClass);
+		addDragOverClass();
 		options.callbacks?.onDragEnter?.(dndState as DragDropState<T>);
 	}
 
@@ -295,7 +330,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * Decrements the counter. Only when counter reaches 0 do we actually
 	 * consider this a "leave" (handles nested element bubbling).
 	 */
-	function handleDragLeave(event: DragEvent) {
+	function handleDragLeave(_event: DragEvent) {
 		if (options.disabled) return;
 
 		dragEnterCounter--;
@@ -307,15 +342,10 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (dragEnterCounter > 0) return;
 
 		// Actually leaving - remove visual feedback
-		node.classList.remove(...dragOverClass);
+		removeDragOverClass();
 		clearDropIndicator();
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
-
-		// Clear target state if this was the active container
-		if (dndState.targetContainer === options.container && dndState.targetElement === event.target) {
-			dndState.targetContainer = null;
-			dndState.targetElement = null;
-		}
+		clearTargetState();
 	}
 
 	/**
@@ -356,7 +386,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 		// Reset counter - we're no longer dragging over this zone
 		dragEnterCounter = 0;
-		node.classList.remove(...dragOverClass);
+		removeDragOverClass();
+		dndState.targetContainer = options.container;
+		dndState.targetElement = event.target as HTMLElement;
 
 		try {
 			// Extract the dragged data from the HTML5 dataTransfer
@@ -370,6 +402,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		} finally {
 			// Always clean up the indicator, even if drop handler fails
 			clearDropIndicator();
+			clearTargetState();
 		}
 	}
 
@@ -387,13 +420,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (dragEnterCounter === 0) return;
 		if (node.contains(event.target as Node)) return;
 		dragEnterCounter = 0;
-		node.classList.remove(...dragOverClass);
+		wasOver = false;
+		removeDragOverClass();
 		clearDropIndicator();
-		if (dndState.targetContainer === options.container) {
-			dndState.targetContainer = null;
-			dndState.targetElement = null;
-		}
 		options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
+		clearTargetState();
 	}
 
 	/**
@@ -407,11 +438,14 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * started — triggers cleanup on this drop zone.
 	 */
 	function handleGlobalDragEnd() {
+		const hadActiveState =
+			dragEnterCounter > 0 || wasOver || dndState.targetContainer === options.container;
+
 		wasOver = false;
-		if (dragEnterCounter === 0) return;
 		dragEnterCounter = 0;
-		node.classList.remove(...dragOverClass);
+		removeDragOverClass();
 		clearDropIndicator();
+		if (hadActiveState) clearTargetState();
 	}
 
 	/**
@@ -423,8 +457,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handleDragStartOnContainer() {
 		if (options.disabled) return;
 		dragEnterCounter = 0;
-		node.classList.remove(...dragOverClass);
+		removeDragOverClass();
 		clearDropIndicator();
+		clearTargetState();
 		wasOver = false;
 	}
 
@@ -441,7 +476,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (dndState.targetContainer !== options.container) return;
 
 		dragEnterCounter = 0;
-		node.classList.remove(...dragOverClass);
+		removeDragOverClass();
 
 		try {
 			// Extract data from the custom event detail
@@ -454,6 +489,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			console.error('Drop handling failed:', error);
 		} finally {
 			clearDropIndicator();
+			clearTargetState();
 		}
 	}
 
@@ -491,13 +527,22 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		 * @param newOptions - Updated configuration
 		 */
 		update(newOptions: DragDropOptions<T>) {
+			const previousDragOverClass = dragOverClass;
+			const hadActiveState =
+				dragEnterCounter > 0 || wasOver || dndState.targetContainer === options.container;
+
 			// Update exclusion if autoScroll option changed
 			if (newOptions.autoScroll === false && options.autoScroll !== false) {
 				addScrollExclusion(node);
 			} else if (newOptions.autoScroll !== false && options.autoScroll === false) {
 				removeScrollExclusion(node);
 			}
+
 			options = newOptions;
+			dragOverClass = getDragOverClass(options);
+
+			removeDragOverClass(previousDragOverClass);
+			if (hadActiveState) addDragOverClass();
 		},
 
 		/**
@@ -507,6 +552,8 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		 */
 		destroy() {
 			clearDropIndicator();
+			removeDragOverClass();
+			clearTargetState();
 			removeScrollExclusion(node);
 			node.removeEventListener('dragenter', handleDragEnter);
 			node.removeEventListener('dragleave', handleDragLeave);
