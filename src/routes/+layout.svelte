@@ -2,8 +2,12 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import pkg from '../../package.json' with { type: 'json' };
 
 	let { children } = $props();
+
+	/** Keep demo chrome in sync with package.json (release-please bumps this). */
+	const version = pkg.version;
 
 	const examples = [
 		{ path: '/', title: 'kanban board', number: '01' },
@@ -64,7 +68,7 @@
 						<p class="mt-1 text-sm text-swiss-mid-gray dark:text-white/60">drag & drop library</p>
 					</div>
 					<div class="text-right">
-						<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.1.1</span>
+						<span class="text-xs text-swiss-mid-gray dark:text-white/60">v{version}</span>
 					</div>
 				</div>
 			</div>
@@ -140,7 +144,7 @@
 		<div class="flex items-center gap-2">
 			<div class="h-2 w-2 bg-swiss-red"></div>
 			<span class="text-lg dark:text-white">sveltednd</span>
-			<span class="text-xs text-swiss-mid-gray dark:text-white/60">v0.1.1</span>
+			<span class="text-xs text-swiss-mid-gray dark:text-white/60">v{version}</span>
 		</div>
 	</div>
 </header>
