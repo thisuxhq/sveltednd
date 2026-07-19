@@ -4,6 +4,7 @@
 	import '$lib/styles/dnd.css';
 	import Card from './Card.svelte';
 	import Column from './Column.svelte';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Task {
 		id: string;
@@ -35,20 +36,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Attachments ({`{@attach}`}) - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Use attachDraggable and attachDroppable with Svelte 5 attachments on components."
-	/>
-	<meta property="og:title" content="Attachments - SvelteDnD" />
-	<meta
-		property="og:description"
-		content="Native Svelte 5 attachments for drag and drop on components"
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/attach" />
-</svelte:head>
+<SeoHead
+	title="Attachments"
+	description="Use attachDraggable and attachDroppable with Svelte 5 attachments on components that spread root props."
+	path="/attach"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

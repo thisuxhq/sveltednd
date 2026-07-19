@@ -1,0 +1,5 @@
+# https://sveltednd.thisux.com
+User-agent: *
+Allow: /
+
+Sitemap: https://sveltednd.thisux.com/sitemap.xml

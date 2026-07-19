@@ -2,6 +2,7 @@
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Item {
 		id: string;
@@ -30,19 +31,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Drag Handle - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Restrict drag initiation to specific handles. Keep text selectable while enabling drag via grip icons or buttons."
-	/>
-	<meta property="og:title" content="Drag Handle - SvelteDnD" />
-	<meta property="og:description" content="Handle-based drag initiation example with SvelteDnD" />
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/drag-handle" />
-	<meta name="twitter:title" content="Drag Handle - SvelteDnD" />
-	<meta name="twitter:description" content="Handle-based drag initiation example with SvelteDnD" />
-</svelte:head>
+<SeoHead
+	title="Drag handle"
+	description="Restrict drag initiation to a handle. Keep text selectable while reordering with a grip control."
+	path="/drag-handle"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
 	import { flip } from 'svelte/animate';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Card {
 		id: string;
@@ -26,25 +27,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Grid Sorting - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Implement grid-based drag and drop sorting with SvelteDnD. Reorder items in a responsive grid layout."
-	/>
-	<meta property="og:title" content="Grid Sorting - SvelteDnD" />
-	<meta
-		property="og:description"
-		content="Grid-based drag and drop sorting example with SvelteDnD"
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/grid-sort" />
-	<meta name="twitter:title" content="Grid Sorting - SvelteDnD" />
-	<meta
-		name="twitter:description"
-		content="Grid-based drag and drop sorting example with SvelteDnD"
-	/>
-</svelte:head>
+<SeoHead
+	title="Grid sorting"
+	description="Grid-based drag and drop sorting with nearest-edge detection using SvelteDnD for Svelte 5."
+	path="/grid-sort"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
