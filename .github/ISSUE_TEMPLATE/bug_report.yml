@@ -1,0 +1,104 @@
+name: Bug report
+description: Report incorrect drag-and-drop behavior or a regression
+title: 'bug: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve **@thisux/sveltednd**.
+
+        For **security** issues, do not use this form — email
+        [hello@thisux.com](mailto:hello@thisux.com) per
+        [SECURITY.md](https://github.com/thisuxhq/sveltednd/blob/main/SECURITY.md).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where does the problem show up?
+      options:
+        - draggable action
+        - droppable action
+        - dndState / reactive state
+        - Touch / pointer events
+        - HTML5 drag path (desktop)
+        - Drop indicators / CSS classes
+        - Drag handles
+        - Nested containers
+        - Grid / horizontal layout
+        - Auto-scroll
+        - Types / TypeScript
+        - Demo site
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Clear description of the bug.
+      placeholder: Dragging an item leaves the drag-over class stuck after leaving the zone…
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps or a small Svelte 5 snippet. Link a StackBlitz / repo if helpful.
+      placeholder: |
+        1. Open the nested containers demo
+        2. Drag item A into nested list B on mobile Safari
+        3. Observe …
+      render: markdown
+    validations:
+      required: true
+
+  - type: input
+    id: package-version
+    attributes:
+      label: '@thisux/sveltednd version'
+      placeholder: '0.4.1'
+    validations:
+      required: true
+
+  - type: input
+    id: svelte-version
+    attributes:
+      label: Svelte version
+      placeholder: '5.x'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Desktop (Chrome / Edge)
+        - Desktop (Firefox)
+        - Desktop (Safari)
+        - Mobile (iOS Safari)
+        - Mobile (Chrome Android)
+        - SSR / Node (N/A)
+        - Multiple / unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Screenshots, console errors, browser versions, related issues.

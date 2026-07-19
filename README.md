@@ -3,7 +3,10 @@
 A lightweight, flexible drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's runes system for maximum performance and developer experience.
 
 [![npm version](https://badge.fury.io/js/@thisux%2Fsveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Copyright](https://img.shields.io/badge/©-THISUX%20Private%20Limited-111111.svg)](LICENSE)
+
+**Docs & community:** [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Features
 
@@ -461,12 +464,27 @@ The component just needs to spread its props onto a root element:
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for setup,
+coding style, Conventional Commits, and PR guidelines. Please also follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+Security vulnerabilities should be reported privately — see [SECURITY.md](SECURITY.md).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 
-MIT License — see [LICENSE](./LICENSE) for details.
+Copyright © 2024–2026 [THISUX Private Limited](https://github.com/thisuxhq).
+
+Released under the [MIT License](LICENSE). You may use, modify, and distribute
+this project for personal and commercial purposes, provided the copyright and
+permission notice are retained.
 
 ## Acknowledgment
 
-Created by [Sanju](https://sanju.sh), founder of [ThisUX Private Limited](https://thisux.com) — a design-led product studio. If you need help building your next product, [let's talk](https://cal.com/imsanju/15min).
+Created by [Sanju](https://sanju.sh), founder of
+[THISUX Private Limited](https://thisux.com) — a design-led product studio. If
+you need help building your next product,
+[let's talk](https://cal.com/imsanju/15min).

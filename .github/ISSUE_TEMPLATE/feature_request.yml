@@ -1,0 +1,63 @@
+name: Feature request
+description: Propose a new capability or improvement for sveltednd
+title: 'feat: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem you are solving and how you would use the feature
+        in a Svelte 5 app. Keep the API surface lean when possible.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What are you building, and what is hard or impossible today?
+      placeholder: I need keyboard-accessible reordering for a sortable list in a design tool…
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or behavior
+      description: Sketch options, callbacks, or action attributes you have in mind.
+      placeholder: |
+        e.g. `use:draggable={{ ..., keyboard: true }}` with Arrow keys to move
+        and Space/Enter to pick up / drop.
+      render: markdown
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - draggable / droppable actions
+        - dndState
+        - Accessibility / keyboard
+        - Touch / mobile
+        - Layouts (grid, horizontal, nested)
+        - Styling / indicators
+        - Types
+        - Docs / demos
+        - Tooling / packaging
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds, other libraries, or approaches you tried.
+
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to open a PR for this (with guidance if needed)

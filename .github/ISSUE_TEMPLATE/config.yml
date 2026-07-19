@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/thisuxhq/sveltednd/blob/main/SECURITY.md
+    about: Please do not open public issues for security reports. Email hello@thisux.com instead.
+  - name: Documentation & examples
+    url: https://github.com/thisuxhq/sveltednd/blob/main/README.md
+    about: API reference and usage examples in the README and demo routes.
