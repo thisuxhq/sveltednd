@@ -55,7 +55,9 @@ export const dndState = $state<DragDropState>({
 	 * Set to true when hovering over an invalid drop zone.
 	 * Can be used to show red highlighting or other error states.
 	 */
-	invalidDrop: false
+	invalidDrop: false,
+	/** Input path for the active drag; null when idle */
+	dragInput: null
 });
 
 /**
@@ -73,4 +75,5 @@ export function resetDndState(): void {
 	dndState.targetElement = null;
 	dndState.dropPosition = null;
 	dndState.invalidDrop = false;
+	dndState.dragInput = null;
 }

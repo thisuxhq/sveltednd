@@ -29,8 +29,20 @@
  */
 
 import { dndState, resetDndState } from '$lib/stores/dnd.svelte.js';
-import type { DraggableOptions, DragDropState } from '$lib/types/index.js';
+import type { DraggableOptions, DragDropState, KeyboardOptions } from '$lib/types/index.js';
 import { startAutoScroll, stopAutoScroll } from '$lib/utils/auto-scroll.js';
+import {
+	cancelKeyboardSession,
+	isKeyboardSessionActive,
+	startKeyboardSession
+} from '$lib/utils/keyboard-session.js';
+
+/** Normalize keyboard option into options object or null when disabled. */
+function resolveKeyboardOptions(keyboard: DraggableOptions['keyboard']): KeyboardOptions | null {
+	if (keyboard === true) return { enabled: true, navigation: 'list' };
+	if (!keyboard || keyboard.enabled === false) return null;
+	return { enabled: true, navigation: 'list', ...keyboard };
+}
 
 /**
  * Default CSS class applied while dragging.
@@ -99,7 +111,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 * drag was cancelled after hovering an invalid zone, that flag must not leak
 	 * into the next drag.
 	 */
-	function beginDragState() {
+	function beginDragState(input: 'html5' | 'pointer' | 'keyboard' = 'pointer') {
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
 		dndState.sourceContainer = options.container;
@@ -107,6 +119,50 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		dndState.targetElement = null;
 		dndState.dropPosition = null;
 		dndState.invalidDrop = false;
+		dndState.dragInput = input;
+	}
+
+	function getItemLabel(): string {
+		const data = options.dragData as { title?: string; name?: string; id?: string } | unknown;
+		if (data && typeof data === 'object') {
+			const o = data as { title?: string; name?: string; id?: string };
+			if (o.title) return String(o.title);
+			if (o.name) return String(o.name);
+			if (o.id !== undefined) return String(o.id);
+		}
+		if (typeof data === 'string' || typeof data === 'number') return String(data);
+		const text = node.textContent?.trim();
+		return text ? text.slice(0, 80) : 'Item';
+	}
+
+	function applyKeyboardFocusability() {
+		const kb = resolveKeyboardOptions(options.keyboard);
+		if (options.disabled || !kb) {
+			if (node.getAttribute('data-sveltednd-keyboard') === 'true') {
+				node.removeAttribute('tabindex');
+				node.removeAttribute('data-sveltednd-keyboard');
+				node.removeAttribute('aria-describedby');
+				node.removeAttribute('aria-grabbed');
+			}
+			return;
+		}
+
+		// Prefer focusing the handle when one is configured
+		if (options.handle) {
+			const handleEl = node.querySelector(options.handle) as HTMLElement | null;
+			if (handleEl) {
+				handleEl.tabIndex = 0;
+				handleEl.setAttribute('data-sveltednd-keyboard-handle', 'true');
+			}
+		}
+		node.tabIndex = 0;
+		node.setAttribute('data-sveltednd-keyboard', 'true');
+		node.setAttribute('aria-grabbed', 'false');
+		// Instructions id is created lazily by live region; describe operation statically
+		node.setAttribute(
+			'aria-roledescription',
+			'draggable. Press Space or Enter to pick up, arrow keys to move, Space or Enter to drop, Escape to cancel.'
+		);
 	}
 
 	/**
@@ -130,7 +186,13 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		html5DragActive = false;
 		removePointerListeners();
 		stopAutoScroll();
+		// Keyboard session owns its own teardown (onDragEnd + reset)
+		if (isKeyboardSessionActive()) {
+			cancelKeyboardSession();
+			return;
+		}
 		node.classList.remove(...draggingClass);
+		if (node.isConnected) node.setAttribute('aria-grabbed', 'false');
 		// Best-effort: if this node was already removed, also clear any leftover class
 		document.querySelectorAll(`.${draggingClass[0]}`).forEach((el) => {
 			if (el instanceof HTMLElement) el.classList.remove(...draggingClass);
@@ -177,6 +239,11 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 */
 	function handleDragStart(event: DragEvent) {
 		if (options.disabled) return;
+		// Keyboard session owns the drag — do not start HTML5 in parallel
+		if (isKeyboardSessionActive() || dndState.dragInput === 'keyboard') {
+			event.preventDefault();
+			return;
+		}
 
 		// Use the element that was actually pressed (captured in pointerdown), not
 		// event.target — dragstart always reports the draggable container as target,
@@ -201,7 +268,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		html5DragActive = true;
 
 		// Update global state - this triggers reactive updates across all components
-		beginDragState();
+		beginDragState('html5');
 
 		// Configure the native drag data transfer
 		// We stringify the data so it works across different browser contexts
@@ -257,13 +324,15 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		pointerDownTarget = event.target as HTMLElement;
 
 		if (options.disabled) return;
+		// Do not start pointer drag while keyboard session is active
+		if (isKeyboardSessionActive() || dndState.dragInput === 'keyboard') return;
 
 		if (!isHandleElement(event.target as HTMLElement)) return;
 
 		if (!options.handle && isInteractiveElement(event.target as HTMLElement)) return;
 
 		// Initialize the drag state (same as HTML5 path)
-		beginDragState();
+		beginDragState('pointer');
 
 		// Visual feedback
 		node.classList.add(...draggingClass);
@@ -305,7 +374,44 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 */
 	function handlePointerCancel(event: PointerEvent) {
 		if (html5DragActive) return;
+		if (isKeyboardSessionActive() || dndState.dragInput === 'keyboard') return;
 		handlePointerUp(event);
+	}
+
+	/**
+	 * Keyboard grab entry (Space / Enter) when `keyboard: true` (#24).
+	 * Arrow / drop / cancel are handled on document by keyboard-session.
+	 */
+	function handleKeyDown(event: KeyboardEvent) {
+		const kb = resolveKeyboardOptions(options.keyboard);
+		if (!kb || options.disabled) return;
+
+		// Already in a keyboard session — document handler owns keys
+		if (isKeyboardSessionActive()) return;
+
+		const target = event.target as HTMLElement;
+		// Never hijack typing / native control activation
+		if (isInteractiveElement(target) && target !== node) return;
+
+		if (options.handle && !isHandleElement(target) && target !== node) return;
+
+		if (event.key !== ' ' && event.key !== 'Enter') return;
+		if (dndState.isDragging) return;
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		startKeyboardSession({
+			sourceElement: node,
+			sourceContainer: options.container,
+			dragData: options.dragData,
+			draggingClass,
+			direction: options.direction ?? 'vertical',
+			keyboard: kb,
+			itemLabel: getItemLabel(),
+			onDragStart: options.callbacks?.onDragStart as ((state: DragDropState) => void) | undefined,
+			onDragEnd: options.callbacks?.onDragEnd as ((state: DragDropState) => void) | undefined
+		});
 	}
 
 	/**
@@ -373,6 +479,10 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	// Pointer events for broader device support
 	node.addEventListener('pointerdown', handlePointerDown);
 
+	// Keyboard accessibility (opt-in via keyboard: true) — issue #24
+	node.addEventListener('keydown', handleKeyDown);
+	applyKeyboardFocusability();
+
 	// Return Svelte action lifecycle methods
 	return {
 		/**
@@ -385,6 +495,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			node.draggable = !options.disabled;
 			node.style.touchAction = options.disabled ? '' : 'none';
 			node.style.userSelect = options.disabled ? '' : 'none';
+			applyKeyboardFocusability();
 		},
 
 		/**
@@ -399,6 +510,10 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			node.removeEventListener('dragstart', handleDragStart);
 			node.removeEventListener('dragend', handleDragEnd);
 			node.removeEventListener('pointerdown', handlePointerDown);
+			node.removeEventListener('keydown', handleKeyDown);
+			node.removeAttribute('data-sveltednd-keyboard');
+			node.removeAttribute('aria-roledescription');
+			node.removeAttribute('aria-grabbed');
 
 			// If this node is destroyed mid-drag (common when onDrop reorders lists
 			// and the source element unmounts before dragend), force full cleanup (#60).
@@ -410,6 +525,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 				finishDrag();
 			} else {
 				removePointerListeners();
+				if (isKeyboardSessionActive()) cancelKeyboardSession();
 			}
 		}
 	};

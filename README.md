@@ -19,6 +19,7 @@ A lightweight, flexible drag and drop library for Svelte 5 applications. Built w
 - **Drop Indicators** — Visual feedback showing exactly where items will drop
 - **Nested Support** — Works with nested containers and complex hierarchies
 - **Attachments** — First-class `{@attach}` factories for components (Svelte 5.29+)
+- **Keyboard** — Opt-in Space/arrows/Escape reordering with screen-reader announcements
 - **Lightweight** — Minimal footprint with zero external dependencies
 
 ## Installation
@@ -415,6 +416,64 @@ Explore the demo pages for complete working examples:
 - **[Interactive Elements](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/interactive-elements/+page.svelte)** — Forms inside draggable items
 - **[Conditional Check](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/conditional-check/+page.svelte)** — Validation before drop
 - **[Attachments](https://github.com/thisuxhq/sveltednd/blob/main/src/routes/attach/+page.svelte)** — `{@attach}` on components
+- **[Keyboard](https://github.com/thisuxhq/sveltednd/blob/main/src/routes/keyboard/+page.svelte)** — Space / arrows / Escape reordering
+
+## Keyboard accessibility (opt-in)
+
+Enable keyboard reordering with `keyboard: true` on a **draggable**. Mouse and touch
+behavior are unchanged when the option is omitted.
+
+| Key                                 | Action                                            |
+| ----------------------------------- | ------------------------------------------------- |
+| **Tab**                             | Focus a keyboard-enabled item                     |
+| **Space** / **Enter**               | Pick up, or drop while dragging                   |
+| **↑ / ↓** (or ← / → for horizontal) | Move the drop preview among registered drop zones |
+| **Escape**                          | Cancel without calling `onDrop`                   |
+
+```svelte
+<script lang="ts">
+	import { draggable, droppable, type DragDropState } from '@thisux/sveltednd';
+
+	let items = $state(['Alpha', 'Beta', 'Gamma']);
+
+	function handleDrop(state: DragDropState<string>) {
+		const from = items.indexOf(state.draggedItem);
+		let to = parseInt(state.targetContainer ?? '0');
+		if (state.dropPosition === 'after') to += 1;
+		if (from === -1) return;
+		const next = [...items];
+		const [item] = next.splice(from, 1);
+		next.splice(from < to ? to - 1 : to, 0, item);
+		items = next;
+	}
+</script>
+
+{#each items as item, index (item)}
+	<div
+		use:draggable={{
+			container: index.toString(),
+			dragData: item,
+			keyboard: true
+		}}
+		use:droppable={{
+			container: index.toString(),
+			callbacks: { onDrop: handleDrop }
+		}}
+	>
+		{item}
+	</div>
+{/each}
+```
+
+Notes:
+
+- Keyboard uses the **same** `onDrop` contract as pointer/HTML5 — your data model stays in the app.
+- An assertive live region announces grab / move / drop / cancel for screen readers.
+- Interactive children (inputs, buttons, …) still receive Space/Enter normally.
+- Cross-column Kanban keyboard navigation is planned as a follow-up (`navigation: 'containers'`).
+
+Live demo: [Keyboard](https://sveltednd.thisux.com/keyboard) ·
+[source](https://github.com/thisuxhq/sveltednd/blob/main/src/routes/keyboard/+page.svelte)
 
 ## Using with Components — `{@attach}` (Svelte 5.29+)
 

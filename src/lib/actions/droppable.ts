@@ -41,6 +41,11 @@ import {
 	removeScrollExclusion,
 	stopAutoScroll
 } from '$lib/utils/auto-scroll.js';
+import {
+	registerDroppable,
+	unregisterDroppable,
+	type DroppableRegistration
+} from '$lib/utils/dnd-registry.js';
 
 /**
  * Default CSS class applied when an item is dragged over this element.
@@ -566,10 +571,60 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		}
 	}
 
+	/**
+	 * Keyboard hover preview — reuses drag-over class + drop indicators (#24).
+	 */
+	function setKeyboardHover(active: boolean, position: 'before' | 'after' | null = null) {
+		if (active) {
+			addDragOverClass();
+			if (position) {
+				setDropIndicator(position);
+			}
+			options.callbacks?.onDragOver?.(dndState as DragDropState<T>);
+		} else {
+			removeDragOverClass();
+			clearDropIndicator();
+		}
+	}
+
+	/**
+	 * Keyboard drop commit — same onDrop + finalize pipeline as pointer (#24).
+	 */
+	async function commitDrop(state: DragDropState) {
+		if (options.disabled) return;
+
+		dragEnterCounter = 0;
+		removeDragOverClass();
+
+		const dropState = { ...state } as DragDropState<T>;
+		dndState.targetContainer = options.container;
+		dndState.targetElement = node;
+
+		try {
+			await options.callbacks?.onDrop?.(dropState);
+		} catch (error) {
+			console.error('Drop handling failed:', error);
+		} finally {
+			finalizeDropSession();
+		}
+	}
+
+	const registration: DroppableRegistration = {
+		element: node,
+		container: options.container,
+		direction: options.direction ?? 'vertical',
+		disabled: !!options.disabled,
+		setKeyboardHover,
+		commitDrop
+	};
+
 	// === Setup: Attach all event listeners ===
 
 	// Marker for nested deepest-target resolution (#27)
 	node.setAttribute('data-sveltednd-droppable', options.container);
+
+	// Keyboard navigation registry (#24)
+	registerDroppable(registration);
 
 	// HTML5 drag API events
 	node.addEventListener('dragenter', handleDragEnter);
@@ -618,6 +673,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			dragOverClass = getDragOverClass(options);
 			node.setAttribute('data-sveltednd-droppable', options.container);
 
+			// Keep keyboard registry in sync
+			registration.container = options.container;
+			registration.direction = options.direction ?? 'vertical';
+			registration.disabled = !!options.disabled;
+
 			removeDragOverClass(previousDragOverClass);
 			if (hadActiveState) addDragOverClass();
 		},
@@ -628,6 +688,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		 * Removes all event listeners and clears any visual indicators.
 		 */
 		destroy() {
+			unregisterDroppable(registration);
 			clearDropIndicator();
 			removeDragOverClass();
 			clearTargetState();

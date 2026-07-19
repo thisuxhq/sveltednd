@@ -33,6 +33,9 @@
  *
  * @typeParam T - The type of data being dragged (your item type)
  */
+/** Which input path started the current drag session (when active). */
+export type DragInputMode = 'html5' | 'pointer' | 'keyboard';
+
 export interface DragDropState<T = unknown> {
 	/** True while the user is actively dragging (from dragstart to dragend) */
 	isDragging: boolean;
@@ -62,6 +65,11 @@ export interface DragDropState<T = unknown> {
 	 * Useful for showing visual feedback (e.g., red highlighting).
 	 */
 	invalidDrop?: boolean;
+	/**
+	 * Input modality for the active drag, when dragging.
+	 * `null` when idle. Additive — safe for apps that ignore it.
+	 */
+	dragInput?: DragInputMode | null;
 }
 
 /**
@@ -188,6 +196,49 @@ export interface DragDropOptions<T = unknown> {
 }
 
 /**
+ * Context passed to keyboard announcement formatters.
+ */
+export interface KeyboardAnnouncementContext {
+	/** Human-readable label for the item when available */
+	itemLabel: string;
+	/** Source container id */
+	sourceContainer: string;
+	/** Current target container id (if any) */
+	targetContainer: string | null;
+	/** 1-based index among keyboard targets, or null */
+	position: number | null;
+	/** Total keyboard targets considered */
+	total: number | null;
+}
+
+/**
+ * Opt-in keyboard drag configuration (issue #24).
+ *
+ * Default is off so existing apps get zero tabindex/listener changes until
+ * they enable `keyboard: true` on a draggable.
+ */
+export interface KeyboardOptions {
+	/**
+	 * When false, keyboard support is disabled even if the object is present.
+	 * @default true when `keyboard` is an object or `true`
+	 */
+	enabled?: boolean;
+	/**
+	 * - `'list'` (default): arrows move among registered droppables along the axis
+	 * - `'containers'`: reserved for multi-column navigation (future)
+	 */
+	navigation?: 'list' | 'containers';
+	/** Override screen-reader announcements (assertive live region) */
+	announcements?: {
+		grabbed?: (ctx: KeyboardAnnouncementContext) => string;
+		moved?: (ctx: KeyboardAnnouncementContext) => string;
+		dropped?: (ctx: KeyboardAnnouncementContext) => string;
+		cancelled?: (ctx: KeyboardAnnouncementContext) => string;
+		invalid?: (ctx: KeyboardAnnouncementContext) => string;
+	};
+}
+
+/**
  * Configuration options specifically for draggable elements.
  *
  * Extends the base DragDropOptions with features for controlling
@@ -216,4 +267,13 @@ export interface DraggableOptions<T = unknown> extends DragDropOptions<T> {
 	 * '.drag-handle', '[data-drag-handle]'
 	 */
 	handle?: string;
+	/**
+	 * Enable keyboard reordering for this item (Space/Enter grab & drop,
+	 * arrows to move, Escape to cancel). Opt-in to avoid changing Tab order
+	 * in existing apps. Works with `attachDraggable` as well.
+	 *
+	 * @example
+	 * use:draggable={{ container: '0', dragData: item, keyboard: true }}
+	 */
+	keyboard?: boolean | KeyboardOptions;
 }
