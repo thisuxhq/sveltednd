@@ -31,9 +31,13 @@
  */
 
 // === Actions ===
-// The core draggable and droppable actions that power the library.
-// Import these to make elements draggable and accept drops.
+// Svelte actions for `use:draggable` / `use:droppable` on HTML elements.
 export { draggable, droppable } from './actions/index.js';
+
+// === Attachments (Svelte 5.29+) ===
+// Factories for `{@attach attachDraggable(...)}` / `{@attach attachDroppable(...)}`.
+// Prefer these when applying DnD to components that spread props to a root element.
+export { attachDraggable, attachDroppable } from './attachments/index.js';
 
 // === Store ===
 // Global reactive state tracking the current drag operation.

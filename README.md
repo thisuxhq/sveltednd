@@ -18,6 +18,7 @@ A lightweight, flexible drag and drop library for Svelte 5 applications. Built w
 - **Smart Interaction** — Automatically protects interactive elements (inputs, buttons, etc.)
 - **Drop Indicators** — Visual feedback showing exactly where items will drop
 - **Nested Support** — Works with nested containers and complex hierarchies
+- **Attachments** — First-class `{@attach}` factories for components (Svelte 5.29+)
 - **Lightweight** — Minimal footprint with zero external dependencies
 
 ## Installation
@@ -413,32 +414,62 @@ Explore the demo pages for complete working examples:
 - **[Custom Classes](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/custom-classes/+page.svelte)** — Custom styling
 - **[Interactive Elements](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/interactive-elements/+page.svelte)** — Forms inside draggable items
 - **[Conditional Check](https://github.com/thisuxhq/SvelteDnD/blob/main/src/routes/conditional-check/+page.svelte)** — Validation before drop
+- **[Attachments](https://github.com/thisuxhq/sveltednd/blob/main/src/routes/attach/+page.svelte)** — `{@attach}` on components
 
-## Using with Components (Svelte 5.29+)
+## Using with Components — `{@attach}` (Svelte 5.29+)
 
-Svelte actions (`use:draggable`, `use:droppable`) only work on native HTML elements, not components. If you need to use drag and drop on a component, Svelte 5.29+ provides `fromAction` to convert actions into attachments that pass through component props:
+Svelte actions (`use:draggable`, `use:droppable`) only work on **native HTML elements**. For
+**components**, use the first-class attachment factories:
+
+| API                                   | Use on                     | Syntax                           |
+| ------------------------------------- | -------------------------- | -------------------------------- |
+| `draggable` / `droppable`             | HTML elements              | `use:draggable={...}`            |
+| `attachDraggable` / `attachDroppable` | Elements **or** components | `{@attach attachDraggable(...)}` |
+
+Pass a **getter** (`() => options`) when options depend on reactive state — that keeps
+generics intact and updates the underlying action without remounting.
 
 ```svelte
 <script lang="ts">
-	import { fromAction } from 'svelte/attachments';
-	import { draggable, droppable } from '@thisux/sveltednd';
+	import { attachDraggable, attachDroppable, type DragDropState } from '@thisux/sveltednd';
+
+	interface Task {
+		id: string;
+		title: string;
+	}
+
+	let task = $state<Task>({ id: '1', title: 'Ship attach API' });
+
+	function handleDrop(state: DragDropState<Task>) {
+		// update your data
+	}
 </script>
 
-<!-- Works on components that spread props onto their root element -->
-<Card {@attach fromAction(draggable, { container: 'list', dragData: item })}>
-	{item.title}
+<!-- Component roots: works because Card/Column spread {...props} onto an element -->
+<Card
+	{@attach attachDraggable(() => ({
+		container: 'list',
+		dragData: task
+	}))}
+>
+	{task.title}
 </Card>
 
-<Column {@attach fromAction(droppable, { container: 'todo', callbacks: { onDrop: handleDrop } })}>
-	<!-- draggable items -->
+<Column
+	{@attach attachDroppable<Task>(() => ({
+		container: 'todo',
+		callbacks: { onDrop: handleDrop }
+	}))}
+>
+	<!-- cards -->
 </Column>
 ```
 
-The component just needs to spread its props onto a root element:
+Your component must forward props (and thus attachments) to a real DOM node:
 
 ```svelte
 <!-- Card.svelte -->
-<script>
+<script lang="ts">
 	let { children, ...props } = $props();
 </script>
 
@@ -447,7 +478,22 @@ The component just needs to spread its props onto a root element:
 </div>
 ```
 
-> **Note:** Requires Svelte 5.29 or newer. On older versions, wrap the component in a `<div>` with the action instead.
+You can still use `fromAction` from `svelte/attachments` with the raw actions if you prefer,
+but always pass a **function** as the second argument:
+
+```svelte
+<!-- Correct -->
+<div {@attach fromAction(draggable, () => ({ container: 'list', dragData: item }))}></div>
+
+<!-- Incorrect — second arg must be a getter, not the options object -->
+<div {@attach fromAction(draggable, { container: 'list', dragData: item })}></div>
+```
+
+> **Note:** Attachments require **Svelte 5.29+** (`fromAction` is available in current 5.x).
+> On older versions, wrap the component in a `<div>` and use `use:draggable` / `use:droppable`.
+
+Live demo: [Attachments](https://sveltednd.thisux.com/attach) ·
+[source](https://github.com/thisuxhq/sveltednd/blob/main/src/routes/attach/+page.svelte)
 
 ## Browser Support
 
