@@ -15,7 +15,8 @@
 		{ path: '/custom-classes', title: 'custom classes', number: '07' },
 		{ path: '/drag-handle', title: 'drag handle', number: '08' },
 		{ path: '/interactive-elements', title: 'interactive elements', number: '09' },
-		{ path: '/conditional-check', title: 'conditional check', number: '10' }
+		{ path: '/conditional-check', title: 'conditional check', number: '10' },
+		{ path: '/attach', title: 'attachments', number: '11' }
 	];
 
 	const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');

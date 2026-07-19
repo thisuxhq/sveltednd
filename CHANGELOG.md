@@ -5,31 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Features
+
+- **#59** — First-class `{@attach}` factories: `attachDraggable` / `attachDroppable`
+  with generics and reactive getters; demo at `/attach`; README documents correct
+  `fromAction(..., () => options)` usage
+
 ## [0.4.2](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.1...sveltednd-v0.4.2) (2026-07-19)
 
 
 ### Bug Fixes
 
 * drag lifecycle reliability ([#61](https://github.com/thisuxhq/sveltednd/issues/61), [#60](https://github.com/thisuxhq/sveltednd/issues/60), [#27](https://github.com/thisuxhq/sveltednd/issues/27)) ([#64](https://github.com/thisuxhq/sveltednd/issues/64)) ([6cad235](https://github.com/thisuxhq/sveltednd/commit/6cad235019f2450f00f3566810ed7e76a0c5ecf8))
-
-## [Unreleased]
-
-### Fixed
-
-- **#61** — Auto-scroll no longer jumps the page to the top on pointerdown /
-  first drag; scroll waits for a real pointer/drag position and pointer-path
-  starts auto-scroll on first `pointermove`
-- **#60** — Global `dndState` always resets after drop, including when `onDrop`
-  removes the dragged node (so `dragend` never fires); destroy mid-drag also
-  cleans up
-- **#27** — Nested droppables prefer the deepest target; HTML5 `drop` stops
-  propagation; nested demo supports group reorder + item move between groups
-
-### Documentation
-
-- Align community health files with THISUX standards (SECURITY, CITATION,
-  issue/PR templates, license copyright, Code of Conduct contact)
-- Nested containers demo rewritten with typed payloads and list-body drop zones
 
 ## [0.4.1](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.0...sveltednd-v0.4.1) (2026-04-23)
 

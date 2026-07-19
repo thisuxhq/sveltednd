@@ -344,28 +344,34 @@ import '$lib/styles/dnd.css';
 {/if}
 ```
 
-## Using with Components (Svelte 5.29+)
+## Using with Components — attachments (Svelte 5.29+)
 
-Svelte actions only work on native HTML elements, not components. Svelte 5.29 introduced attachments and `fromAction` to bridge this gap. Use `fromAction` from `svelte/attachments` to convert `draggable` or `droppable` into an attachment that passes through component props:
+Svelte actions only work on native HTML elements. For components, use first-class
+attachment factories: `attachDraggable` and `attachDroppable`.
 
 ```svelte
-<script>
-  import { fromAction } from 'svelte/attachments';
-  import { draggable, droppable } from '@thisux/sveltednd';
+<script lang="ts">
+  import { attachDraggable, attachDroppable, type DragDropState } from '@thisux/sveltednd';
+
+  interface Task { id: string; title: string }
+  let task = $state<Task>({ id: '1', title: 'Ship it' });
+
+  function handleDrop(state: DragDropState<Task>) { /* ... */ }
 </script>
 
-<Card {@attach fromAction(draggable, { container: 'list', dragData: item })}>
-  {item.title}
+<Card {@attach attachDraggable(() => ({ container: 'list', dragData: task }))}>
+  {task.title}
 </Card>
 
-<Column {@attach fromAction(droppable, { container: 'todo', callbacks: { onDrop: handleDrop } })}>
-  {#each items as item}
-    ...
-  {/each}
+<Column {@attach attachDroppable<Task>(() => ({
+  container: 'todo',
+  callbacks: { onDrop: handleDrop }
+}))}>
+  <!-- cards -->
 </Column>
 ```
 
-The receiving component must spread props onto a root element for this to work:
+The receiving component must spread props onto a root element:
 
 ```svelte
 <!-- Card.svelte -->
@@ -375,7 +381,11 @@ The receiving component must spread props onto a root element for this to work:
 <div {...props}>{@render children?.()}</div>
 ```
 
-This requires Svelte 5.29+. On older Svelte 5.x versions, wrap the component in a `<div>` with the action instead.
+Prefer a getter `() => options` so reactive state is read on each attach evaluation.
+If you use `fromAction` yourself, the second argument must be a getter:
+`fromAction(draggable, () => options)` — not the raw options object.
+
+Requires Svelte 5.29+. On older versions, wrap the component in a `<div>` with `use:`.
 
 ## Architecture
 
