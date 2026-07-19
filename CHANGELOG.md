@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.2...sveltednd-v0.5.0) (2026-07-19)
+
+
+### Features
+
+* add attachDraggable and attachDroppable for {[@attach](https://github.com/attach)} ([#66](https://github.com/thisuxhq/sveltednd/issues/66)) ([db5cbe9](https://github.com/thisuxhq/sveltednd/commit/db5cbe96dabd3d9f97bef7af2202edb01a78877d))
+
 ## [Unreleased]
 
 ### Features
