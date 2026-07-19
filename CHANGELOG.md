@@ -7,10 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **#61** — Auto-scroll no longer jumps the page to the top on pointerdown /
+  first drag; scroll waits for a real pointer/drag position and pointer-path
+  starts auto-scroll on first `pointermove`
+- **#60** — Global `dndState` always resets after drop, including when `onDrop`
+  removes the dragged node (so `dragend` never fires); destroy mid-drag also
+  cleans up
+- **#27** — Nested droppables prefer the deepest target; HTML5 `drop` stops
+  propagation; nested demo supports group reorder + item move between groups
+
 ### Documentation
 
 - Align community health files with THISUX standards (SECURITY, CITATION,
   issue/PR templates, license copyright, Code of Conduct contact)
+- Nested containers demo rewritten with typed payloads and list-body drop zones
 
 ## [0.4.1](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.0...sveltednd-v0.4.1) (2026-04-23)
 

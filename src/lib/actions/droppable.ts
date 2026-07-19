@@ -34,9 +34,13 @@
  * @module droppable
  */
 
-import { dndState } from '$lib/stores/dnd.svelte.js';
+import { dndState, resetDndState } from '$lib/stores/dnd.svelte.js';
 import type { DragDropOptions, DragDropState } from '$lib/types/index.js';
-import { addScrollExclusion, removeScrollExclusion } from '$lib/utils/auto-scroll.js';
+import {
+	addScrollExclusion,
+	removeScrollExclusion,
+	stopAutoScroll
+} from '$lib/utils/auto-scroll.js';
 
 /**
  * Default CSS class applied when an item is dragged over this element.
@@ -278,13 +282,23 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled || !dndState.isDragging) return;
 
 		const rect = node.getBoundingClientRect();
-		const isOver =
+		const boundsHit =
 			event.clientX >= rect.left &&
 			event.clientX <= rect.right &&
 			event.clientY >= rect.top &&
 			event.clientY <= rect.bottom;
 
-		if (isOver) {
+		// Nested droppables: prefer the deepest element under the pointer (#27).
+		// If a child droppable contains the point, do not steal targetContainer.
+		let ownsHover = false;
+		if (boundsHit) {
+			const under = document.elementFromPoint(event.clientX, event.clientY);
+			const deepestDroppable =
+				under instanceof Element ? under.closest('[data-sveltednd-droppable]') : null;
+			ownsHover = !deepestDroppable || deepestDroppable === node;
+		}
+
+		if (ownsHover) {
 			dndState.targetContainer = options.container;
 			dndState.targetElement = node;
 			addDragOverClass();
@@ -296,13 +310,13 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		} else if (wasOver) {
 			removeDragOverClass();
 			clearDropIndicator();
+			options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 			if (dndState.targetContainer === options.container) {
-				options.callbacks?.onDragLeave?.(dndState as DragDropState<T>);
 				clearTargetState();
 			}
 		}
 
-		wasOver = isOver;
+		wasOver = ownsHover;
 	}
 
 	/**
@@ -314,6 +328,13 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handleDragEnter(event: DragEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
+
+		// Nested: only the deepest droppable under the event target owns hover (#27)
+		const fromTarget =
+			event.target instanceof Element ? event.target.closest('[data-sveltednd-droppable]') : null;
+		if (fromTarget && fromTarget !== node) {
+			return;
+		}
 
 		dragEnterCounter++;
 		dndState.targetContainer = options.container;
@@ -330,8 +351,15 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * Decrements the counter. Only when counter reaches 0 do we actually
 	 * consider this a "leave" (handles nested element bubbling).
 	 */
-	function handleDragLeave(_event: DragEvent) {
+	function handleDragLeave(event: DragEvent) {
 		if (options.disabled) return;
+
+		// Nested: ignore leave events that belong to a deeper droppable (#27)
+		const fromTarget =
+			event.target instanceof Element ? event.target.closest('[data-sveltednd-droppable]') : null;
+		if (fromTarget && fromTarget !== node) {
+			return;
+		}
 
 		dragEnterCounter--;
 
@@ -362,12 +390,42 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
+		// Nested: defer to deeper droppable under the cursor (#27)
+		const fromTarget =
+			event.target instanceof Element ? event.target.closest('[data-sveltednd-droppable]') : null;
+		if (fromTarget && fromTarget !== node) {
+			return;
+		}
+
 		// Show the "move" cursor to indicate this is a valid drop target
 		if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+
+		dndState.targetContainer = options.container;
+		dndState.targetElement = node;
 
 		// Update the position indicator based on cursor position
 		updateDropIndicator(event.clientY, event.clientX);
 		options.callbacks?.onDragOver?.(dndState as DragDropState<T>);
+	}
+
+	/**
+	 * Ends the global drag session after a successful drop path.
+	 *
+	 * When onDrop mutates the list and removes the dragged element, the browser
+	 * often never fires `dragend` on that node. Without this reset, isDragging
+	 * stays true and indicators stick (#60). Idempotent with draggable cleanup.
+	 */
+	function finalizeDropSession() {
+		wasOver = false;
+		dragEnterCounter = 0;
+		removeDragOverClass();
+		clearDropIndicator();
+		stopAutoScroll();
+		// Best-effort remove leftover dragging classes (source may already be gone)
+		document.querySelectorAll('.dragging').forEach((el) => {
+			el.classList.remove('dragging');
+		});
+		resetDndState();
 	}
 
 	/**
@@ -376,13 +434,16 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * This is where the actual data update happens. We:
 	 * 1. Parse the dropped data from the dataTransfer
 	 * 2. Call the consumer's onDrop callback
-	 * 3. Clean up visual state
+	 * 3. Clean up visual + global drag state
 	 *
-	 * Supports async callbacks - state stays stable until the promise resolves.
+	 * Supports async callbacks - state is snapshotted for the callback, then
+	 * reset so a removed source node cannot leave the app stuck dragging.
 	 */
 	async function handleDrop(event: DragEvent) {
 		if (options.disabled) return;
 		event.preventDefault();
+		// Nested droppables: only the deepest zone that handles the drop should win (#27)
+		event.stopPropagation();
 
 		// Reset counter - we're no longer dragging over this zone
 		dragEnterCounter = 0;
@@ -390,19 +451,24 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		dndState.targetContainer = options.container;
 		dndState.targetElement = event.target as HTMLElement;
 
+		// Snapshot before consumer mutates DOM / before we reset
+		const dropState = { ...dndState } as DragDropState<T>;
+
 		try {
 			// Extract the dragged data from the HTML5 dataTransfer
 			if (event.dataTransfer) {
-				dndState.draggedItem = JSON.parse(event.dataTransfer.getData('text/plain')) as T;
+				const raw = event.dataTransfer.getData('text/plain');
+				if (raw) {
+					dropState.draggedItem = JSON.parse(raw) as T;
+					dndState.draggedItem = dropState.draggedItem;
+				}
 			}
 			// Let the consumer handle the actual data movement
-			await options.callbacks?.onDrop?.(dndState as DragDropState<T>);
+			await options.callbacks?.onDrop?.(dropState);
 		} catch (error) {
 			console.error('Drop handling failed:', error);
 		} finally {
-			// Always clean up the indicator, even if drop handler fails
-			clearDropIndicator();
-			clearTargetState();
+			finalizeDropSession();
 		}
 	}
 
@@ -470,30 +536,40 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * when the pointer is released. We handle it the same way as HTML5 drop.
 	 *
 	 * Supports async callbacks - returns a Promise if the callback is async.
+	 * Global state is reset after onDrop so list mutations cannot stick (#60).
 	 */
 	async function handlePointerDropOnContainer(event: Event) {
 		if (options.disabled || !dndState.isDragging) return;
 		if (dndState.targetContainer !== options.container) return;
 
+		// Nested: only the matching target handles the drop; stop further bubbling (#27)
+		event.stopPropagation();
+
 		dragEnterCounter = 0;
 		removeDragOverClass();
+
+		const dropState = { ...dndState } as DragDropState<T>;
 
 		try {
 			// Extract data from the custom event detail
 			const customEvent = event as CustomEvent;
 			if (customEvent.detail?.dragData) {
+				dropState.draggedItem = customEvent.detail.dragData;
 				dndState.draggedItem = customEvent.detail.dragData;
 			}
-			await options.callbacks?.onDrop?.(dndState as DragDropState<T>);
+			await options.callbacks?.onDrop?.(dropState);
 		} catch (error) {
 			console.error('Drop handling failed:', error);
 		} finally {
-			clearDropIndicator();
-			clearTargetState();
+			// Pointer path also ends via draggable.finishDrag; keep this idempotent.
+			finalizeDropSession();
 		}
 	}
 
 	// === Setup: Attach all event listeners ===
+
+	// Marker for nested deepest-target resolution (#27)
+	node.setAttribute('data-sveltednd-droppable', options.container);
 
 	// HTML5 drag API events
 	node.addEventListener('dragenter', handleDragEnter);
@@ -540,6 +616,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 			options = newOptions;
 			dragOverClass = getDragOverClass(options);
+			node.setAttribute('data-sveltednd-droppable', options.container);
 
 			removeDragOverClass(previousDragOverClass);
 			if (hadActiveState) addDragOverClass();
@@ -555,6 +632,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			removeDragOverClass();
 			clearTargetState();
 			removeScrollExclusion(node);
+			node.removeAttribute('data-sveltednd-droppable');
 			node.removeEventListener('dragenter', handleDragEnter);
 			node.removeEventListener('dragleave', handleDragLeave);
 			node.removeEventListener('dragover', handleDragOver);

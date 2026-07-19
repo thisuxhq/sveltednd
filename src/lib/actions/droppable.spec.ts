@@ -338,7 +338,7 @@ describe('droppable', () => {
 			action.destroy();
 		});
 
-		it('should update dndState.draggedItem from event detail', async () => {
+		it('should pass draggedItem from event detail to onDrop and reset state (issue #60)', async () => {
 			const onDrop = vi.fn();
 			const dragData = { id: '123', name: 'Test Item' };
 
@@ -358,7 +358,10 @@ describe('droppable', () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 0));
 
-			expect(dndState.draggedItem).toEqual(dragData);
+			expect(onDrop).toHaveBeenCalledWith(expect.objectContaining({ draggedItem: dragData }));
+			// Global state must be idle after drop so list mutations cannot stick (#60)
+			expect(dndState.isDragging).toBe(false);
+			expect(dndState.draggedItem).toBeNull();
 			action.destroy();
 		});
 
@@ -441,8 +444,11 @@ describe('droppable', () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 0));
 
-			expect(dndState.draggedItem).toEqual(dragData);
+			expect(onDrop).toHaveBeenCalledWith(expect.objectContaining({ draggedItem: dragData }));
 			expect(mockDataTransfer.getData).toHaveBeenCalledWith('text/plain');
+			// State is reset after drop so apps never stick in isDragging (#60)
+			expect(dndState.isDragging).toBe(false);
+			expect(dndState.draggedItem).toBeNull();
 			action.destroy();
 		});
 
@@ -677,7 +683,7 @@ describe('droppable', () => {
 			action.destroy();
 		});
 
-		it('should not call onDragLeave when leaving a different container', () => {
+		it('should fire onDragLeave when pointer leaves even if another container was target', () => {
 			const onDragLeave = vi.fn();
 			const action = droppable(node, {
 				container: 'test',
@@ -686,17 +692,148 @@ describe('droppable', () => {
 			});
 
 			dndState.isDragging = true;
-			dndState.targetContainer = 'other-container'; // something else is active
 			dispatchDocumentPointerMove(60, 60); // enter this node
 			expect(node.classList.contains('drag-over')).toBe(true);
-			dndState.targetContainer = 'other-container'; // simulate another container taking over
+			// Simulate another container taking over target ownership
+			dndState.targetContainer = 'other-container';
 			dispatchDocumentPointerMove(5, 5); // leave this node bounds
 
-			// onDragLeave should not fire because targetContainer !== 'test'
-			expect(onDragLeave).not.toHaveBeenCalled();
+			expect(onDragLeave).toHaveBeenCalledTimes(1);
 			expect(node.classList.contains('drag-over')).toBe(false);
 
 			action.destroy();
+		});
+
+		it('should defer hover to a nested child droppable (issue #27)', () => {
+			const parent = node;
+			const child = document.createElement('div');
+			parent.appendChild(child);
+			// Mock layout: parent 0-200, child 20-80
+			vi.spyOn(parent, 'getBoundingClientRect').mockReturnValue({
+				top: 0,
+				left: 0,
+				right: 200,
+				bottom: 200,
+				width: 200,
+				height: 200,
+				x: 0,
+				y: 0,
+				toJSON: () => ({})
+			});
+			vi.spyOn(child, 'getBoundingClientRect').mockReturnValue({
+				top: 20,
+				left: 20,
+				right: 80,
+				bottom: 80,
+				width: 60,
+				height: 60,
+				x: 20,
+				y: 20,
+				toJSON: () => ({})
+			});
+			vi.spyOn(document, 'elementFromPoint').mockImplementation((x, y) => {
+				if (x >= 20 && x <= 80 && y >= 20 && y <= 80) return child;
+				if (x >= 0 && x <= 200 && y >= 0 && y <= 200) return parent;
+				return null;
+			});
+
+			const parentAction = droppable(parent, {
+				container: 'parent',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+			const childAction = droppable(child, {
+				container: 'child',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+
+			dndState.isDragging = true;
+			// Pointer over child — child owns, parent must not steal target
+			dispatchDocumentPointerMove(40, 40);
+			expect(dndState.targetContainer).toBe('child');
+			expect(child.classList.contains('drag-over')).toBe(true);
+			expect(parent.classList.contains('drag-over')).toBe(false);
+
+			// Pointer over parent chrome only
+			dispatchDocumentPointerMove(150, 150);
+			expect(dndState.targetContainer).toBe('parent');
+			expect(parent.classList.contains('drag-over')).toBe(true);
+
+			childAction.destroy();
+			parentAction.destroy();
+			child.remove();
+		});
+	});
+
+	describe('Issue #60 - reset after HTML5 drop', () => {
+		it('should reset isDragging after drop even when onDrop mutates state', async () => {
+			const onDrop = vi.fn(() => {
+				// Consumer removes source from list (simulated by leaving state dirty mid-callback)
+			});
+			const action = droppable(node, {
+				container: 'col-b',
+				callbacks: { onDrop }
+			});
+
+			dndState.isDragging = true;
+			dndState.draggedItem = { id: 'card-1' };
+			dndState.sourceContainer = 'col-a';
+			dndState.targetContainer = 'col-b';
+			node.classList.add('dragging');
+
+			const dataTransfer = {
+				getData: () => JSON.stringify({ id: 'card-1' }),
+				dropEffect: 'none' as DataTransfer['dropEffect']
+			};
+			const dropEvent = new DragEvent('drop', { bubbles: true, cancelable: true });
+			Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
+			node.dispatchEvent(dropEvent);
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(onDrop).toHaveBeenCalled();
+			expect(dndState.isDragging).toBe(false);
+			expect(dndState.draggedItem).toBeNull();
+			expect(dndState.sourceContainer).toBe('');
+			expect(dndState.targetContainer).toBeNull();
+
+			action.destroy();
+		});
+
+		it('should stopPropagation on drop so nested parents do not double-handle (issue #27)', async () => {
+			const parentOnDrop = vi.fn();
+			const childOnDrop = vi.fn();
+			const parent = node;
+			const child = document.createElement('div');
+			parent.appendChild(child);
+
+			const parentAction = droppable(parent, {
+				container: 'parent',
+				callbacks: { onDrop: parentOnDrop }
+			});
+			const childAction = droppable(child, {
+				container: 'child',
+				callbacks: { onDrop: childOnDrop }
+			});
+
+			dndState.isDragging = true;
+			dndState.targetContainer = 'child';
+
+			const dataTransfer = {
+				getData: () => JSON.stringify({ id: '1' }),
+				dropEffect: 'none' as DataTransfer['dropEffect']
+			};
+			const dropEvent = new DragEvent('drop', { bubbles: true, cancelable: true });
+			Object.defineProperty(dropEvent, 'dataTransfer', { value: dataTransfer });
+			child.dispatchEvent(dropEvent);
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+
+			expect(childOnDrop).toHaveBeenCalledTimes(1);
+			expect(parentOnDrop).not.toHaveBeenCalled();
+
+			childAction.destroy();
+			parentAction.destroy();
+			child.remove();
 		});
 	});
 

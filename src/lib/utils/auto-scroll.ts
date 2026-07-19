@@ -5,6 +5,10 @@
  * listeners, and runs a requestAnimationFrame loop that scrolls any
  * scrollable ancestor whose edge the pointer is near.
  *
+ * IMPORTANT: The scroll loop must not run until a real pointer/drag
+ * position has been observed. Starting with default (0,0) scrolls the
+ * page toward the top-left on first pointerdown (issue #61).
+ *
  * @module auto-scroll
  */
 
@@ -14,6 +18,12 @@ const MAX_SCROLL_SPEED = 15;
 /** Pointer position cached from the most recent move event. */
 let lastClientX = 0;
 let lastClientY = 0;
+
+/**
+ * True after at least one pointermove or dragover during the session.
+ * Until then, the rAF loop must not scroll (avoids jump-to-top on #61).
+ */
+let hasPointerPosition = false;
 
 /** rAF handle for the scroll loop. */
 let rafHandle: number | null = null;
@@ -138,16 +148,19 @@ function scrollViewport(): void {
 function scrollLoop(): void {
 	if (!active) return;
 
-	const elementUnderPointer = document.elementFromPoint(lastClientX, lastClientY);
-	if (elementUnderPointer) {
-		const ancestors = getScrollableAncestors(elementUnderPointer as HTMLElement);
-		for (const container of ancestors) {
-			scrollContainer(container);
+	// Wait for a real pointer/drag position so we never scroll toward (0,0)
+	if (hasPointerPosition) {
+		const elementUnderPointer = document.elementFromPoint(lastClientX, lastClientY);
+		if (elementUnderPointer) {
+			const ancestors = getScrollableAncestors(elementUnderPointer as HTMLElement);
+			for (const container of ancestors) {
+				scrollContainer(container);
+			}
 		}
-	}
 
-	// Always check viewport
-	scrollViewport();
+		// Always check viewport
+		scrollViewport();
+	}
 
 	rafHandle = requestAnimationFrame(scrollLoop);
 }
@@ -156,21 +169,29 @@ function scrollLoop(): void {
 function handlePointerMove(event: PointerEvent): void {
 	lastClientX = event.clientX;
 	lastClientY = event.clientY;
+	hasPointerPosition = true;
 }
 
 /** Caches pointer position from dragover events (HTML5 path). */
 function handleDragOver(event: DragEvent): void {
 	lastClientX = event.clientX;
 	lastClientY = event.clientY;
+	hasPointerPosition = true;
 }
 
 /**
  * Starts the auto-scroll manager.
- * Call when a drag operation begins.
+ * Call when a drag operation begins (or on first pointermove after drag start).
+ *
+ * Scrolling itself only begins after the first pointermove/dragover updates
+ * the cached coordinates (#61).
  */
 export function startAutoScroll(): void {
 	if (active) return;
 	active = true;
+	hasPointerPosition = false;
+	lastClientX = 0;
+	lastClientY = 0;
 
 	document.addEventListener('pointermove', handlePointerMove, { passive: true });
 	document.addEventListener('dragover', handleDragOver, { passive: true });
@@ -185,6 +206,7 @@ export function startAutoScroll(): void {
 export function stopAutoScroll(): void {
 	if (!active) return;
 	active = false;
+	hasPointerPosition = false;
 
 	document.removeEventListener('pointermove', handlePointerMove);
 	document.removeEventListener('dragover', handleDragOver);
@@ -196,6 +218,11 @@ export function stopAutoScroll(): void {
 
 	// Clear cache for next drag session
 	scrollableCache = new WeakMap<HTMLElement, boolean>();
+}
+
+/** Whether auto-scroll is currently active (for tests). */
+export function isAutoScrollActive(): boolean {
+	return active;
 }
 
 /** Add an element to the exclusion set (autoScroll: false). */
@@ -214,5 +241,20 @@ export const _testing = {
 	isScrollable,
 	getScrollableAncestors,
 	addExclusion: addScrollExclusion,
-	removeExclusion: removeScrollExclusion
+	removeExclusion: removeScrollExclusion,
+	get hasPointerPosition() {
+		return hasPointerPosition;
+	},
+	get lastClientY() {
+		return lastClientY;
+	},
+	get lastClientX() {
+		return lastClientX;
+	},
+	/** Simulate a pointer position without going through DOM events. */
+	setPointerPosition(x: number, y: number) {
+		lastClientX = x;
+		lastClientY = y;
+		hasPointerPosition = true;
+	}
 };

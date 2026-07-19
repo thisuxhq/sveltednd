@@ -28,7 +28,7 @@
  * @module draggable
  */
 
-import { dndState } from '$lib/stores/dnd.svelte.js';
+import { dndState, resetDndState } from '$lib/stores/dnd.svelte.js';
 import type { DraggableOptions, DragDropState } from '$lib/types/index.js';
 import { startAutoScroll, stopAutoScroll } from '$lib/utils/auto-scroll.js';
 
@@ -121,16 +121,21 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	}
 
 	/**
-	 * Clears all transient drag state at the end of a drag.
+	 * Full teardown after a drag ends (success or cancel).
+	 *
+	 * Idempotent so droppables can also call reset when the source node is
+	 * removed mid-drop and `dragend` never fires (#60).
 	 */
-	function endDragState() {
-		dndState.isDragging = false;
-		dndState.draggedItem = null;
-		dndState.sourceContainer = '';
-		dndState.targetContainer = null;
-		dndState.targetElement = null;
-		dndState.dropPosition = null;
-		dndState.invalidDrop = false;
+	function finishDrag() {
+		html5DragActive = false;
+		removePointerListeners();
+		stopAutoScroll();
+		node.classList.remove(...draggingClass);
+		// Best-effort: if this node was already removed, also clear any leftover class
+		document.querySelectorAll(`.${draggingClass[0]}`).forEach((el) => {
+			if (el instanceof HTMLElement) el.classList.remove(...draggingClass);
+		});
+		resetDndState();
 	}
 
 	/**
@@ -208,6 +213,8 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Visual feedback: add dragging class
 		node.classList.add(...draggingClass);
 
+		// Auto-scroll starts here for HTML5; the scroll loop waits for the first
+		// dragover coordinates so we never scroll toward (0,0) (#61).
 		startAutoScroll();
 
 		// Notify consumer via callback
@@ -222,19 +229,14 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 * Handles HTML5 dragend event.
 	 *
 	 * Cleans up after the drag finishes - removes visual styles and resets state.
-	 * This fires whether the drop succeeded or was cancelled.
+	 * This fires whether the drop succeeded or was cancelled — unless the source
+	 * node was removed during onDrop, in which case droppable also resets (#60).
 	 */
 	function handleDragEnd() {
-		html5DragActive = false;
-		removePointerListeners();
-
-		stopAutoScroll();
-
-		node.classList.remove(...draggingClass);
-		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
-
-		// Reset global state
-		endDragState();
+		// Snapshot state for onDragEnd before reset (consumers may inspect it)
+		const endState = { ...dndState } as DragDropState<T>;
+		options.callbacks?.onDragEnd?.(endState);
+		finishDrag();
 	}
 
 	/**
@@ -266,7 +268,9 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		// Visual feedback
 		node.classList.add(...draggingClass);
 
-		startAutoScroll();
+		// Do NOT start auto-scroll here. Starting on pointerdown with no real
+		// pointer coordinates caused the page to jump to the top (#61). Auto-scroll
+		// begins on the first pointermove instead (and still waits for coords).
 
 		// Notify consumer
 		options.callbacks?.onDragStart?.(dndState as DragDropState<T>);
@@ -280,12 +284,13 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	/**
 	 * Handles pointermove during a drag.
 	 *
-	 * Currently minimal - the heavy lifting (drop indicator positioning)
-	 * happens in the droppable's pointermove handler. We just validate
-	 * that we're still in a drag state.
+	 * Starts auto-scroll on the first move so hold-without-drag never scrolls
+	 * the page (#61). Drop indicator positioning lives on droppable handlers.
 	 */
 	function handlePointerMove(_event: PointerEvent) {
 		if (!dndState.isDragging) return;
+		// Safe to call repeatedly — startAutoScroll is idempotent.
+		startAutoScroll();
 	}
 
 	/**
@@ -310,15 +315,10 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 	 * then dispatch a custom event that droppables listen for.
 	 */
 	function handlePointerUp(event: PointerEvent) {
-		// Clean up our document listeners
+		// Clean up our document listeners first so we don't re-enter
 		removePointerListeners();
 
 		if (!dndState.isDragging) return;
-
-		// Remove visual dragging styles
-		node.classList.remove(...draggingClass);
-
-		stopAutoScroll();
 
 		/**
 		 * Find what's actually under the cursor.
@@ -339,10 +339,10 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			})
 		);
 
-		// Consumer callback and state cleanup
-		options.callbacks?.onDragEnd?.(dndState as DragDropState<T>);
-
-		endDragState();
+		// Snapshot for callback before reset
+		const endState = { ...dndState } as DragDropState<T>;
+		options.callbacks?.onDragEnd?.(endState);
+		finishDrag();
 	}
 
 	// === Setup: Attach all event listeners ===
@@ -400,8 +400,17 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 			node.removeEventListener('dragend', handleDragEnd);
 			node.removeEventListener('pointerdown', handlePointerDown);
 
-			// Safety cleanup: if component unmounts mid-drag, these might still be attached
-			removePointerListeners();
+			// If this node is destroyed mid-drag (common when onDrop reorders lists
+			// and the source element unmounts before dragend), force full cleanup (#60).
+			const wasSource =
+				dndState.isDragging &&
+				(dndState.draggedItem === options.dragData ||
+					node.classList.contains(draggingClass[0] ?? 'dragging'));
+			if (wasSource) {
+				finishDrag();
+			} else {
+				removePointerListeners();
+			}
 		}
 	};
 }

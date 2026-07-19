@@ -57,3 +57,20 @@ export const dndState = $state<DragDropState>({
 	 */
 	invalidDrop: false
 });
+
+/**
+ * Resets all transient drag state to idle.
+ *
+ * Idempotent — safe to call from multiple end paths (drop, dragend, pointerup,
+ * destroy). Critical when `onDrop` removes the dragged node from the DOM:
+ * the browser may never fire `dragend`, so droppables must also reset (#60).
+ */
+export function resetDndState(): void {
+	dndState.isDragging = false;
+	dndState.draggedItem = null;
+	dndState.sourceContainer = '';
+	dndState.targetContainer = null;
+	dndState.targetElement = null;
+	dndState.dropPosition = null;
+	dndState.invalidDrop = false;
+}

@@ -18,12 +18,9 @@
 		items: Item[];
 	}
 
-	interface DraggedItem {
-		id: string;
-		title: string;
-		description: string;
-		priority: 'low' | 'medium' | 'high';
-	}
+	type NestedDragPayload =
+		| { kind: 'group'; group: Group }
+		| { kind: 'item'; item: Item; groupId: string };
 
 	let groups = $state<Group[]>([
 		{
@@ -66,35 +63,72 @@
 		}
 	]);
 
-	function handleGroupDrop(state: DragDropState<DraggedItem>) {
-		const { draggedItem, sourceContainer, targetContainer } = state;
-		if (!targetContainer || sourceContainer === targetContainer) return;
+	/** Reorder groups when a group is dropped onto another group shell. */
+	function handleGroupDrop(state: DragDropState<NestedDragPayload>) {
+		const { draggedItem, targetContainer } = state;
+		if (!draggedItem || draggedItem.kind !== 'group' || !targetContainer) return;
 
-		const sourceIndex = groups.findIndex((g) => g.id === draggedItem.id);
-		const targetIndex = parseInt(targetContainer);
+		const sourceIndex = groups.findIndex((g) => g.id === draggedItem.group.id);
+		const targetIndex = groups.findIndex((g) => g.id === targetContainer);
+		if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return;
 
-		const [movedGroup] = groups.splice(sourceIndex, 1);
-		groups = [...groups.slice(0, targetIndex), movedGroup, ...groups.slice(targetIndex)];
+		const next = [...groups];
+		const [moved] = next.splice(sourceIndex, 1);
+		next.splice(targetIndex, 0, moved);
+		groups = next;
 	}
 
-	function handleItemDrop(groupId: string, state: DragDropState<DraggedItem>) {
-		const { draggedItem, sourceContainer, targetContainer } = state;
-		if (!targetContainer || !draggedItem) return;
+	/**
+	 * Move or reorder items within / across groups.
+	 * Item drop targets use container ids: `item:{groupId}:{itemId}` or `list:{groupId}`.
+	 */
+	function handleItemDrop(state: DragDropState<NestedDragPayload>) {
+		const { draggedItem, targetContainer, dropPosition } = state;
+		if (!draggedItem || draggedItem.kind !== 'item' || !targetContainer) return;
 
-		const [sourceGroupId] = sourceContainer.split(':');
-		const [targetGroupId, targetIndexStr] = targetContainer.split(':');
-		const targetIndex = parseInt(targetIndexStr);
+		const item = draggedItem.item;
+		const sourceGroupId = draggedItem.groupId;
+
+		let targetGroupId: string;
+		let targetIndex: number;
+
+		if (targetContainer.startsWith('list:')) {
+			// Dropped on empty list body — append to that group
+			targetGroupId = targetContainer.slice('list:'.length);
+			const targetGroup = groups.find((g) => g.id === targetGroupId);
+			if (!targetGroup) return;
+			targetIndex = targetGroup.items.length;
+		} else if (targetContainer.startsWith('item:')) {
+			// item:{groupId}:{itemId}
+			const parts = targetContainer.split(':');
+			targetGroupId = parts[1] ?? '';
+			const targetItemId = parts[2] ?? '';
+			const targetGroup = groups.find((g) => g.id === targetGroupId);
+			if (!targetGroup) return;
+			const idx = targetGroup.items.findIndex((i) => i.id === targetItemId);
+			if (idx === -1) return;
+			targetIndex = dropPosition === 'after' ? idx + 1 : idx;
+		} else {
+			return;
+		}
 
 		const sourceGroup = groups.find((g) => g.id === sourceGroupId);
 		const targetGroup = groups.find((g) => g.id === targetGroupId);
-
 		if (!sourceGroup || !targetGroup) return;
 
-		sourceGroup.items = sourceGroup.items.filter((item: DraggedItem) => item.id !== draggedItem.id);
+		// Remove from source
+		const fromIndex = sourceGroup.items.findIndex((i) => i.id === item.id);
+		if (fromIndex === -1) return;
+		sourceGroup.items = sourceGroup.items.filter((i) => i.id !== item.id);
+
+		// Adjust target index when moving within the same group after the original index
+		if (sourceGroupId === targetGroupId && fromIndex < targetIndex) {
+			targetIndex -= 1;
+		}
 
 		targetGroup.items = [
 			...targetGroup.items.slice(0, targetIndex),
-			draggedItem,
+			item,
 			...targetGroup.items.slice(targetIndex)
 		];
 
@@ -135,38 +169,50 @@
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">
 		<h1 class="text-3xl text-swiss-black dark:text-white md:text-4xl">nested containers</h1>
 		<p class="mt-4 max-w-xl text-sm text-swiss-mid-gray dark:text-white/60">
-			drag items within groups and between different groups
+			drag groups to reorder them · drag items within a group or between groups
 		</p>
 	</header>
 
 	<!-- Content -->
 	<div class="p-8 md:p-16">
 		<div class="grid gap-8 md:grid-cols-2">
-			{#each groups as group, groupIndex (group.id)}
+			{#each groups as group (group.id)}
+				<!-- Group shell: accepts other groups for reordering -->
 				<div
 					use:droppable={{
-						container: groupIndex.toString(),
+						container: group.id,
 						callbacks: { onDrop: handleGroupDrop }
 					}}
 					animate:flip={{ duration: 200 }}
 				>
 					<div
-						use:draggable={{
-							container: groupIndex.toString(),
-							dragData: group
-						}}
 						class="svelte-dnd-touch-feedback border border-swiss-black bg-white dark:border-white/20 dark:bg-swiss-black"
 						in:fade={{ duration: 150 }}
 						out:fade={{ duration: 150 }}
 					>
-						<!-- Group Header -->
-						<div class="border-b border-swiss-black p-6 dark:border-white/20">
-							<div class="flex items-start justify-between">
-								<div>
-									<h2 class="text-lg text-swiss-black dark:text-white">{group.title}</h2>
-									<p class="mt-1 text-xs text-swiss-mid-gray dark:text-white/60">
-										{group.description}
-									</p>
+						<!-- Group header is the group drag handle / surface -->
+						<div
+							use:draggable={{
+								container: group.id,
+								dragData: { kind: 'group', group } satisfies NestedDragPayload,
+								handle: '.group-drag-handle'
+							}}
+							class="border-b border-swiss-black p-6 dark:border-white/20"
+						>
+							<div class="flex items-start justify-between gap-4">
+								<div class="flex items-start gap-3">
+									<span
+										class="group-drag-handle mt-0.5 cursor-grab select-none text-swiss-mid-gray dark:text-white/50"
+										aria-hidden="true"
+									>
+										⋮⋮
+									</span>
+									<div>
+										<h2 class="text-lg text-swiss-black dark:text-white">{group.title}</h2>
+										<p class="mt-1 text-xs text-swiss-mid-gray dark:text-white/60">
+											{group.description}
+										</p>
+									</div>
 								</div>
 								<span class="text-xs text-swiss-mid-gray dark:text-white/60"
 									>{group.items.length.toString().padStart(2, '0')}</span
@@ -174,21 +220,30 @@
 							</div>
 						</div>
 
-						<!-- Group Items -->
-						<div class="divide-y divide-swiss-gray dark:divide-white/10">
-							{#each group.items as item, itemIndex (item.id)}
+						<!-- Item list body: accepts items (including empty groups) -->
+						<div
+							use:droppable={{
+								container: `list:${group.id}`,
+								callbacks: { onDrop: handleItemDrop }
+							}}
+							class="min-h-16 divide-y divide-swiss-gray dark:divide-white/10"
+						>
+							{#each group.items as item (item.id)}
 								<div
 									use:droppable={{
-										container: `${group.id}:${itemIndex}`,
-										callbacks: {
-											onDrop: (state: DragDropState<DraggedItem>) => handleItemDrop(group.id, state)
-										}
+										container: `item:${group.id}:${item.id}`,
+										callbacks: { onDrop: handleItemDrop }
 									}}
+									animate:flip={{ duration: 150 }}
 								>
 									<div
 										use:draggable={{
-											container: `${group.id}:${itemIndex}`,
-											dragData: item
+											container: `item:${group.id}:${item.id}`,
+											dragData: {
+												kind: 'item',
+												item,
+												groupId: group.id
+											} satisfies NestedDragPayload
 										}}
 										class="svelte-dnd-touch-feedback cursor-move bg-white p-6 transition-all hover:bg-swiss-gray dark:bg-swiss-black dark:hover:bg-white/10"
 									>

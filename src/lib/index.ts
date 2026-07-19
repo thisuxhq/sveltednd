@@ -38,7 +38,7 @@ export { draggable, droppable } from './actions/index.js';
 // === Store ===
 // Global reactive state tracking the current drag operation.
 // Access this for real-time drag info in your components.
-export { dndState } from './stores/dnd.svelte.js';
+export { dndState, resetDndState } from './stores/dnd.svelte.js';
 
 // === Types ===
 // Full TypeScript type definitions for options, callbacks, and state.
