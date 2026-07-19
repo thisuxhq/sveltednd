@@ -16,9 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
-- **#59** — First-class `{@attach}` factories: `attachDraggable` / `attachDroppable`
-  with generics and reactive getters; demo at `/attach`; README documents correct
-  `fromAction(..., () => options)` usage
+- **#24** — Opt-in keyboard accessibility: `keyboard: true` on draggable
+  (Space/Enter grab & drop, arrows move preview, Escape cancel), droppable
+  registry, assertive live-region announcements, `/keyboard` demo
 
 ## [0.4.2](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.1...sveltednd-v0.4.2) (2026-07-19)
 

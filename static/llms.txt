@@ -22,14 +22,18 @@ Studio: https://thisux.com
 - [Interactive Elements](/interactive-elements): Draggable items containing buttons, inputs, and links that remain fully interactive
 - [Conditional Check](/conditional-check): Accept or reject drops based on custom logic
 - [Custom Classes](/custom-classes): Override default drag/drop CSS classes with your own
+- [Attachments](/attach): `{@attach attachDraggable}` / `attachDroppable` on components
+- [Keyboard](/keyboard): Opt-in Space / arrows / Escape reordering with live announcements
 
 ## Core Exports
 
-The library exports exactly three things from `@thisux/sveltednd`:
+From `@thisux/sveltednd`:
 
 - `draggable` — Svelte action. Attach to any element to make it draggable.
 - `droppable` — Svelte action. Attach to any element to make it a drop target.
+- `attachDraggable` / `attachDroppable` — Attachment factories for `{@attach}` (Svelte 5.29+).
 - `dndState` — Global reactive state object. Tracks the active drag operation in real time.
+- `resetDndState` — Force-clear global drag state.
 
 ## draggable Action
 
@@ -55,6 +59,21 @@ All options from `DragDropOptions<T>` plus:
 | `callbacks` | `DragDropCallbacks<T>` | No | Lifecycle event handlers. |
 | `attributes` | `DragDropAttributes` | No | Custom CSS class overrides. |
 | `direction` | `'vertical' \| 'horizontal' \| 'grid'` | No | List layout. Defaults to `'vertical'`. Affects drop indicator direction and position detection. |
+| `keyboard` | `boolean \| KeyboardOptions` | No | Opt-in keyboard reordering (`true` enables Space/Enter grab & drop, arrows to move, Escape to cancel). Default off. |
+
+### Keyboard example
+
+```svelte
+<div
+  use:draggable={{ container: index.toString(), dragData: item, keyboard: true }}
+  use:droppable={{ container: index.toString(), callbacks: { onDrop: handleDrop } }}
+>
+  {item.title}
+</div>
+```
+
+Keys: Tab focus → Space/Enter pick up → arrows move preview → Space/Enter drop → Escape cancel.
+Uses the same `onDrop` contract as pointer/HTML5. Assertive live region announces status.
 
 ### Handle Example
 
