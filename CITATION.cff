@@ -1,16 +1,16 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: 'If you use this software, please cite it as below.'
 type: software
-title: "@thisux/sveltednd"
+title: '@thisux/sveltednd'
 abstract: "A lightweight, flexible drag and drop library for Svelte 5 applications. Built with TypeScript and Svelte's runes system."
 authors:
-  - name: "THISUX Private Limited"
-    website: "https://github.com/thisuxhq"
+  - name: 'THISUX Private Limited'
+    website: 'https://github.com/thisuxhq'
 license: MIT
-repository-code: "https://github.com/thisuxhq/sveltednd"
-url: "https://github.com/thisuxhq/sveltednd"
-date-released: "2026-04-23"
-version: "0.4.1"
+repository-code: 'https://github.com/thisuxhq/sveltednd'
+url: 'https://github.com/thisuxhq/sveltednd'
+date-released: '2026-04-23'
+version: '0.4.1'
 keywords:
   - svelte
   - svelte5
