@@ -1,6 +1,6 @@
 {
 	"name": "@thisux/sveltednd",
-	"version": "0.6.1",
+	"version": "0.7.0",
 	"private": false,
 	"description": "A lightweight, flexible drag and drop library for Svelte 5 applications. Open source by THISUX Private Limited.",
 	"author": {

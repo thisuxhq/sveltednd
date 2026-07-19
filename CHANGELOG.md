@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.6.1...sveltednd-v0.7.0) (2026-07-19)
+
+
+### Features
+
+* **demo:** rich SEO with THISUX brand signals ([#72](https://github.com/thisuxhq/sveltednd/issues/72)) ([bad94f8](https://github.com/thisuxhq/sveltednd/commit/bad94f814ba825a447e610e5a7ffa7cb5cae95f7))
+
 ## [0.6.1](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.6.0...sveltednd-v0.6.1) (2026-07-19)
 
 
