@@ -2,11 +2,11 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| `main`  | :white_check_mark: |
-| Latest release (`0.4.x`) | :white_check_mark: |
-| Older releases | :x: Only critical fixes may be backported |
+| Version                  | Supported                                 |
+| ------------------------ | ----------------------------------------- |
+| `main`                   | :white_check_mark:                        |
+| Latest release (`0.4.x`) | :white_check_mark:                        |
+| Older releases           | :x: Only critical fixes may be backported |
 
 We support the latest published release on npm and the `main` branch. Older
 versions may not receive security updates.

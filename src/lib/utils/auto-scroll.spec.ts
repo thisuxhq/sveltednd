@@ -69,6 +69,43 @@ describe('auto-scroll manager', () => {
 
 			stopAutoScroll();
 		});
+
+		it('should not have a pointer position until the first move (issue #61)', () => {
+			startAutoScroll();
+			expect(_testing.hasPointerPosition).toBe(false);
+
+			document.dispatchEvent(
+				new PointerEvent('pointermove', { clientX: 120, clientY: 240, bubbles: true })
+			);
+			expect(_testing.hasPointerPosition).toBe(true);
+			expect(_testing.lastClientX).toBe(120);
+			expect(_testing.lastClientY).toBe(240);
+
+			stopAutoScroll();
+			expect(_testing.hasPointerPosition).toBe(false);
+		});
+
+		it('should not scroll the viewport before a real pointer position is known (issue #61)', () => {
+			const scrollBy = vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
+			// Drive rAF callbacks manually
+			const callbacks: FrameRequestCallback[] = [];
+			vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+				callbacks.push(cb);
+				return callbacks.length;
+			});
+
+			startAutoScroll();
+			// First scheduled frame — no position yet, must not scroll
+			callbacks[0]?.(0);
+			expect(scrollBy).not.toHaveBeenCalled();
+
+			_testing.setPointerPosition(10, 10);
+			callbacks[1]?.(0);
+			// Near top edge with a real position — may scroll
+			expect(scrollBy).toHaveBeenCalled();
+
+			stopAutoScroll();
+		});
 	});
 
 	describe('calcScrollSpeed', () => {

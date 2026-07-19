@@ -515,5 +515,47 @@ describe('draggable', () => {
 			// Just verify destroy doesn't throw and removes listeners
 			expect(() => action.destroy()).not.toThrow();
 		});
+
+		it('should not start auto-scroll on pointerdown (issue #61)', async () => {
+			const { isAutoScrollActive } = await import('../utils/auto-scroll.js');
+			const action = draggable(node, {
+				container: 'test',
+				dragData: { id: '1' }
+			});
+
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			expect(dndState.isDragging).toBe(true);
+			expect(isAutoScrollActive()).toBe(false);
+
+			document.dispatchEvent(
+				new PointerEvent('pointermove', { bubbles: true, clientX: 50, clientY: 50 })
+			);
+			expect(isAutoScrollActive()).toBe(true);
+
+			document.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+			expect(isAutoScrollActive()).toBe(false);
+
+			action.destroy();
+		});
+
+		it('should reset state when source node is destroyed mid-drag (issue #60)', () => {
+			const action = draggable(node, {
+				container: 'col-a',
+				dragData: { id: 'card-1' },
+				attributes: { draggingClass: 'dragging' }
+			});
+
+			node.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 }));
+			expect(dndState.isDragging).toBe(true);
+			expect(node.classList.contains('dragging')).toBe(true);
+
+			// Simulate onDrop removing the node before dragend
+			action.destroy();
+			node.remove();
+
+			expect(dndState.isDragging).toBe(false);
+			expect(dndState.draggedItem).toBeNull();
+			expect(dndState.sourceContainer).toBe('');
+		});
 	});
 });
