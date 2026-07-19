@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.5.0...sveltednd-v0.6.0) (2026-07-19)
+
+
+### Features
+
+* add opt-in keyboard drag accessibility ([#68](https://github.com/thisuxhq/sveltednd/issues/68)) ([e75485c](https://github.com/thisuxhq/sveltednd/commit/e75485c9be6ba8f1a9d24d4da3dabafcbb29c19c))
+
 ## [0.5.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.4.2...sveltednd-v0.5.0) (2026-07-19)
 
 
