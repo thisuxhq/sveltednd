@@ -3,6 +3,7 @@
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import '$lib/styles/dnd.css';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Item {
 		id: string;
@@ -49,20 +50,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Keyboard Accessibility - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Reorder a list with the keyboard using Space, arrow keys, and Escape. Opt-in keyboard accessibility for SvelteDnD."
-	/>
-	<meta property="og:title" content="Keyboard Accessibility - SvelteDnD" />
-	<meta
-		property="og:description"
-		content="Keyboard grab, move, and drop with screen reader announcements"
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/keyboard" />
-</svelte:head>
+<SeoHead
+	title="Keyboard accessibility"
+	description="Keyboard reordering with Space, arrow keys, and Escape. Opt-in accessibility for SvelteDnD with live announcements."
+	path="/keyboard"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<header class="border-b border-swiss-black px-8 py-12 dark:border-white/20 md:px-16 md:py-16">

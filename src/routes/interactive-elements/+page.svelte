@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { draggable, droppable, type DragDropState } from '$lib/index.js';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Item {
 		id: string;
@@ -35,19 +36,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Interactive Elements - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Combine drag and drop with clickable buttons and interactive elements. Click to select or delete while dragging."
-	/>
-	<meta property="og:title" content="Interactive Elements - SvelteDnD" />
-	<meta property="og:description" content="Drag with interactive elements using SvelteDnD" />
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/interactive-elements" />
-	<meta name="twitter:title" content="Interactive Elements - SvelteDnD" />
-	<meta name="twitter:description" content="Drag with interactive elements using SvelteDnD" />
-</svelte:head>
+<SeoHead
+	title="Interactive elements"
+	description="Drag and drop with buttons, inputs, and other interactive children that stay clickable."
+	path="/interactive-elements"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->

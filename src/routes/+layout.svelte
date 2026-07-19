@@ -3,11 +3,15 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import pkg from '../../package.json' with { type: 'json' };
+	import { ORG, SITE, buildJsonLd } from '$lib/seo.js';
 
 	let { children } = $props();
 
 	/** Keep demo chrome in sync with package.json (release-please bumps this). */
 	const version = pkg.version;
+	const jsonLd = JSON.stringify(buildJsonLd(version));
+	// Split closing tag so the HTML parser does not end this Svelte script block early
+	const jsonLdHtml = '<script type="application/ld+json">' + jsonLd + '<' + '/script>';
 
 	const examples = [
 		{ path: '/', title: 'kanban board', number: '01' },
@@ -47,10 +51,18 @@
 </script>
 
 <svelte:head>
-	<meta name="author" content="ThisUX" />
+	<meta name="author" content={ORG.name} />
 	<meta name="robots" content="index, follow" />
-	<meta property="og:site_name" content="@thisux/sveltednd" />
+	<meta name="generator" content="{SITE.name} demo" />
+	<meta property="og:site_name" content={SITE.name} />
+	<meta property="og:image" content="{SITE.url}{SITE.ogImagePath}" />
+	<meta property="og:image:alt" content="{SITE.name} by {ORG.name}" />
 	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:image" content="{SITE.url}{SITE.ogImagePath}" />
+	<link rel="alternate" type="text/plain" title="LLM documentation" href="/llms.txt" />
+	<!-- Trusted static JSON-LD graph (ORG + SoftwareApplication); not user input -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html jsonLdHtml}
 </svelte:head>
 
 <div class="flex min-h-screen">
@@ -93,34 +105,42 @@
 				{/each}
 			</div>
 
-			<!-- Footer links -->
+			<!-- Footer links + THISUX brand -->
 			<div class="border-t border-swiss-black dark:border-white/20">
-				<div
-					class="flex items-center gap-2 border-b border-swiss-gray px-8 py-4 dark:border-white/10"
-				>
-					<div class="h-2 w-2 bg-swiss-red"></div>
-					<span class="text-xs text-swiss-dark-gray dark:text-white/60">available for projects</span
-					>
+				<div class="border-b border-swiss-gray px-8 py-4 dark:border-white/10">
+					<p class="text-xs leading-relaxed text-swiss-dark-gray dark:text-white/60">
+						Open source by
+						<a
+							href={ORG.url}
+							class="text-swiss-black underline-offset-2 hover:text-swiss-red hover:underline dark:text-white dark:hover:text-swiss-red"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{ORG.name}
+						</a>
+					</p>
 					<a
-						href="https://thisux.com"
-						class="ml-auto text-xs text-swiss-black hover:text-swiss-red dark:text-white dark:hover:text-swiss-red"
+						href={ORG.url}
+						class="mt-2 inline-block text-xs text-swiss-black hover:text-swiss-red dark:text-white dark:hover:text-swiss-red"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
-						thisux.com →
+						thisux.com · available for projects →
 					</a>
 				</div>
 				<div class="flex gap-6 px-8 py-4">
 					<a
-						href="https://github.com/thisuxhq/sveltednd"
+						href={SITE.github}
 						target="_blank"
+						rel="noopener noreferrer"
 						class="text-sm text-swiss-dark-gray transition-colors hover:text-swiss-black dark:text-white/70 dark:hover:text-white"
 					>
 						github →
 					</a>
 					<a
-						href="https://www.npmjs.com/package/@thisux/sveltednd"
+						href={SITE.npm}
 						target="_blank"
+						rel="noopener noreferrer"
 						class="text-sm text-swiss-dark-gray transition-colors hover:text-swiss-red dark:text-white/70 dark:hover:text-swiss-red"
 					>
 						npm →
@@ -182,13 +202,20 @@
 <!-- Mobile badge -->
 <div class="fixed bottom-20 left-4 right-4 z-40 md:hidden">
 	<div
-		class="flex items-center justify-between border border-swiss-black bg-white px-4 py-3 dark:border-white/20 dark:bg-swiss-black"
+		class="flex items-center justify-between gap-3 border border-swiss-black bg-white px-4 py-3 dark:border-white/20 dark:bg-swiss-black"
 	>
-		<div class="flex items-center gap-2">
-			<div class="h-2 w-2 bg-swiss-red"></div>
-			<span class="text-xs text-swiss-dark-gray dark:text-white/60">available for projects</span>
+		<div class="min-w-0">
+			<div class="flex items-center gap-2">
+				<div class="h-2 w-2 shrink-0 bg-swiss-red"></div>
+				<span class="truncate text-xs text-swiss-dark-gray dark:text-white/60">{ORG.name}</span>
+			</div>
 		</div>
-		<a href="https://thisux.com" class="text-xs text-swiss-black dark:text-white" target="_blank">
+		<a
+			href={ORG.url}
+			class="shrink-0 text-xs text-swiss-black dark:text-white"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
 			thisux.com →
 		</a>
 	</div>

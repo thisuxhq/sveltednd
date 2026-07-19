@@ -3,6 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import '$lib/styles/dnd.css';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Item {
 		id: string;
@@ -144,25 +145,11 @@
 	};
 </script>
 
-<svelte:head>
-	<title>Nested Containers - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Build complex drag and drop interfaces with nested containers. Move items within and between parent containers."
-	/>
-	<meta property="og:title" content="Nested Containers - SvelteDnD" />
-	<meta
-		property="og:description"
-		content="Nested drag and drop containers example with SvelteDnD"
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/nested" />
-	<meta name="twitter:title" content="Nested Containers - SvelteDnD" />
-	<meta
-		name="twitter:description"
-		content="Nested drag and drop containers example with SvelteDnD"
-	/>
-</svelte:head>
+<SeoHead
+	title="Nested containers"
+	description="Nested drag and drop containers. Reorder groups and move items within and between parent zones."
+	path="/nested"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->

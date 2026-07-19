@@ -2,20 +2,35 @@
 	"name": "@thisux/sveltednd",
 	"version": "0.6.1",
 	"private": false,
-	"description": "A lightweight, flexible drag and drop library for Svelte 5 applications.",
-	"author": "sanju <work@sanju.sh>",
+	"description": "A lightweight, flexible drag and drop library for Svelte 5 applications. Open source by THISUX Private Limited.",
+	"author": {
+		"name": "THISUX Private Limited",
+		"email": "hello@thisux.com",
+		"url": "https://thisux.com"
+	},
 	"contributors": [
 		"sanju <work@sanju.sh>"
 	],
+	"homepage": "https://sveltednd.thisux.com",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thisuxhq/sveltednd.git"
+	},
+	"bugs": {
+		"url": "https://github.com/thisuxhq/sveltednd/issues"
+	},
 	"license": "MIT",
 	"keywords": [
 		"svelte",
+		"svelte5",
 		"drag",
 		"drop",
 		"dnd",
 		"drag-and-drop",
 		"typescript",
-		"svelte5"
+		"keyboard",
+		"accessibility",
+		"thisux"
 	],
 	"scripts": {
 		"dev": "vite dev",

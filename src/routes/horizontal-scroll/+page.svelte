@@ -3,6 +3,7 @@
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import '$lib/styles/dnd.css';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface ImageItem {
 		id: string;
@@ -28,25 +29,11 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Horizontal Scroll Gallery - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Create horizontal scrolling galleries with drag and drop reordering. Perfect for image galleries and carousel layouts."
-	/>
-	<meta property="og:title" content="Horizontal Scroll Gallery - SvelteDnD" />
-	<meta
-		property="og:description"
-		content="Horizontal drag and drop gallery example with SvelteDnD"
-	/>
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/horizontal-scroll" />
-	<meta name="twitter:title" content="Horizontal Scroll Gallery - SvelteDnD" />
-	<meta
-		name="twitter:description"
-		content="Horizontal drag and drop gallery example with SvelteDnD"
-	/>
-</svelte:head>
+<SeoHead
+	title="Horizontal scroll gallery"
+	description="Horizontal scrolling gallery with drag and drop reordering. Ideal for carousels and media strips in Svelte 5."
+	path="/horizontal-scroll"
+/>
 
 <div class="h-screen overflow-hidden pt-20 md:pt-0">
 	<!-- Header -->

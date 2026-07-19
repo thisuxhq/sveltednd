@@ -3,6 +3,7 @@
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import SeoHead from '$lib/components/SeoHead.svelte';
 
 	interface Item {
 		id: string;
@@ -52,19 +53,11 @@
 	};
 </script>
 
-<svelte:head>
-	<title>Custom CSS Classes - SvelteDnD Examples</title>
-	<meta
-		name="description"
-		content="Customize drag and drop styling with custom CSS classes. Override default dragging and drag-over styles."
-	/>
-	<meta property="og:title" content="Custom CSS Classes - SvelteDnD" />
-	<meta property="og:description" content="Custom styling for drag and drop with SvelteDnD" />
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://sveltednd.thisux.com/custom-classes" />
-	<meta name="twitter:title" content="Custom CSS Classes - SvelteDnD" />
-	<meta name="twitter:description" content="Custom styling for drag and drop with SvelteDnD" />
-</svelte:head>
+<SeoHead
+	title="Custom CSS classes"
+	description="Customize dragging and drag-over styles with custom CSS classes for SvelteDnD."
+	path="/custom-classes"
+/>
 
 <div class="min-h-screen pt-20 md:pt-0">
 	<!-- Header -->
