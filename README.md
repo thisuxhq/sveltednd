@@ -5,6 +5,7 @@ A lightweight, flexible drag and drop library for Svelte 5 applications. Built w
 [![npm version](https://badge.fury.io/js/@thisux%2Fsveltednd.svg)](https://www.npmjs.com/package/@thisux/sveltednd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Copyright](https://img.shields.io/badge/©-THISUX%20Private%20Limited-111111.svg)](LICENSE)
+[![skills.sh](https://skills.sh/b/thisuxhq/sveltednd)](https://skills.sh/thisuxhq/sveltednd)
 
 **Docs & community:** [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [Code of Conduct](CODE_OF_CONDUCT.md)
 
@@ -33,6 +34,18 @@ yarn add @thisux/sveltednd
 # or
 pnpm add @thisux/sveltednd
 ```
+
+## Agent skill
+
+Coding agents can install the SvelteDnD skill for API patterns, reorder recipes, attachments, and keyboard guidance:
+
+```bash
+npx skills add thisuxhq/sveltednd
+# or a single skill
+npx skills add thisuxhq/sveltednd --skill sveltednd
+```
+
+Skill source: [`skills/sveltednd/`](skills/sveltednd/). Directory: [skills.sh/thisuxhq/sveltednd](https://skills.sh/thisuxhq/sveltednd).
 
 ## Quick Start
 
