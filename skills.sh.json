@@ -1,0 +1,11 @@
+{
+	"$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+	"notGrouped": "bottom",
+	"groupings": [
+		{
+			"title": "SvelteDnD",
+			"description": "Agent guidance for @thisux/sveltednd drag and drop in Svelte 5.",
+			"skills": ["sveltednd"]
+		}
+	]
+}
