@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.7.0...sveltednd-v0.8.0) (2026-09-01)
+
+
+### Features
+
+* add containerGroup for selective nested drag indicators ([#77](https://github.com/thisuxhq/sveltednd/issues/77)) ([0239734](https://github.com/thisuxhq/sveltednd/commit/0239734af1af7c4ef0d3dab82c7cf560e5ac1114))
+
 ## [0.7.0](https://github.com/thisuxhq/sveltednd/compare/sveltednd-v0.6.1...sveltednd-v0.7.0) (2026-07-19)
 
 
