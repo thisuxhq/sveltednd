@@ -53,6 +53,26 @@ describe('Type exports', () => {
 			expect(options.attributes).toBe(attributes);
 		});
 
+		it('should allow containerGroup on options (#76)', () => {
+			const options: DraggableOptions<string> = {
+				container: 'list',
+				containerGroup: 'task',
+				dragData: 'x'
+			};
+			expect(options.containerGroup).toBe('task');
+
+			const state: DragDropState<string> = {
+				isDragging: true,
+				draggedItem: 'x',
+				sourceContainer: 'list',
+				targetContainer: null,
+				targetElement: null,
+				dropPosition: null,
+				sourceContainerGroup: 'task'
+			};
+			expect(state.sourceContainerGroup).toBe('task');
+		});
+
 		it('should have optional interactive property', () => {
 			// Should work without interactive
 			const optionsWithoutInteractive: DraggableOptions<number> = {

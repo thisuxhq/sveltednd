@@ -18,7 +18,7 @@ A lightweight, flexible drag and drop library for Svelte 5 applications. Built w
 - **Drag Handles** — Optional handle selectors for precise drag control
 - **Smart Interaction** — Automatically protects interactive elements (inputs, buttons, etc.)
 - **Drop Indicators** — Visual feedback showing exactly where items will drop
-- **Nested Support** — Works with nested containers and complex hierarchies
+- **Nested Support** — Works with nested containers and complex hierarchies (`containerGroup` keeps indicators on matching levels)
 - **Attachments** — First-class `{@attach}` factories for components (Svelte 5.29+)
 - **Keyboard** — Opt-in Space/arrows/Escape reordering with screen-reader announcements
 - **Lightweight** — Minimal footprint with zero external dependencies

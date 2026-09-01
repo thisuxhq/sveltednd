@@ -46,6 +46,12 @@ import {
 	unregisterDroppable,
 	type DroppableRegistration
 } from '$lib/utils/dnd-registry.js';
+import {
+	CONTAINER_GROUP_ATTR,
+	containerGroupsMatch,
+	findDeepestCompatibleDroppable,
+	normalizeContainerGroup
+} from '$lib/utils/container-group.js';
 
 /**
  * Default CSS class applied when an item is dragged over this element.
@@ -124,6 +130,24 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function removeDragOverClass(classes = dragOverClass) {
 		if (classes.length === 0) return;
 		node.classList.remove(...classes);
+	}
+
+	/**
+	 * Whether this zone should react to the active drag for indicators (#76).
+	 * Unset groups on either side stay compatible (legacy behavior).
+	 */
+	function acceptsCurrentDrag() {
+		return containerGroupsMatch(dndState.sourceContainerGroup, options.containerGroup);
+	}
+
+	/** Keep data-sveltednd-group in sync for nested ownership walks. */
+	function syncGroupAttribute() {
+		const group = normalizeContainerGroup(options.containerGroup);
+		if (group === null) {
+			node.removeAttribute(CONTAINER_GROUP_ATTR);
+		} else {
+			node.setAttribute(CONTAINER_GROUP_ATTR, group);
+		}
 	}
 
 	/**
@@ -293,14 +317,17 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			event.clientY >= rect.top &&
 			event.clientY <= rect.bottom;
 
-		// Nested droppables: prefer the deepest element under the pointer (#27).
-		// If a child droppable contains the point, do not steal targetContainer.
+		// Nested droppables: prefer the deepest *compatible* zone under the pointer
+		// (#27 + #76). Incompatible child groups are skipped so a parent group shell
+		// can still own hover while dragging a group over nested items.
 		let ownsHover = false;
-		if (boundsHit) {
+		if (boundsHit && acceptsCurrentDrag()) {
 			const under = document.elementFromPoint(event.clientX, event.clientY);
-			const deepestDroppable =
-				under instanceof Element ? under.closest('[data-sveltednd-droppable]') : null;
-			ownsHover = !deepestDroppable || deepestDroppable === node;
+			const deepestCompatible = findDeepestCompatibleDroppable(
+				under instanceof Element ? under : null,
+				dndState.sourceContainerGroup
+			);
+			ownsHover = !deepestCompatible || deepestCompatible === node;
 		}
 
 		if (ownsHover) {
@@ -334,9 +361,14 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
-		// Nested: only the deepest droppable under the event target owns hover (#27)
+		// Hierarchy mismatch — do not claim indicators (#76)
+		if (!acceptsCurrentDrag()) return;
+
+		// Nested: only the deepest *compatible* droppable under the event target owns hover (#27 + #76)
 		const fromTarget =
-			event.target instanceof Element ? event.target.closest('[data-sveltednd-droppable]') : null;
+			event.target instanceof Element
+				? findDeepestCompatibleDroppable(event.target, dndState.sourceContainerGroup)
+				: null;
 		if (fromTarget && fromTarget !== node) {
 			return;
 		}
@@ -359,9 +391,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	function handleDragLeave(event: DragEvent) {
 		if (options.disabled) return;
 
-		// Nested: ignore leave events that belong to a deeper droppable (#27)
+		// Nested: ignore leave events that belong to a deeper compatible droppable (#27 + #76)
 		const fromTarget =
-			event.target instanceof Element ? event.target.closest('[data-sveltednd-droppable]') : null;
+			event.target instanceof Element
+				? findDeepestCompatibleDroppable(event.target, dndState.sourceContainerGroup)
+				: null;
 		if (fromTarget && fromTarget !== node) {
 			return;
 		}
@@ -395,9 +429,14 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 		if (options.disabled) return;
 		event.preventDefault();
 
-		// Nested: defer to deeper droppable under the cursor (#27)
+		// Hierarchy mismatch — skip indicators / target ownership (#76)
+		if (!acceptsCurrentDrag()) return;
+
+		// Nested: defer to deeper compatible droppable under the cursor (#27 + #76)
 		const fromTarget =
-			event.target instanceof Element ? event.target.closest('[data-sveltednd-droppable]') : null;
+			event.target instanceof Element
+				? findDeepestCompatibleDroppable(event.target, dndState.sourceContainerGroup)
+				: null;
 		if (fromTarget && fromTarget !== node) {
 			return;
 		}
@@ -575,7 +614,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	 * Keyboard hover preview — reuses drag-over class + drop indicators (#24).
 	 */
 	function setKeyboardHover(active: boolean, position: 'before' | 'after' | null = null) {
-		if (active) {
+		if (active && acceptsCurrentDrag()) {
 			addDragOverClass();
 			if (position) {
 				setDropIndicator(position);
@@ -612,6 +651,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 	const registration: DroppableRegistration = {
 		element: node,
 		container: options.container,
+		containerGroup: options.containerGroup,
 		direction: options.direction ?? 'vertical',
 		disabled: !!options.disabled,
 		setKeyboardHover,
@@ -620,8 +660,9 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 
 	// === Setup: Attach all event listeners ===
 
-	// Marker for nested deepest-target resolution (#27)
+	// Marker for nested deepest-target resolution (#27 + #76)
 	node.setAttribute('data-sveltednd-droppable', options.container);
+	syncGroupAttribute();
 
 	// Keyboard navigation registry (#24)
 	registerDroppable(registration);
@@ -672,9 +713,11 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			options = newOptions;
 			dragOverClass = getDragOverClass(options);
 			node.setAttribute('data-sveltednd-droppable', options.container);
+			syncGroupAttribute();
 
 			// Keep keyboard registry in sync
 			registration.container = options.container;
+			registration.containerGroup = options.containerGroup;
 			registration.direction = options.direction ?? 'vertical';
 			registration.disabled = !!options.disabled;
 
@@ -694,6 +737,7 @@ export function droppable<T>(node: HTMLElement, options: DragDropOptions<T>) {
 			clearTargetState();
 			removeScrollExclusion(node);
 			node.removeAttribute('data-sveltednd-droppable');
+			node.removeAttribute(CONTAINER_GROUP_ATTR);
 			node.removeEventListener('dragenter', handleDragEnter);
 			node.removeEventListener('dragleave', handleDragLeave);
 			node.removeEventListener('dragover', handleDragOver);

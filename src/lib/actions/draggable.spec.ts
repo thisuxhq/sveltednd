@@ -14,6 +14,8 @@ describe('draggable', () => {
 		dndState.targetElement = null;
 		dndState.dropPosition = null;
 		dndState.invalidDrop = false;
+		dndState.sourceContainerGroup = null;
+		dndState.dragInput = null;
 		node = document.createElement('div');
 		document.body.appendChild(node);
 	});
@@ -353,6 +355,47 @@ describe('draggable', () => {
 			node.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
 
 			expect(receivedDetail).toEqual({ dragData });
+			action.destroy();
+		});
+	});
+
+	describe('Issue #76 - containerGroup on drag start', () => {
+		it('sets sourceContainerGroup from options on HTML5 dragstart', () => {
+			const action = draggable(node, {
+				container: 'list',
+				containerGroup: 'task',
+				dragData: { id: '1' }
+			});
+
+			node.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true }));
+
+			expect(dndState.isDragging).toBe(true);
+			expect(dndState.sourceContainerGroup).toBe('task');
+			action.destroy();
+		});
+
+		it('clears sourceContainerGroup on dragend', () => {
+			const action = draggable(node, {
+				container: 'list',
+				containerGroup: 'task',
+				dragData: { id: '1' }
+			});
+
+			node.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true }));
+			node.dispatchEvent(new DragEvent('dragend', { bubbles: true }));
+
+			expect(dndState.sourceContainerGroup).toBeNull();
+			action.destroy();
+		});
+
+		it('leaves sourceContainerGroup null when unset', () => {
+			const action = draggable(node, {
+				container: 'list',
+				dragData: { id: '1' }
+			});
+
+			node.dispatchEvent(new DragEvent('dragstart', { bubbles: true, cancelable: true }));
+			expect(dndState.sourceContainerGroup).toBeNull();
 			action.destroy();
 		});
 	});

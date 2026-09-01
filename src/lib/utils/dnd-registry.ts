@@ -8,6 +8,8 @@
  */
 
 import type { DragDropState } from '$lib/types/index.js';
+import { containerGroupsMatch } from './container-group.js';
+import { dndState } from '$lib/stores/dnd.svelte.js';
 
 export type DroppableDirection = 'vertical' | 'horizontal' | 'grid';
 
@@ -16,6 +18,8 @@ export interface DroppableRegistration {
 	element: HTMLElement;
 	/** Container id (same as droppable options.container) */
 	container: string;
+	/** Optional hierarchy tag (#76); mirrors droppable options.containerGroup */
+	containerGroup?: string | number;
 	direction: DroppableDirection;
 	disabled: boolean;
 	/**
@@ -50,9 +54,16 @@ export function getRegisteredDroppables(): DroppableRegistration[] {
  * deepest zones win (same spirit as #27).
  */
 export function listKeyboardTargets(
-	direction: DroppableDirection = 'vertical'
+	direction: DroppableDirection = 'vertical',
+	sourceGroup: string | number | null | undefined = dndState.sourceContainerGroup
 ): DroppableRegistration[] {
-	const enabled = [...droppables].filter((d) => !d.disabled && d.element.isConnected);
+	const enabled = [...droppables].filter(
+		(d) =>
+			!d.disabled &&
+			d.element.isConnected &&
+			// Skip hierarchy-mismatched zones during an active drag (#76)
+			containerGroupsMatch(sourceGroup, d.containerGroup)
+	);
 
 	// Prefer deepest: drop a zone if another registered zone is contained inside it
 	const deepest = enabled.filter(
