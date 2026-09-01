@@ -14,6 +14,8 @@ describe('droppable', () => {
 		dndState.targetElement = null;
 		dndState.dropPosition = null;
 		dndState.invalidDrop = false;
+		dndState.sourceContainerGroup = null;
+		dndState.dragInput = null;
 		node = document.createElement('div');
 		document.body.appendChild(node);
 	});
@@ -834,6 +836,174 @@ describe('droppable', () => {
 			childAction.destroy();
 			parentAction.destroy();
 			child.remove();
+		});
+	});
+
+	describe('Issue #76 - containerGroup selective indicators', () => {
+		function dispatchDocumentPointerMove(clientX: number, clientY: number) {
+			document.dispatchEvent(
+				new PointerEvent('pointermove', {
+					bubbles: true,
+					clientX,
+					clientY
+				})
+			);
+		}
+
+		it('sets data-sveltednd-group from containerGroup', () => {
+			const action = droppable(node, {
+				container: 'zone',
+				containerGroup: 'task'
+			});
+			expect(node.getAttribute('data-sveltednd-group')).toBe('task');
+			action.update({ container: 'zone', containerGroup: 2 });
+			expect(node.getAttribute('data-sveltednd-group')).toBe('2');
+			action.update({ container: 'zone' });
+			expect(node.getAttribute('data-sveltednd-group')).toBeNull();
+			action.destroy();
+			expect(node.getAttribute('data-sveltednd-group')).toBeNull();
+		});
+
+		it('does not add drag-over on dragenter when groups mismatch', () => {
+			const onDragEnter = vi.fn();
+			const action = droppable(node, {
+				container: 'item-zone',
+				containerGroup: 'item',
+				attributes: { dragOverClass: 'drag-over' },
+				callbacks: { onDragEnter }
+			});
+
+			dndState.isDragging = true;
+			dndState.sourceContainerGroup = 'group';
+
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true, cancelable: true }));
+
+			expect(node.classList.contains('drag-over')).toBe(false);
+			expect(onDragEnter).not.toHaveBeenCalled();
+			action.destroy();
+		});
+
+		it('adds drag-over on dragenter when groups match', () => {
+			const onDragEnter = vi.fn();
+			const action = droppable(node, {
+				container: 'group-zone',
+				containerGroup: 'group',
+				attributes: { dragOverClass: 'drag-over' },
+				callbacks: { onDragEnter }
+			});
+
+			dndState.isDragging = true;
+			dndState.sourceContainerGroup = 'group';
+
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true, cancelable: true }));
+
+			expect(node.classList.contains('drag-over')).toBe(true);
+			expect(onDragEnter).toHaveBeenCalled();
+			action.destroy();
+		});
+
+		it('keeps legacy accept-all when either side has no group', () => {
+			const action = droppable(node, {
+				container: 'open',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+
+			dndState.isDragging = true;
+			dndState.sourceContainerGroup = 'group';
+
+			node.dispatchEvent(new DragEvent('dragenter', { bubbles: true, cancelable: true }));
+			expect(node.classList.contains('drag-over')).toBe(true);
+			action.destroy();
+		});
+
+		it('pointer path skips mismatched nested zones and lets parent group own hover', () => {
+			const parent = node;
+			const child = document.createElement('div');
+			parent.appendChild(child);
+
+			vi.spyOn(parent, 'getBoundingClientRect').mockReturnValue({
+				top: 0,
+				left: 0,
+				right: 200,
+				bottom: 200,
+				width: 200,
+				height: 200,
+				x: 0,
+				y: 0,
+				toJSON: () => ({})
+			});
+			vi.spyOn(child, 'getBoundingClientRect').mockReturnValue({
+				top: 20,
+				left: 20,
+				right: 80,
+				bottom: 80,
+				width: 60,
+				height: 60,
+				x: 20,
+				y: 20,
+				toJSON: () => ({})
+			});
+			vi.spyOn(document, 'elementFromPoint').mockImplementation((x, y) => {
+				if (x >= 20 && x <= 80 && y >= 20 && y <= 80) return child;
+				if (x >= 0 && x <= 200 && y >= 0 && y <= 200) return parent;
+				return null;
+			});
+
+			const parentAction = droppable(parent, {
+				container: 'group-shell',
+				containerGroup: 'group',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+			const childAction = droppable(child, {
+				container: 'item-slot',
+				containerGroup: 'item',
+				attributes: { dragOverClass: 'drag-over' }
+			});
+
+			// Dragging a group over nested item — parent group should own hover
+			dndState.isDragging = true;
+			dndState.sourceContainerGroup = 'group';
+			dispatchDocumentPointerMove(40, 40);
+
+			expect(dndState.targetContainer).toBe('group-shell');
+			expect(parent.classList.contains('drag-over')).toBe(true);
+			expect(child.classList.contains('drag-over')).toBe(false);
+
+			// Dragging an item — child owns hover
+			parent.classList.remove('drag-over');
+			dndState.sourceContainerGroup = 'item';
+			dndState.targetContainer = null;
+			dispatchDocumentPointerMove(40, 40);
+
+			expect(dndState.targetContainer).toBe('item-slot');
+			expect(child.classList.contains('drag-over')).toBe(true);
+			expect(parent.classList.contains('drag-over')).toBe(false);
+
+			childAction.destroy();
+			parentAction.destroy();
+			child.remove();
+		});
+
+		it('does not fire onDragOver on dragover when groups mismatch', () => {
+			const onDragOver = vi.fn();
+			const action = droppable(node, {
+				container: 'item-zone',
+				containerGroup: 'item',
+				callbacks: { onDragOver }
+			});
+
+			dndState.isDragging = true;
+			dndState.sourceContainerGroup = 'group';
+
+			const over = new DragEvent('dragover', { bubbles: true, cancelable: true });
+			Object.defineProperty(over, 'dataTransfer', {
+				value: { dropEffect: 'none' }
+			});
+			node.dispatchEvent(over);
+
+			expect(onDragOver).not.toHaveBeenCalled();
+			expect(dndState.targetContainer).not.toBe('item-zone');
+			action.destroy();
 		});
 	});
 

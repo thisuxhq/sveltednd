@@ -57,7 +57,9 @@ export const dndState = $state<DragDropState>({
 	 */
 	invalidDrop: false,
 	/** Input path for the active drag; null when idle */
-	dragInput: null
+	dragInput: null,
+	/** containerGroup from the active draggable; null when idle / unset */
+	sourceContainerGroup: null
 });
 
 /**
@@ -76,4 +78,5 @@ export function resetDndState(): void {
 	dndState.dropPosition = null;
 	dndState.invalidDrop = false;
 	dndState.dragInput = null;
+	dndState.sourceContainerGroup = null;
 }

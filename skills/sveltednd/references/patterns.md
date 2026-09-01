@@ -165,6 +165,56 @@ Use the same reorder splice recipe; `dropPosition` still guides before/after rel
 - Give every zone a unique `container` string
 - In `onDrop`, branch on `targetContainer` (and optionally inspect `targetElement`)
 - Deepest zone wins the drop; avoid accidental parent handling by checking ids
+- Set matching `containerGroup` on draggables and droppables at the same hierarchy level so `drag-over` / drop indicators only light up compatible zones (e.g. `'group'` vs `'item'`)
+
+```svelte
+<!-- Group shell -->
+<div
+	use:droppable={{
+		container: group.id,
+		containerGroup: 'group',
+		callbacks: { onDrop: handleGroupDrop }
+	}}
+>
+	<div
+		use:draggable={{
+			container: group.id,
+			containerGroup: 'group',
+			dragData: { kind: 'group', group }
+		}}
+	>
+		...
+	</div>
+	<!-- Items -->
+	<div
+		use:droppable={{
+			container: `list:${group.id}`,
+			containerGroup: 'item',
+			callbacks: { onDrop: handleItemDrop }
+		}}
+	>
+		{#each group.items as item (item.id)}
+			<div
+				use:droppable={{
+					container: `item:${group.id}:${item.id}`,
+					containerGroup: 'item',
+					callbacks: { onDrop: handleItemDrop }
+				}}
+			>
+				<div
+					use:draggable={{
+						container: `item:${group.id}:${item.id}`,
+						containerGroup: 'item',
+						dragData: { kind: 'item', item, groupId: group.id }
+					}}
+				>
+					{item.title}
+				</div>
+			</div>
+		{/each}
+	</div>
+</div>
+```
 
 ## 9. Custom classes
 

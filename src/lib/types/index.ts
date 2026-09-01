@@ -70,6 +70,12 @@ export interface DragDropState<T = unknown> {
 	 * `null` when idle. Additive — safe for apps that ignore it.
 	 */
 	dragInput?: DragInputMode | null;
+	/**
+	 * Hierarchy / type group of the item being dragged (`containerGroup` on the
+	 * draggable). Used so nested drop zones only show indicators for matching
+	 * levels (#76). `null` when idle or when the source did not set a group.
+	 */
+	sourceContainerGroup?: string | number | null;
 }
 
 /**
@@ -166,6 +172,21 @@ export interface DragDropOptions<T = unknown> {
 	 * 'todo-list', 'done-column', 'sidebar-items'
 	 */
 	container: string;
+	/**
+	 * Optional hierarchy / type tag for nested boards (#76).
+	 *
+	 * When both the dragged item and a drop zone set `containerGroup`, drag-over
+	 * classes and drop indicators only apply if the values match. Either side
+	 * unset keeps the previous "accept all" behavior.
+	 *
+	 * @example
+	 * // Groups only highlight other groups; tasks only highlight task slots
+	 * use:draggable={{ container: group.id, containerGroup: 'group', dragData: group }}
+	 * use:droppable={{ container: group.id, containerGroup: 'group', callbacks }}
+	 * use:draggable={{ container: item.id, containerGroup: 'item', dragData: item }}
+	 * use:droppable={{ container: item.id, containerGroup: 'item', callbacks }}
+	 */
+	containerGroup?: string | number;
 	/**
 	 * When true, disables all drag/drop functionality for this element.
 	 * Useful for read-only modes or permission-based UIs.

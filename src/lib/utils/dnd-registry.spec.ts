@@ -129,4 +129,50 @@ describe('dnd-registry', () => {
 		expect(indexOfElement(targets, inner)).toBe(0);
 		el.remove();
 	});
+
+	it('filters keyboard targets by containerGroup when source group is set (#76)', () => {
+		const groupEl = document.createElement('div');
+		const itemEl = document.createElement('div');
+		document.body.appendChild(groupEl);
+		document.body.appendChild(itemEl);
+
+		vi.spyOn(groupEl, 'getBoundingClientRect').mockReturnValue({
+			top: 0,
+			left: 0,
+			bottom: 40,
+			right: 100,
+			width: 100,
+			height: 40,
+			x: 0,
+			y: 0,
+			toJSON: () => ({})
+		});
+		vi.spyOn(itemEl, 'getBoundingClientRect').mockReturnValue({
+			top: 50,
+			left: 0,
+			bottom: 90,
+			right: 100,
+			width: 100,
+			height: 40,
+			x: 0,
+			y: 50,
+			toJSON: () => ({})
+		});
+
+		registerDroppable(makeEntry(groupEl, 'g', { containerGroup: 'group' }));
+		registerDroppable(makeEntry(itemEl, 'i', { containerGroup: 'item' }));
+
+		const groupTargets = listKeyboardTargets('vertical', 'group');
+		expect(groupTargets.map((t) => t.container)).toEqual(['g']);
+
+		const itemTargets = listKeyboardTargets('vertical', 'item');
+		expect(itemTargets.map((t) => t.container)).toEqual(['i']);
+
+		// Unset source group keeps all deepest targets
+		const all = listKeyboardTargets('vertical', null);
+		expect(all.map((t) => t.container).sort()).toEqual(['g', 'i']);
+
+		groupEl.remove();
+		itemEl.remove();
+	});
 });

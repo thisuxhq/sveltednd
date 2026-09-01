@@ -152,9 +152,9 @@ The component root must forward props, e.g. `<div {...props}>{@render children?.
 
 ## Core options (short)
 
-**Draggable:** `container`, `dragData`, `disabled`, `handle` (CSS selector), `interactive` (extra no-drag selectors), `keyboard` (`true` or options object), `callbacks`, `attributes.draggingClass`, `autoScroll`.
+**Draggable:** `container`, `containerGroup` (optional hierarchy tag for nested boards), `dragData`, `disabled`, `handle` (CSS selector), `interactive` (extra no-drag selectors), `keyboard` (`true` or options object), `callbacks`, `attributes.draggingClass`, `autoScroll`.
 
-**Droppable:** `container`, `disabled`, `direction` (`'vertical' | 'horizontal' | 'grid'`), `callbacks`, `attributes.dragOverClass`, `autoScroll`.
+**Droppable:** `container`, `containerGroup` (must match dragged item's group for indicators when both set), `disabled`, `direction` (`'vertical' | 'horizontal' | 'grid'`), `callbacks`, `attributes.dragOverClass`, `autoScroll`.
 
 Default protected interactive elements (no drag start): `input`, `textarea`, `select`, `button`, `[contenteditable]`, `a[href]`, `label`, `option`.
 

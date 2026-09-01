@@ -115,6 +115,11 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		dndState.isDragging = true;
 		dndState.draggedItem = options.dragData;
 		dndState.sourceContainer = options.container;
+		// Nested hierarchy tag for selective indicators (#76)
+		dndState.sourceContainerGroup =
+			options.containerGroup === undefined || options.containerGroup === ''
+				? null
+				: options.containerGroup;
 		dndState.targetContainer = null;
 		dndState.targetElement = null;
 		dndState.dropPosition = null;
@@ -404,6 +409,7 @@ export function draggable<T>(node: HTMLElement, options: DraggableOptions<T>) {
 		startKeyboardSession({
 			sourceElement: node,
 			sourceContainer: options.container,
+			sourceContainerGroup: options.containerGroup ?? null,
 			dragData: options.dragData,
 			draggingClass,
 			direction: options.direction ?? 'vertical',

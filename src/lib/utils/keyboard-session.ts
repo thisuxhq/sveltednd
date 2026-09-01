@@ -26,6 +26,8 @@ import { stopAutoScroll } from './auto-scroll.js';
 export interface KeyboardSessionConfig {
 	sourceElement: HTMLElement;
 	sourceContainer: string;
+	/** Optional hierarchy tag from the draggable (#76) */
+	sourceContainerGroup?: string | number | null;
 	dragData: unknown;
 	draggingClass: string[];
 	direction: DroppableDirection;
@@ -238,7 +240,13 @@ export function startKeyboardSession(config: KeyboardSessionConfig): void {
 	if (session) return;
 	if (dndState.isDragging) return;
 
-	const targets = listKeyboardTargets(config.direction);
+	const sourceGroup =
+		config.sourceContainerGroup === undefined || config.sourceContainerGroup === ''
+			? null
+			: config.sourceContainerGroup;
+
+	// Filter targets by group before the session starts (#76)
+	const targets = listKeyboardTargets(config.direction, sourceGroup);
 	if (targets.length === 0) return;
 
 	let targetIndex = indexOfElement(targets, config.sourceElement);
@@ -256,6 +264,7 @@ export function startKeyboardSession(config: KeyboardSessionConfig): void {
 	dndState.isDragging = true;
 	dndState.draggedItem = config.dragData;
 	dndState.sourceContainer = config.sourceContainer;
+	dndState.sourceContainerGroup = sourceGroup;
 	dndState.targetContainer = null;
 	dndState.targetElement = null;
 	dndState.dropPosition = null;

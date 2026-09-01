@@ -168,6 +168,7 @@
 				<div
 					use:droppable={{
 						container: group.id,
+						containerGroup: 'group',
 						callbacks: { onDrop: handleGroupDrop }
 					}}
 					animate:flip={{ duration: 200 }}
@@ -181,6 +182,7 @@
 						<div
 							use:draggable={{
 								container: group.id,
+								containerGroup: 'group',
 								dragData: { kind: 'group', group } satisfies NestedDragPayload,
 								handle: '.group-drag-handle'
 							}}
@@ -211,6 +213,7 @@
 						<div
 							use:droppable={{
 								container: `list:${group.id}`,
+								containerGroup: 'item',
 								callbacks: { onDrop: handleItemDrop }
 							}}
 							class="min-h-16 divide-y divide-swiss-gray dark:divide-white/10"
@@ -219,6 +222,7 @@
 								<div
 									use:droppable={{
 										container: `item:${group.id}:${item.id}`,
+										containerGroup: 'item',
 										callbacks: { onDrop: handleItemDrop }
 									}}
 									animate:flip={{ duration: 150 }}
@@ -226,6 +230,7 @@
 									<div
 										use:draggable={{
 											container: `item:${group.id}:${item.id}`,
+											containerGroup: 'item',
 											dragData: {
 												kind: 'item',
 												item,
